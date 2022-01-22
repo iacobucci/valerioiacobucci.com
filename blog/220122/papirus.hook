@@ -1,0 +1,10 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = papirus-icon-theme
+
+[Action]
+Description = Papirus icon theme workaround for chrome icon in gnome shell search
+When = PostTransaction
+Exec = /bin/sh -c "for i in $(/usr/bin/ls -d /usr/share/icons/Papirus/*/); do sudo mv ${i}apps/epiphany.svg ${i}apps/epiphany.old sudo ln -sn ${i}apps/google-chrome.svg ${i}apps/epiphany.svg done"

@@ -1,0 +1,66 @@
+<DOCTYPE HTML>
+  <html>
+
+  <body>
+    <h1>Use Chrome from Gnome shell search</h1>
+    <h2>or any other browser really...</h2>
+    <p>
+      Gnome shell is a very cool enviroment but it is not always easy to customize. I like the integrated search
+      feature, that indexes .desktop shortcuts and files from the home user directory, but i'd like to browse the web
+      with it too. I mean, you could technically do that out of the box but you'd be stuck with <a
+        href="https://github.com/GNOME/epiphany">Epiphany</a> (i.e. Gnome Web), which is pretty unusable.
+      </br>
+      Some time ago i've managed to port <a href="https://extensions.gnome.org/extension/1389/qwant-search/">this
+        extension</a> so that it would use DuckDuckGo, and posted it on <a
+        href="https://github.com/iacobucci/gnome-shell-extension-duckduckgo-search">Github</a>, but due to the recent
+      Gnome's updates, it doesnt work anymore. And i could barely understand what the extension did in the first place,
+      so i don't think to pick it up anytime soon.
+      </br>
+      Still, i've found a quirky workaround that lets me do what i need: type a query into the search box and have my
+      browser of choice manage requests and stuff, though it doesnt provide suggestions.
+      </br>
+      </br>
+      <img src="search.png" alt="the workaround...">
+      </br>
+      </br>
+      At this point i've got to specify that i use arch btw... So this guide will suggest you to use pacman hooks to
+      make the changes persistent after each and every update.
+      The procedure consists into tricking gnome to execute Chrome (or any other browser) when calling for the epiphany
+      binary. All you need to do really is: </br>
+      </br>
+      <code>
+        sudo mv /usr/bin/epiphany /usr/bin/epiphany-old</br>
+        sudo ln -sn /usr/bin/google-chrome-stable /usr/bin/epiphany
+      </code>
+      </br>
+      </br>
+      And in order to apply the correct icon:
+      </br>
+      </br>
+      <code>
+        for i in $(/usr/bin/ls -d /usr/share/icons/Papirus/*/);</br>
+        do</br>
+        sudo mv ${i}apps/epiphany.svg ${i}apps/epiphany.old</br>
+        sudo ln -sn ${i}apps/google-chrome.svg ${i}apps/epiphany.svg</br>
+        done</br>
+      </code>
+      </br>
+      As i said before, in order to automate this process on package updates you can use
+      <a href="papirus.hook" download="papirus.hook">this hook</a> and
+      <a href="epiphany.hook" download="epiphany.hook">this hook</a>.</br>
+      And it should be all done, now you can go on with your nasty Chrome searches directly from the Gnome shell
+      search!</br>
+    </p>
+  </body>
+
+  <style>
+    body {
+      background-color: white;
+    }
+
+    #pic {
+      max-width: 100%
+    }
+  </style>
+
+  </html>

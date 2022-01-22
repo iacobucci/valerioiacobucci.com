@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = epiphany
+
+[Action]
+Description = Epiphany workaround for using chrome
+When = PostTransaction
+Exec = /bin/sh -c "sudo mv /usr/bin/epiphany /usr/bin/epiphany-old ; sudo ln -sn /usr/bin/google-chrome-stable /usr/bin/epiphany"
+
