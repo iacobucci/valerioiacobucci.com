@@ -1,0 +1,46 @@
+<html>
+
+<style>
+img{
+	width: 30%;
+}
+*
+{
+text-align: center !important;
+margin: auto !important;
+}
+</style>
+
+<body>
+
+
+	<img src="./hasher-banner.svg">
+	</br>
+
+	<button id="btn" onclick="playpause()">play</button>
+	</br>
+	</br>
+
+	<video id="vid" autoplay>
+  <source src="video.mp4" type="video/mp4" controls autoplay>
+Your browser does not support the video tag.
+</video> 
+
+	<script>
+var myVideo = document.getElementById("vid"); 
+var but = document.getElementById("btn");
+
+function playpause() { 
+	if (myVideo.paused) {
+    myVideo.play(); 
+		but.innerText = "pause";
+	}
+	else {
+    myVideo.pause(); 
+		but.innerText = "play";
+	}
+} 
+	</script>
+</body>
+
+</html>
