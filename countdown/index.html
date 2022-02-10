@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>countdown</title>
+</head>
+<link rel="stylesheet" type="text/css" href="./flipdown.css" />
+<script type="text/javascript" src="./moment.js"></script>
+<script type="text/javascript" src="./flipdown.js">
+</script>
+<style>
+  /* @font-face {
+    font-family: Roboto Slab;
+    src: url("../font/RobotoSlab-Medium.ttf");
+    src: url("../font/RobotoSlab-Thin.ttf");
+    src: url("../font/RobotoSlab-Bold.ttf");
+    src: url("../font/RobotoSlab-Black.ttf");
+    src: url("../font/RobotoSlab-Light.ttf");
+    src: url("../font/RobotoSlab-SemiBold.ttf");
+    src: url("../font/RobotoSlab-ExtraBold.ttf");
+    src: url("../font/RobotoSlab-ExtraLight.ttf");
+    src: url("../font/RobotoSlab-Regular.ttf");
+  } */
+
+  html {
+    text-align: center;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #212121;
+    color: white;
+    font-family: "Roboto Slab";
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .flipdown {
+    align-items: center;
+
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  .tit {
+    font-size: 200%;
+  }
+</style>
+
+<body></body>
+
+<script>
+  class Reminder {
+    constructor(name, time) {
+      this.name = name;
+      this.time = moment(time).unix();
+      this.innerName = this.name.replace(/\s/g, "") + time;
+    }
+    display() {
+      document.addEventListener("DOMContentLoaded", () => {
+        new FlipDown(this.time, this.innerName, {
+          theme: "light"
+        }).start();
+      });
+      document.body.innerHTML +=
+        '<p class="tit">' +
+        this.name +
+        '</p><div id="' +
+        this.innerName +
+        '" class="flipdown"></div></br>';
+    }
+  }
+
+  reminders = [
+    new Reminder("Calcolatori Elettronici", "2022-02-17 9:30"),
+    new Reminder("Sistemi Informativi", "2022-02-18 13:30"),
+  ];
+
+  reminders.sort(function (a, b) {
+    return moment(a.time).unix() - moment(b.time).unix();
+  });
+
+  for (r of reminders) r.display();
+</script>
+
+</html>
