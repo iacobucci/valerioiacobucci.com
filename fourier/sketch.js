@@ -4,7 +4,6 @@ var mx,my;
 var input;
 var file;
 
-
 function startup(){
 	f = new Fourier(100,400);
 
@@ -18,8 +17,9 @@ function setup() {
 	frameRate(60);
 	background(0);
 	stroke(255);
-	// input = createFileInput(handleFile);
-	// input.position(10,10);
+	input = createFileInput(handleFile);
+	input.position(10,10);
+	input.id("inputfile");
 
 	startup();
 
@@ -39,10 +39,12 @@ function draw() {
 
 function handleFile(f) {
 	// console.log(f.data);
-	// data = f.data.split(" d=\"")[1];
-	// newpath = data.substring(data.indexOf("m"),data.indexOf("Z"));
 	
-	path.setAttribute("d",f);
+	file = f.data.split("base64,")[1];
+	raw = atob(file);
+	data = raw.split(" d=\"")[1];
+	newpath = data.substring(data.indexOf("m"),data.indexOf('\"'));
+	path.setAttribute("d",newpath);
 	startup();
 }
 
