@@ -37,8 +37,9 @@ function draw() {
 	translate(mx,my); 
     scale(sc, sc);
 
-	if (!pause)
+	if (!pause){
 		t_delta += 1; 
+	}
 
 	t = t_delta/(60*t_mult);
 	
@@ -74,7 +75,6 @@ function mouseDragged(event) {
 }
 
 function keyPressed(){
-	console.log(key);
 	if (key == " ")
 		pause = !pause;
 }
