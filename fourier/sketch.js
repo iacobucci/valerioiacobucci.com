@@ -6,7 +6,7 @@ var file;
 
 
 function startup(){
-	f = new Fourier(100,100,1000);
+	f = new Fourier(100,400);
 
 	f.ps[0].c = math.complex(0,0);
 	for (let p in f.ps)
@@ -38,11 +38,11 @@ function draw() {
 }
 
 function handleFile(f) {
-	console.log(f.data);
-	data = f.data.split(" d=\"")[1];
-
-	newpath = data.substring(data.indexOf("m"),data.indexOf("Z"));
-	path.setAttribute("d",newpath);
+	// console.log(f.data);
+	// data = f.data.split(" d=\"")[1];
+	// newpath = data.substring(data.indexOf("m"),data.indexOf("Z"));
+	
+	path.setAttribute("d",f);
 	startup();
 }
 

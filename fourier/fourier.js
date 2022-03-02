@@ -1,5 +1,5 @@
 class Fourier {
-	constructor(n,definition,maxtrace) {
+	constructor(definition,maxtrace) {
 		this.ps = [];
 		this.tr = new Trace(maxtrace);
 		this.converter = new Converter(definition);
@@ -7,7 +7,7 @@ class Fourier {
 		let sign = +1;
 		let index;
 
-		for (let i = 0; i < n; i++) {
+		for (let i = 0; i < definition; i++) {
 			index = sign * math.ceil(i/2);
 			this.ps.push( new Phasor( this.converter.get(index), index));
 			sign = -1 * sign;
