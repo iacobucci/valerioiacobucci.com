@@ -10,7 +10,7 @@ function startup(){
 
 	f.ps[0].c = math.complex(0,0);
 	for (let p in f.ps)
-		f.ps[p].c = math.multiply(f.ps[p].c,20);
+		f.ps[p].c = math.multiply(f.ps[p].c,10);
 }
 
 function setup() {
