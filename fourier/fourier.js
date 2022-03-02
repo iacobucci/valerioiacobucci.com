@@ -14,6 +14,15 @@ class Fourier {
 		}
 	}
 
+	repr(){
+		let eq = "f(t)=";
+
+		for (let p in this.ps){
+			eq += "(" + this.ps[p].c.re.toFixed(2) + "+" + this.ps[p].c.im.toFixed(2) + "i)*e^(" + this.ps[p].omega + "*2πit) + ";
+		}
+		return eq;
+	}
+
 	show(t) {
 		let base = this.ps[0].c;
 		strokeWeight(0.5);
