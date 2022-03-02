@@ -17,8 +17,10 @@ class Fourier {
 	repr(){
 		let eq = "f(t)=";
 
-		for (let p in this.ps){
-			eq += "(" + this.ps[p].c.re.toFixed(2) + "+" + this.ps[p].c.im.toFixed(2) + "i)*e^(" + this.ps[p].omega + "*2πit) + ";
+		for (let i = 0 ; i < this.ps.length; i++ ){
+			eq += "(" + this.ps[i].c.re.toFixed(2) + "+" + this.ps[i].c.im.toFixed(2) + "i)*e^(" + this.ps[i].omega + "*2πit)";
+			if (i != this.ps.length -1)
+				eq += " + "; 
 		}
 		return eq;
 	}
