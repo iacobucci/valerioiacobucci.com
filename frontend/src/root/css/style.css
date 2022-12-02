@@ -1,0 +1,95 @@
+body {
+    color: #242424;
+    background-color: #ffffff;
+	font-family: "computer_modern";
+	src: url("./ttf/cmunrm.ttf") format('truetype');
+}
+
+a:link {
+    color: #a4ffff;
+}
+
+a:visited {
+    color: #d6acff;
+}
+
+a:hover {
+    color: #ffffa5;
+}
+
+a:active {
+    color: #a4ffff;
+}
+
+.type-anim {
+    width: 17ch;
+
+    animation: typing 2s steps(17, jump-start), blink .5s step-end infinite alternate;
+
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 3px solid;
+    font-family: monospace;
+    font-size: 2em;
+	margin-bottom: 12px;
+}
+
+.l1 {
+    animation: l1a 3s;
+}
+
+@keyframes l1a {
+    0% {
+        opacity: 0;
+		display: none;
+    }
+
+    66% {
+        opacity: 0;
+		display: inline;
+    }
+
+    100% {
+        opacity: 1;
+		display: inline;
+    }
+}
+
+@keyframes typing {
+    from {
+        width: 0
+    }
+}
+
+@keyframes blink {
+    50% {
+        border-color: transparent
+    }
+}
+
+.centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#links {
+	display: flex;
+    margin: 4px auto;
+    text-align: center;
+	width: 100%;
+    height: calc(36 + 4px);;
+}
+
+.link {
+	align-items: center;;
+    margin: 4px auto;
+    height: 36;
+    width: 36;
+    float: left;
+}
+
+img{
+	filter: invert(80%);
+}

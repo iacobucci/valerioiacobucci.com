@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  valerio-nginx:
+    image: valerio-nginx
+    container_name: valerio-nginx-compose
+    ports:
+      - '8080:80'
+    networks:
+      - valerio-network
+
+  valerio-backend:
+    image: valerio-backend
+    container_name: valerio-backend-compose
+    depends_on:
+      - valerio-nginx
+    networks:
+      - valerio-network
+
+  valerio-frontend:
+    image: valerio-frontend
+    container_name: valerio-frontend-compose
+    depends_on:
+      - valerio-backend
+    networks:
+      - valerio-network
+
+networks:
+  valerio-network:
+    driver: bridge
