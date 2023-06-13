@@ -4,8 +4,10 @@ HOSTNAME=$(hostname)
 
 if [[ $HOSTNAME == "vultr" ]];
 then
-	git -C "/home/valerio/valerioiacobucci.com" pull
-	echo ciao > ~/cane
+	cd /home/valerio/valerioiacobucci.com
+	git pull
+	./build.sh
+	docker-compose up -d
 else
 	ssh valerio@valerioiacobucci.com sh -c '/home/valerio/valerioiacobucci.com/sync.sh'
 fi
