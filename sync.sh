@@ -5,12 +5,8 @@ HOSTNAME=$(hostname)
 if [[ $HOSTNAME == "vultr" ]];
 then
 	git -C "/home/valerio/valerioiacobucci.com" pull
-	systemctl --user restart server
-	systemctl --user status server
+	echo ciao > ~/cane
 else
-	git push
-	ssh valerio@valerioiacobucci.com git -C "/home/valerio/valerioiacobucci.com" pull
-	ssh valerio@valerioiacobucci.com systemctl --user restart server
-	ssh valerio@valerioiacobucci.com systemctl --user status server
+	ssh valerio@valerioiacobucci.com sh -c '/home/valerio/valerioiacobucci.com/sync.sh'
 fi
 
