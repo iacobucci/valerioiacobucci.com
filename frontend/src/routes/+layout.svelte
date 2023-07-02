@@ -14,7 +14,7 @@
 
 <style>
 	.app {
-		background-color: blue;
+		background-color: red;
 		height: 100%;
 		width: 100%;
 		margin: none;
