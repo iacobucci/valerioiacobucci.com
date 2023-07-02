@@ -10,6 +10,9 @@ then
 	./build.sh
 	docker-compose up -d
 else
+	git add -A
+	git commit -a
+	git push
 	ssh valerio@valerioiacobucci.com sh -c '/home/valerio/valerioiacobucci.com/sync.sh'
 fi
 
