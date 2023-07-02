@@ -14,15 +14,21 @@ server {
 
 listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/valerioiacobucci.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/valerioiacobucci.com/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/codemonkey.valerioiacobucci.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/codemonkey.valerioiacobucci.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
 
 }
 
 
 server {
+    if ($host = codemonkey.valerioiacobucci.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
     if ($host = www.valerioiacobucci.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
@@ -38,5 +44,7 @@ server {
 
 	server_name codemonkey.valerioiacobucci.com;
     return 404; # managed by Certbot
+
+
 
 }
