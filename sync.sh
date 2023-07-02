@@ -5,7 +5,7 @@ HOSTNAME=$(hostname)
 if [[ $HOSTNAME == "vultr" ]];
 then
 	cd /home/valerio/valerioiacobucci.com
-	git pull
+	git pull github master
 	./build.sh
 	docker-compose up -d
 else
