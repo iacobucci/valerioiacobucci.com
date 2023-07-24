@@ -2,7 +2,6 @@
 	import { T } from "@threlte/core";
 	import { interactivity } from "@threlte/extras";
 	import { spring } from "svelte/motion";
-	import { Text } from "@threlte/extras";
 	import { useFrame } from "@threlte/core";
 
 	interactivity();
@@ -12,7 +11,12 @@
 	useFrame((state, delta) => {
 		rotation -= delta;
 	});
-	
+
+	// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+	// import { useLoader } from "@threlte/core";
+
+	// const gltf = useLoader(GLTFLoader).load("/assets/suzanne.gltf");
+	import Suzanne from "./Suzanne.svelte";
 </script>
 
 <T.PerspectiveCamera
@@ -25,12 +29,8 @@
 
 <T.DirectionalLight position={[3, 10, 7]} />
 
-<Text
-	rotation.y={rotation}
-	position={[0, 5, 0]}
-	fontSize={1}
-	text="Valerio Iacobucci"
-	scale={$scale}
-	on:pointerenter={() => scale.set(1.5)}
-	on:pointerleave={() => scale.set(1)}
-/>
+<!-- {#if $gltf}
+	<T is={$gltf.scene} />
+{/if} -->
+
+<Suzanne />

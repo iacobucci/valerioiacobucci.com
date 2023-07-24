@@ -1,3 +1,13 @@
-body{
+:root {
+	--col-1: #242424;
+	--col-2: #ffb2e6;
+	--col-3: #d972ff;
+	--col-4: #8447ff;
+	--col-5: #8cffda;
+	--col-6: #ffffe8;
+}
+
+
+body {
 	margin: 0;
 }

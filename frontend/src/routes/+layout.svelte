@@ -1,36 +1,64 @@
 <script>
 	import { Canvas } from "@threlte/core";
 	import Scene from "./Scene.svelte";
-	import './styles.css';
+	import "./styles.css";
 </script>
 
-<div class="app">
-	<main>
+<main>
+	<div class="bg">
 		<Canvas>
 			<Scene />
 		</Canvas>
-	</main>
-</div>
+	</div>
+
+	<div class="center-box">
+		<div class="title">Valerio Iacobucci</div>
+	</div>
+</main>
 
 <style>
-	.app {
-		background-color: red;
-		height: 100%;
+	.bg {
+		background-color: var(--col-6);
+
 		width: 100%;
-		margin: none;
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
+		height: 100%;
+		display: block;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: -9999;
 	}
 
-	main {
-		flex: 1;
+	@font-face {
+		font-family: "gazebo";
+		src: url("/fonts/gazebo.otf") format("opentype");
+	}
+
+	@font-face {
+		font-family: "capuche";
+		src: url("/fonts/capuche.otf") format("opentype");
+	}
+
+	@font-face {
+		font-family: "sake_moru";
+		src: url("/fonts/sake_moru.ttf") format("truetype");
+	}
+	
+	.center-box {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		
+		border: var(--col-1) 3px solid;
+	}
+
+	.title {
+		/* add the font in ../fonts/title.ttf  */
+		font-family: "gazebo";
+		font-size: 10vw;
 		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
+		text-align: center;
+		color: var(--col-1);
 	}
 </style>
