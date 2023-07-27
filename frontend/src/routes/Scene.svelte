@@ -40,6 +40,8 @@
 	rotation.y={rotation * 1.2}
 	rotation.z={rotation * 0.8}
 	scale={[1, 2, 1]}
+
+	on:click={() => { console.log(Date()); }}  
 />
 
 <!-- <T.Mesh

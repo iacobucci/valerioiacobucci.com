@@ -5,8 +5,14 @@
     import { Group } from "three";
     import { useGltf } from "@threlte/extras";
 
-	import { MeshStandardMaterial, DoubleSide } from 'three';
-    
+    import {
+        MeshStandardMaterial,
+        MeshBasicMaterial,
+        MeshMatcapMaterial,
+        MeshNormalMaterial,
+        Color,
+    } from "three";
+
     export const ref = new Group();
 
     const gltf = useGltf("/assets/teapot.gltf");
@@ -15,10 +21,9 @@
 {#if $gltf}
     <T is={ref} {...$$restProps}>
         <T.Mesh
-            recieveShadows
-            material={new MeshStandardMaterial({ side: DoubleSide, color: 'green', roughness: 0.5, metalness: 0.5 })}
+            material={new MeshNormalMaterial({})}
             geometry={$gltf.nodes.teapot.geometry}
-            rotation={[0,0,0]}
+            rotation={[0, 0, 0]}
             scale={1.0}
         />
         <slot {ref} />
