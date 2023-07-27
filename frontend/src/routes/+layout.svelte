@@ -43,14 +43,23 @@
 		font-family: "sake_moru";
 		src: url("/fonts/sake_moru.ttf") format("truetype");
 	}
+
+	@font-face {
+		font-family: "aubergine";
+		src: url("/fonts/aubergine.ttf") format("truetype");
+	}
 	
+	
+
 	.center-box {
 		position: absolute;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		
+
 		border: var(--col-1) 3px solid;
+
+		pointer-events: none;
 	}
 
 	.title {

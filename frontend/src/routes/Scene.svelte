@@ -1,8 +1,9 @@
 <script>
 	import { T } from "@threlte/core";
-	import { interactivity } from "@threlte/extras";
+	import { interactivity, useCursor } from "@threlte/extras";
 	import { spring } from "svelte/motion";
 	import { useFrame } from "@threlte/core";
+	import { MeshStandardMaterial } from "three";
 
 	interactivity();
 	const scale = spring(1);
@@ -12,11 +13,14 @@
 		rotation -= delta;
 	});
 
+	const { onPointerEnter, onPointerLeave } = useCursor();
+
 	// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 	// import { useLoader } from "@threlte/core";
 
 	// const gltf = useLoader(GLTFLoader).load("/assets/suzanne.gltf");
 	import Suzanne from "./Suzanne.svelte";
+	import Teapot from "./Teapot.svelte";
 </script>
 
 <T.PerspectiveCamera
@@ -27,10 +31,30 @@
 	}}
 />
 
-<T.DirectionalLight position={[3, 10, 7]} />
+<T.DirectionalLight position={{ x: 3, y: 10, z: 10 }} />
+<T.HemisphereLight intensity={1} />
+<T.AmbientLight intensity={1} />
 
-<!-- {#if $gltf}
-	<T is={$gltf.scene} />
-{/if} -->
+<Teapot
+	rotation.x={rotation}
+	rotation.y={rotation * 1.2}
+	rotation.z={rotation * 0.8}
+	scale={[1, 2, 1]}
+/>
 
-<Suzanne />
+<!-- <T.Mesh
+	rotation.x={rotation}
+	rotation.y={rotation * 1.2}
+	rotation.z={rotation * 0.8}
+	scale={2}
+	on:pointerenter={onPointerEnter}
+	on:pointerleave={onPointerLeave}
+	on:pointerenter={() => {
+		$scale = 2;
+	}}
+	on:pointerleave={() => {
+		$scale = 1;
+	}}
+>
+	<T.BoxGeometry />
+</T.Mesh> -->
