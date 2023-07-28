@@ -24,8 +24,8 @@ services:
     container_name: valerio-frontend-compose
     depends_on:
       - valerio-backend
-      ports:
-      - '4173:4173'
+    ports:
+    - '4173:4173'
     networks:
       - valerio-network
 
