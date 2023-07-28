@@ -9,18 +9,30 @@
 
     export const ref = new Group();
 
+    import { useFrame } from "@threlte/core";
+    let rotation = 0;
+    useFrame((state, delta) => {
+        rotation -= delta;
+    });
+
     const gltf = useGltf("/assets/typewriter.gltf");
 </script>
 
 {#if $gltf}
     <T is={ref} {...$$restProps}>
-        <T.Mesh
-            material={new MeshNormalMaterial({})}
-            geometry={$gltf.nodes.typewriter.geometry}
+        <T.Group
             position={[0, 0, 0]}
-            rotation={[0, 0, 0]}
-            scale={1.0}
-        />
+            rotation.x={rotation}
+            rotation.y={rotation * 1.2}
+            rotation.z={rotation * 0.8}
+        >
+            <T.Mesh
+                material={new MeshNormalMaterial({})}
+                geometry={$gltf.nodes.typewriter.geometry}
+                scale={1.0}
+            />
+            <slot {ref} />
+        </T.Group>
         <slot {ref} />
     </T>
 {/if}
