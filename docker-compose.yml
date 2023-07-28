@@ -14,6 +14,8 @@ services:
     container_name: valerio-backend-compose
     depends_on:
       - valerio-nginx
+    ports:
+      - '8000:80'
     networks:
       - valerio-network
 
