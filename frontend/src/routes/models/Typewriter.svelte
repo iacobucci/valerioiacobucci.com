@@ -1,28 +1,23 @@
 <script>
     import { T } from "@threlte/core";
-    import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-    import { useLoader } from "@threlte/core";
     import { Group } from "three";
     import { useGltf } from "@threlte/extras";
 
     import {
-        MeshStandardMaterial,
-        MeshBasicMaterial,
-        MeshMatcapMaterial,
         MeshNormalMaterial,
-        Color,
     } from "three";
 
     export const ref = new Group();
 
-    const gltf = useGltf("/assets/teapot.gltf");
+    const gltf = useGltf("/assets/typewriter.gltf");
 </script>
 
 {#if $gltf}
     <T is={ref} {...$$restProps}>
         <T.Mesh
             material={new MeshNormalMaterial({})}
-            geometry={$gltf.nodes.teapot.geometry}
+            geometry={$gltf.nodes.typewriter.geometry}
+            position={[0, 0, 0]}
             rotation={[0, 0, 0]}
             scale={1.0}
         />

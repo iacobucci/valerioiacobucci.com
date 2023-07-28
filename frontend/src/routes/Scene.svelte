@@ -19,8 +19,11 @@
 	// import { useLoader } from "@threlte/core";
 
 	// const gltf = useLoader(GLTFLoader).load("/assets/suzanne.gltf");
-	import Suzanne from "./Suzanne.svelte";
-	import Teapot from "./Teapot.svelte";
+	import Suzanne from "./models/Suzanne.svelte";
+	import Teapot from "./models/Teapot.svelte";
+	import Leica from "./models/Leica.svelte";
+	import Typewriter from "./models/Typewriter.svelte";
+
 </script>
 
 <T.PerspectiveCamera
@@ -35,14 +38,29 @@
 <T.HemisphereLight intensity={1} />
 <T.AmbientLight intensity={1} />
 
-<Teapot
+<!-- <Teapot
 	rotation.x={rotation}
 	rotation.y={rotation * 1.2}
 	rotation.z={rotation * 0.8}
-	scale={[1, 2, 1]}
+	postion={[-2, 0, 0]}
+	scale={[1, 1, 1]}
+/> -->
 
-	on:click={() => { console.log(Date()); }}  
+<Leica
+	rotation.x={rotation}
+	rotation.y={rotation * 1.2}
+	rotation.z={rotation * 0.8}
+	scale={[1, 1, 1]}
 />
+
+<Typewriter
+	rotation.x={rotation + Math.PI / 2}
+	rotation.y={rotation * 1.2}
+	rotation.z={rotation * 0.8 }
+	scale={[1, 1, 1]}
+/>
+
+<!-- TODO: pass on:click property to component -->
 
 <!-- <T.Mesh
 	rotation.x={rotation}
