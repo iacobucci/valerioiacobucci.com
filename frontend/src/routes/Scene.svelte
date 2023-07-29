@@ -18,6 +18,8 @@
 	import Teapot from "./models/Teapot.svelte";
 	import Leica from "./models/Leica.svelte";
 	import Typewriter from "./models/Typewriter.svelte";
+	import Microscope from "./models/Microscope.svelte";
+	import Controller from "./models/Controller.svelte";
 </script>
 
 <T.PerspectiveCamera
@@ -37,3 +39,8 @@
 <Typewriter />
 
 <Teapot />
+
+<Microscope />
+
+<Controller />
+
