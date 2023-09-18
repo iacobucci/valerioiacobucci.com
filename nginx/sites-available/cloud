@@ -169,13 +169,6 @@ server {
     location / {
         try_files $uri $uri/ /index.php$request_uri;
     }
-    ssl_certificate /etc/letsencrypt/live/valerioiacobucci.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/valerioiacobucci.com/privkey.pem; # managed by Certbot
-
-
-
-
-
 
 }
 
