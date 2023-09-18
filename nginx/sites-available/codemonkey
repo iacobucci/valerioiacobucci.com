@@ -1,4 +1,9 @@
 server {
+    if ($host = codemonkey.valerioiacobucci.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
 
 	server_name codemonkey.valerioiacobucci.com;
 
@@ -10,6 +15,8 @@ server {
 		proxy_set_header Host $host;
 		proxy_cache_bypass $http_upgrade;
 	}
+
+
 
 }
 

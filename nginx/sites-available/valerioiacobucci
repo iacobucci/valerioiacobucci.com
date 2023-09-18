@@ -9,6 +9,19 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
 	}
 
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/mail.valerioiacobucci.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/mail.valerioiacobucci.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+
+
+
+
 }
 
 server {
@@ -29,6 +42,18 @@ server {
     return 404; # managed by Certbot
 
 
+
+
+}server {
+    if ($host = valerioiacobucci.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+
+	server_name *.valerioiacobucci.com valerioiacobucci.com www.valerioiacobucci.com;
+    listen 80;
+    return 404; # managed by Certbot
 
 
 }

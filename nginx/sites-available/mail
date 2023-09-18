@@ -1,4 +1,14 @@
 server {
+    if ($host = www.mail.valerioiacobucci.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = mail.valerioiacobucci.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
 
 	root /var/www/mail;
 
@@ -9,7 +19,6 @@ server {
 	location / {
 		try_files $uri $uri/ =404;
 	}
-
 
 }
 
