@@ -1,0 +1,15 @@
+modalità di sviluppo
+	ts-node
+
+compilazione ts
+	da src
+	a dist
+
+bundling di moduli in un unico file js
+	da dist
+	a bundle
+
+docker multistage build
+	builder
+	deployer
+		copy --from=builder /app/dist ./dist
