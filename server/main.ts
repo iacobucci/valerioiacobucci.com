@@ -4,6 +4,8 @@ const app = express();
 
 // serve public folder
 
+app.get("/api/ciao", (req, res) => {res.send("ciao")});
+
 app.use(express.static("public"));
 
 app.listen(3000, () => {
