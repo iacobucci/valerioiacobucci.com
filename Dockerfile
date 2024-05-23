@@ -17,8 +17,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copia solo la directory 'dist' dalla fase di compilazione
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/public ./public
 
 # Comando predefinito per avviare l'app una volta che il container è in esecuzione
 CMD ["node", "dist/bundle.js"]

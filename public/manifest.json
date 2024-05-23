@@ -1,0 +1,14 @@
+{
+	"version": "1.0",
+	"manifest_version": 2,
+	"name": "My PWA",
+	"icons": [
+		{
+			"src": "icons/icon.png",
+			"type": "image/png",
+			"sizes": "512x512"
+		}
+	],
+	"start_url": "https://valerioiacobucci.com",
+	"display": "standalone"
+}
