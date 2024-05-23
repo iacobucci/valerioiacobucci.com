@@ -5,7 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "webpack",
-		"serve": "node dist/bundle.js"
+		"serve": "node dist/bundle.js",
+		"publish": "docker build -t docker-registry.valerioiacobucci.com/valerioiacobucci.com:latest .; docker push docker-registry.valerioiacobucci.com/valerioiacobucci.com:latest"
 	},
 	"author": "",
 	"license": "ISC",
