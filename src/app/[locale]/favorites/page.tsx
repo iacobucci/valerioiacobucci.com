@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { getAllContent } from '@/lib/mdx';
+import { getPosts } from '@/lib/content';
 import ContentList from '@/components/ContentList';
 
 export default async function FavoritesIndexPage({
@@ -11,7 +11,7 @@ export default async function FavoritesIndexPage({
   setRequestLocale(locale);
   const t = await getTranslations('favorites');
 
-  const favorites = await getAllContent('favorites', locale);
+  const favorites = await getPosts('favorites', locale);
 
   return (
     <div className="flex flex-col flex-1 bg-bg-light dark:bg-bg-dark font-sans">

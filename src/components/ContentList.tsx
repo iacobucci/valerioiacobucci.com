@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
-import { ContentMetadata } from '@/lib/mdx';
+import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdSortByAlpha, MdFormatListNumbered } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 
