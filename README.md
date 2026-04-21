@@ -30,15 +30,16 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/home/valerio/source/web/valerioiacobucci.com
-EnvironmentFile=/home/valerio/source/web/valerioiacobucci.com/.env
-ExecStart=/usr/bin/node .output/server/index.mjs
+ExecStart=pnpm run start
 Restart=always
+Environment=PORT=8080
 RestartSec=3
 
 KillSignal=SIGINT
 
 [Install]
 WantedBy=default.target
+
 ```
 
 The node process exposes a server at TCP port 8080, but the access to valerioiacobucci.com is behind a nginx proxy, and the connection is secured with SSL:
@@ -68,10 +69,6 @@ The node process exposes a server at TCP port 8080, but the access to valerioiac
 ### Secrets
 
 The `secrets` git submodule has two branches: production and development, used respectively. It contains a `.env` file that is symlinked to the main repository.
-
-### Content
-
-The `content` git submodule has a Github remote, so the content of the site can be authored collaboratively. There, some Github actions are used to refresh the site upon content update.
 
 ## Getting Started
 
