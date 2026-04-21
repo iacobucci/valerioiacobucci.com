@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import LanguageSwitcher from './LanguageSwitcher';
 import ColorModeToggle from './ColorModeToggle';
 import Search from './Search';
@@ -17,7 +18,7 @@ export default function Navbar() {
 	const navLinks = [
 		{ href: '/', label: t('home') },
 		{ href: '/blog', label: t('blog') },
-		{ href: '/cv', label: t('cv') },
+		// { href: '/cv', label: t('cv') },
 		{ href: '/favorites', label: t('favorites') },
 		{ href: '/projects', label: t('projects') },
 	];
@@ -40,8 +41,14 @@ export default function Navbar() {
 								>
 									<Link href="/" className="flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400">
 										<div className="w-12 flex justify-center items-center h-10">
-											<div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700">
-												<span className="text-xs font-bold text-fg-light dark:text-fg-dark">VI</span>
+											<div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden hover:scale-105 transition-transform border border-gray-100 dark:border-gray-800">
+												<Image
+													src="/drawing.png"
+													alt="Logo"
+													width={40}
+													height={40}
+													className="w-full h-full object-cover"
+												/>
 											</div>
 										</div>
 									</Link>
@@ -69,8 +76,14 @@ export default function Navbar() {
 												exit={{ opacity: 0, scale: 0 }}
 												transition={{ duration: 0.2 }}
 											>
-												<div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden hover:scale-105 transition-transform border border-gray-200 dark:border-gray-700">
-													<span className="text-xs font-bold text-fg-light dark:text-fg-dark">VI</span>
+												<div className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden hover:scale-105 transition-transform border border-gray-100 dark:border-gray-800">
+													<Image
+														src="/drawing.png"
+														alt="Logo"
+														width={40}
+														height={40}
+														className="w-full h-full object-cover"
+													/>
 												</div>
 											</motion.div>
 										) : (
