@@ -10,7 +10,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import ColorModeToggle from './ColorModeToggle';
 import Search from './Search';
 
-export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark' }) {
+export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark' | undefined }) {
 	const t = useTranslations('nav');
 	const pathname = usePathname();
 	const [menuOpen, setMenuOpen] = useState(false);

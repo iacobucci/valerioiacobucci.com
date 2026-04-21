@@ -4,14 +4,24 @@ import { useEffect, useState } from 'react';
 import { MdLightMode, MdDarkMode } from 'react-icons/md';
 
 interface ColorModeToggleProps {
-  initialTheme: 'light' | 'dark';
+  initialTheme: 'light' | 'dark' | undefined;
 }
 
 export default function ColorModeToggle({ initialTheme }: ColorModeToggleProps) {
-  const [theme, setTheme] = useState<'light' | 'dark'>(initialTheme);
+  const [theme, setTheme] = useState<'light' | 'dark'>(initialTheme || 'light');
 
   useEffect(() => {
-    // Sincronizza localStorage e cookie in caso di discrepanze (es. primo caricamento o modifiche esterne)
+    // If no initial theme was provided (first visit), sync state with what the inline script did
+    if (!initialTheme) {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'dark' : 'light');
+    }
+  }, [initialTheme]);
+
+  useEffect(() => {
+    // Don't overwrite if it's the very first render and we are about to sync in the other effect
+    // But actually, setTheme triggers a re-render so it's fine.
+    
     localStorage.setItem('theme', theme);
     document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
     

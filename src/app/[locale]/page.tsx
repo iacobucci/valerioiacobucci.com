@@ -63,6 +63,7 @@ export default function HomePage() {
 								src="/drawing.png"
 								alt="Valerio Iacobucci"
 								fill
+								sizes="296 296"
 								className="object-cover"
 								priority
 							/>

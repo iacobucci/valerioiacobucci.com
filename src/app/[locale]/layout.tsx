@@ -57,9 +57,14 @@ export default async function LocaleLayout({
               __html: `
                 (function() {
                   try {
+                    var theme = 'light';
                     if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                      theme = 'dark';
                       document.documentElement.classList.add('dark');
                     }
+                    // Persist the choice immediately so it's not "dynamic" on next load
+                    document.cookie = "theme=" + theme + "; path=/; max-age=31536000; SameSite=Lax";
+                    localStorage.setItem('theme', theme);
                   } catch (e) {}
                 })();
               `,
@@ -69,7 +74,7 @@ export default async function LocaleLayout({
       </head>
       <body className="min-h-full flex flex-col bg-bg-light dark:bg-bg-dark">
         <NextIntlClientProvider messages={messages}>
-          <Navbar initialTheme={theme} />
+          <Navbar initialTheme={themeValue as 'light' | 'dark' | undefined} />
           <div className="flex-1">
             {children}
           </div>
