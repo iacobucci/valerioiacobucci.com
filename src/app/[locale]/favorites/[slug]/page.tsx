@@ -5,6 +5,7 @@ import {Link} from '@/i18n/routing';
 import {ArrowLeft} from 'lucide-react';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
 import {mdxComponents} from '@/components/mdx-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
@@ -99,7 +100,15 @@ export default async function FavoritePage({
         </header>
 
         <div className="prose prose-neutral prose-lg dark:prose-invert max-w-none">
-          <MDXRemote source={post.content} components={components} />
+          <MDXRemote 
+            source={post.content} 
+            components={components} 
+            options={{
+              mdxOptions: {
+                remarkPlugins: [remarkGfm],
+              },
+            }}
+          />
         </div>
       </article>
     </div>

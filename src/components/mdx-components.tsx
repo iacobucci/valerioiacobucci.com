@@ -63,5 +63,22 @@ export const mdxComponents = {
          {...props} 
        />
      );
-  }
+  },
+  table: (props: any) => (
+    <div className="my-6 w-full overflow-x-auto">
+      <table className="w-full border-collapse text-sm" {...props} />
+    </div>
+  ),
+  thead: (props: any) => (
+    <thead className="bg-gray-100 dark:bg-gray-800" {...props} />
+  ),
+  th: (props: any) => (
+    <th className="border border-gray-200 dark:border-gray-700 px-4 py-2 text-left font-bold" {...props} />
+  ),
+  td: (props: any) => (
+    <td className="border border-gray-200 dark:border-gray-700 px-4 py-2" {...props} />
+  ),
+  tr: (props: any) => (
+    <tr className="even:bg-gray-50 dark:even:bg-gray-900/50" {...props} />
+  ),
 };

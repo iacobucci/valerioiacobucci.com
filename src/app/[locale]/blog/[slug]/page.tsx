@@ -6,6 +6,7 @@ import {ArrowLeft} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
+import remarkGfm from 'remark-gfm';
 import {mdxComponents} from '@/components/mdx-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
@@ -110,7 +111,15 @@ export default async function BlogPostPage({
         </header>
 
         <div className="prose prose-neutral prose-lg dark:prose-invert max-w-none">
-          <MDXRemote source={post.content} components={components} />
+          <MDXRemote 
+            source={post.content} 
+            components={components} 
+            options={{
+              mdxOptions: {
+                remarkPlugins: [remarkGfm],
+              },
+            }}
+          />
         </div>
       </article>
     </div>

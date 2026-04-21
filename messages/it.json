@@ -31,7 +31,29 @@
 		"no_projects": "Nessun progetto trovato.",
 		"updated": "Aggiornato il {date}",
 		"github": "GitHub",
-		"website": "Sito Web"
+		"website": "Sito Web",
+		"list": {
+			"valerioiacobucci-com": {
+				"title": "valerioiacobucci.com",
+				"description": "Il mio portfolio e blog personale costruito con Next.js."
+			},
+			"spl": {
+				"title": "Spl",
+				"description": "Una semplice libreria di parsing in C."
+			},
+			"lispv": {
+				"title": "Lispv",
+				"description": "Un linguaggio simile a lisp didattico che compila in assembly rv32i."
+			},
+			"digit-recognizer": {
+				"title": "Digit Recognizer",
+				"description": "Una rete neurale per riconoscere cifre scritte a mano costruita da zero in C++."
+			},
+			"sviluppo-web-in-js": {
+				"title": "Sviluppo Web in JS",
+				"description": "Risorse didattiche per lo sviluppo web in JavaScript."
+			}
+		}
 	},
 	"favorites": {
 		"title": "Preferiti",
