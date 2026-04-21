@@ -2,15 +2,16 @@ import React from 'react';
 import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch } from 'react-icons/fa';
 import { ProjectGitHubData } from '@/lib/projects';
 import { getLanguageColor } from '@/lib/colors';
+import { useTranslations } from 'next-intl';
 
 interface ProjectCardProps {
   project: ProjectGitHubData;
-  t: (key: string) => string;
 }
 
-export default function ProjectCard({ project, t }: ProjectCardProps) {
+export default function ProjectCard({ project }: ProjectCardProps) {
+  const t = useTranslations('projects');
   return (
-    <div className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 hover:shadow-xl hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 flex flex-col h-full">
+    <div className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 hover:shadow-xl hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 flex flex-col h-full text-left">
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
           {t(`list.${project.slug}.title`)}

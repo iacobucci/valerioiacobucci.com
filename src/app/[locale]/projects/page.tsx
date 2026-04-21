@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { projects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
-import ProjectCard from '@/components/ProjectCard';
+import ProjectList from '@/components/ProjectList';
 
 export default async function ProjectsPage({
   params,
@@ -38,11 +38,7 @@ export default async function ProjectsPage({
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projectsWithData.map((project) => (
-            <ProjectCard key={project.slug} project={project} t={t} />
-          ))}
-        </div>
+        <ProjectList projects={projectsWithData} />
       </main>
     </div>
   );

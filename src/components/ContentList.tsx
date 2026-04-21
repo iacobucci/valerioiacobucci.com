@@ -188,14 +188,15 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 key={item.slug}
                 onMouseEnter={() => setFocusedIndex(index)}
+                className={`transition-all duration-200 rounded-2xl ${
+                  isFocused 
+                    ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.01]' 
+                    : ''
+                }`}
               >
                 <Link
                   href={`/${type}/${item.slug}`}
-                  className={`group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border transition-all duration-300 overflow-hidden ${
-                    isFocused
-                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50/30 dark:bg-blue-900/10 shadow-lg ring-1 ring-blue-500/20'
-                      : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl'
-                  }`}
+                  className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
                   {coverSrc && (
                     <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">

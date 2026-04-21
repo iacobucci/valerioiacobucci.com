@@ -169,7 +169,6 @@ export default function Search() {
                       >
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                           result.type === 'blog' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                          result.type === 'favorites' ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' :
                           'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
                         }`}>
                           {getIcon(result.type)}
