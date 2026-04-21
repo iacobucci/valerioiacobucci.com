@@ -78,8 +78,8 @@
 	"terminal": {
 		"welcome": "Try \"help\" to start.",
 		"help": "Available commands: about, blog, projects, clear, whoami",
-		"whoami": "Valerio - Software Engineer & Nuxt Enthusiast",
-		"about": "I am a full-stack developer passionate about building modern web applications with Nuxt and Vue.",
+		"whoami": "Valerio - Software engineer",
+		"about": "I am a full-stack developer passionate about building modern web applications.",
 		"redirecting_blog": "Redirecting to blog...",
 		"redirecting_projects": "Redirecting to projects...",
 		"redirecting": "Redirecting...",
