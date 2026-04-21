@@ -6,10 +6,12 @@ import ContentRenderer from '@/components/mdx/ContentRenderer';
 import fs from 'fs';
 import path from 'path';
 
-const CONTENT_TYPE = 'blog';
+const CONTENT_TYPE = 'favorites';
 
 export async function generateStaticParams() {
 	const contentDir = path.join(process.cwd(), 'content', CONTENT_TYPE);
+	if (!fs.existsSync(contentDir)) return [];
+
 	const slugs = fs.readdirSync(contentDir).filter(file =>
 		fs.statSync(path.join(contentDir, file)).isDirectory()
 	);
@@ -21,7 +23,7 @@ export async function generateStaticParams() {
 	);
 }
 
-export default async function BlogPostPage({
+export default async function FavoritePage({
 	params,
 }: {
 	params: Promise<{ locale: string; slug: string }>;
@@ -29,7 +31,7 @@ export default async function BlogPostPage({
 	const { locale, slug } = await params;
 
 	setRequestLocale(locale);
-	const t = await getTranslations('blog');
+	const t = await getTranslations('favorites');
 
 	const result = await getContentMDX(CONTENT_TYPE, slug, locale);
 
@@ -39,7 +41,7 @@ export default async function BlogPostPage({
 	const Content = content.default;
 
 	return (
-		<article className="max-w-3xl mx-auto py-20 px-6 prose dark:prose-invert">
+		<article className="max-w-4xl mx-auto py-20 px-6 prose prose-indigo dark:prose-invert">
 			{isFallback && (
 				<div className="bg-amber-100 border-l-4 border-amber-500 p-4 mb-8 text-amber-900 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-200" role="alert">
 					<p className="font-bold">Info</p>

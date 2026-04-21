@@ -41,7 +41,8 @@
 		"error": "Error loading favorites:",
 		"no_favorites": "No favorites found.",
 		"no_favorites_tag": "No favorites found for tag \"{tag}\".",
-		"back": "Back to Favorites"
+		"back": "Back to Favorites",
+		"fallback_warning": "This page is not available in your language. Showing the English version instead."
 	},
 	"footer": {
 		"version": "version",

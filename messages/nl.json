@@ -41,7 +41,8 @@
 		"error": "Fout bij het laden van favorieten:",
 		"no_favorites": "Geen favorieten gevonden.",
 		"no_favorites_tag": "Geen favorieten gevonden voor tag \"{tag}\".",
-		"back": "Terug naar favorieten"
+		"back": "Terug naar favorieten",
+		"fallback_warning": "Deze pagina is niet beschikbaar in uw taal. De Engelse versie wordt in plaats daarvan weergegeven."
 	},
 	"footer": {
 		"version": "versie",

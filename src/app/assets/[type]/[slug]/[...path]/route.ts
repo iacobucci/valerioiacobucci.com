@@ -4,17 +4,17 @@ import path from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string; path: string[] }> }
+  { params }: { params: Promise<{ type: string; slug: string; path: string[] }> }
 ) {
-  const { slug, path: pathSegments } = await params;
+  const { type, slug, path: pathSegments } = await params;
   const filename = pathSegments.join('/');
   
   // Security: prevent path traversal
-  if (filename.includes('..') || slug.includes('..')) {
+  if (filename.includes('..') || slug.includes('..') || type.includes('..')) {
     return new NextResponse('Invalid path', { status: 400 });
   }
 
-  const filePath = path.join(process.cwd(), 'content/blog', slug, filename);
+  const filePath = path.join(process.cwd(), 'content', type, slug, filename);
 
   if (!fs.existsSync(filePath)) {
     return new NextResponse('Not Found', { status: 404 });
