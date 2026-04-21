@@ -3,16 +3,16 @@ features
 		[ ] dark mode
 	[ ] version
 	[x] i18n
-		[x] hot module replacement
 		[x] interface
 			[x] automatic user languages
 			translations
 				[x] english
 				[x] italian
 				[x] dutch
-		[ ] content
-			[ ] fallback to english
-	[x] mdx content
+	[ ] mdx content
+		[ ] hmr
+		[ ] fallback to english
+
 	[ ] iconify
 	[ ] rss feed
 	[ ] framer motion

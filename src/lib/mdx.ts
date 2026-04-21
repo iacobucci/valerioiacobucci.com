@@ -6,6 +6,7 @@ export async function getPostMDX(slug: string, locale: string) {
 
 		return mod;
 	} catch (e) {
+		console.error(`Error importing MDX: content/blog/${slug}/${locale}.mdx`, e);
 		return null;
 	}
 }
