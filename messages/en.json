@@ -1,6 +1,6 @@
 {
   "HomePage": {
-    "title": "To get CANE, edit the page.tsx file.",
+    "title": "To get started, edit the page.tsx file.",
     "description": "Looking for a starting point or more instructions? Head over to <templateLink>Templates</templateLink> or the <learningLink>Learning</learningLink> center.",
     "deploy": "Deploy Now",
     "documentation": "Documentation"
