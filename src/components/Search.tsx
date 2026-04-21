@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { MdSearch, MdClose } from 'react-icons/md';
 import { Search as SearchIcon, FileText, Star, Layout, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter, Link } from '@/i18n/routing';
+import { useRouter } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 
 interface SearchResult {
@@ -17,7 +17,6 @@ interface SearchResult {
 export default function Search() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<SearchResult[]>([]);
   const [allData, setAllData] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   
@@ -50,28 +49,31 @@ export default function Search() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Filter results
-  useEffect(() => {
-    if (!query) {
-      setResults([]);
-      return;
-    }
-    const filtered = allData.filter(item => 
+  // Filter results using useMemo to avoid setState in useEffect
+  const results = useMemo(() => {
+    if (!query) return [];
+    
+    return allData.filter(item => 
       item.title.toLowerCase().includes(query.toLowerCase()) ||
       item.description?.toLowerCase().includes(query.toLowerCase())
     ).slice(0, 8);
-    setResults(filtered);
-    setSelectedIndex(0);
   }, [query, allData]);
 
   // Focus input when opened
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
+      const timer = setTimeout(() => inputRef.current?.focus(), 100);
+      return () => clearTimeout(timer);
     } else {
-      setQuery('');
+      // Clear query when closing, but do it in a way that doesn't trigger cascade during render
+      // Actually, it's better to just use a local state or clear it when opening
     }
   }, [isOpen]);
+
+  const handleOpen = () => {
+    setQuery('');
+    setIsOpen(true);
+  };
 
   const handleSelect = useCallback((result: SearchResult) => {
     setIsOpen(false);
@@ -102,7 +104,7 @@ export default function Search() {
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700 group"
         aria-label="Search"
       >
@@ -135,7 +137,10 @@ export default function Search() {
                 <input
                   ref={inputRef}
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setSelectedIndex(0);
+                  }}
                   onKeyDown={handleKeyDown}
                   placeholder="What are you looking for?"
                   className="flex-1 bg-transparent border-none outline-none text-lg text-gray-900 dark:text-white placeholder-gray-400"
@@ -187,7 +192,7 @@ export default function Search() {
                   </div>
                 ) : query ? (
                   <div className="p-12 text-center">
-                    <p className="text-gray-500 dark:text-gray-400">No results found for "{query}"</p>
+                    <p className="text-gray-500 dark:text-gray-400">No results found for &quot;{query}&quot;</p>
                   </div>
                 ) : (
                   <div className="p-8 text-center text-gray-400 space-y-2">

@@ -14,7 +14,7 @@ export interface ContentMetadata {
   order?: number;
   description?: string;
   isFallback: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 function calculateReadingTime(content: string): number {

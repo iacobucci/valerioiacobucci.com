@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   let messages;
   try {
     messages = (await import(`../../../../messages/${locale}.json`)).default;
-  } catch (e) {
+  } catch {
     messages = (await import(`../../../../messages/en.json`)).default;
   }
 

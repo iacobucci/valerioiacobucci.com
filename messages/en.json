@@ -24,6 +24,17 @@
 		"back": "Back to Blog",
 		"fallback_warning": "This post is not available in your language. Showing the English version instead."
 	},
+	"favorites": {
+		"title": "Favorites",
+		"description": "Thoughts on engineering and whatever else.",
+		"all": "All",
+		"loading": "Loading favorites...",
+		"error": "Error loading favorites:",
+		"no_favorites": "No favorites found.",
+		"no_favorites_tag": "No favorites found for tag \"{tag}\".",
+		"back": "Back to Favorites",
+		"fallback_warning": "This page is not available in your language. Showing the English version instead."
+	},
 	"projects": {
 		"title": "Projects",
 		"description": "A showcase of my open-source projects and experiments on GitHub.",
@@ -55,17 +66,6 @@
 				"description": "Educational resources for web development in JavaScript."
 			}
 		}
-	},
-	"favorites": {
-		"title": "Favorites",
-		"description": "Thoughts on engineering and whatever else.",
-		"all": "All",
-		"loading": "Loading favorites...",
-		"error": "Error loading favorites:",
-		"no_favorites": "No favorites found.",
-		"no_favorites_tag": "No favorites found for tag \"{tag}\".",
-		"back": "Back to Favorites",
-		"fallback_warning": "This page is not available in your language. Showing the English version instead."
 	},
 	"footer": {
 		"version": "version",

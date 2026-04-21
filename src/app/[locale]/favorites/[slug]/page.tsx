@@ -42,7 +42,7 @@ export default async function FavoritePage({
   if (process.env.NODE_ENV === 'development') {
     try {
       await import(`@/../content/${CONTENT_TYPE}/${slug}/${locale}.mdx`);
-    } catch (e) {
+    } catch {
       // Ignore errors, we only want the watcher to register the dependency
     }
   }
@@ -66,7 +66,7 @@ export default async function FavoritePage({
       }
       return <ModelViewerWrapper {...props} url={url} />;
     },
-    img: ({ src, alt, ...props }: any) => {
+    img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
       let finalSrc = src;
       if (src && typeof src === 'string' && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
         const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
