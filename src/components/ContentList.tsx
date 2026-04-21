@@ -123,10 +123,12 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
           {filteredItems.map((item) => {
             // Handle relative cover image
             let finalCover = item.coverImage;
-            if (finalCover && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
+            if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
               const normalized = finalCover.startsWith('./') ? finalCover.slice(2) : finalCover;
               finalCover = `/assets/${type}/${item.slug}/${normalized}`;
             }
+            
+            const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
 
             return (
               <motion.div
@@ -140,10 +142,10 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                   href={`/${type}/${item.slug}`}
                   className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
-                  {finalCover && (
+                  {coverSrc && (
                     <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">
                       <Image
-                        src={finalCover}
+                        src={coverSrc}
                         alt={item.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
