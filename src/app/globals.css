@@ -27,8 +27,13 @@
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  html {
+    @apply bg-bg-light dark:bg-bg-dark;
+  }
+  
   body {
-    @apply bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark transition-colors duration-200;
+    @apply bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark;
+    /* transition removed from body to prevent flashes on navigation */
   }
 }
 

@@ -5,6 +5,7 @@ import {routing} from '@/i18n/routing';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Navbar from '@/components/Navbar';
+import { cookies } from 'next/headers';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,9 @@ export default async function LocaleLayout({
   params: Promise<{locale: string}>;
 }) {
   const {locale} = await params;
+  const cookieStore = await cookies();
+  const theme = cookieStore.get('theme')?.value;
+  const isDark = theme === 'dark';
 
   // Ensure that the incoming `locale` is valid
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
@@ -42,8 +46,25 @@ export default async function LocaleLayout({
   const messages = await getMessages();
  
   return (
-    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${isDark ? 'dark' : ''}`} suppressHydrationWarning>
+      <head>
+        {!theme && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  try {
+                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                      document.documentElement.classList.add('dark');
+                    }
+                  } catch (e) {}
+                })();
+              `,
+            }}
+          />
+        )}
+      </head>
+      <body className="min-h-full flex flex-col bg-bg-light dark:bg-bg-dark">
         <NextIntlClientProvider messages={messages}>
           <Navbar />
           {children}
