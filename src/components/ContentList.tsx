@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Link } from '@/i18n/routing';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdSortByAlpha, MdFormatListNumbered, MdTag } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,8 +17,11 @@ interface ContentListProps {
 type SortBy = 'date' | 'alphabetical' | 'predefined';
 
 export default function ContentList({ items, type, locale }: ContentListProps) {
+  const router = useRouter();
   const [sortBy, setSortBy] = useState<SortBy>('date');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Extract all unique tags
   const allTags = useMemo(() => {
@@ -53,6 +56,52 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
       return 0;
     });
   }, [items, sortBy, selectedTag]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input or textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedIndex(prev => (prev < filteredItems.length - 1 ? prev + 1 : prev));
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedIndex(prev => (prev > 0 ? prev - 1 : 0));
+      } else if (e.key === 'Enter' && focusedIndex >= 0) {
+        const item = filteredItems[focusedIndex];
+        if (item) {
+          router.push(`/${type}/${item.slug}`);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [filteredItems, focusedIndex, router, type]);
+
+  // Reset focus when filters change
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [selectedTag, sortBy]);
+
+  // Scroll focused item into view
+  useEffect(() => {
+    if (focusedIndex >= 0 && listRef.current) {
+      const children = listRef.current.children;
+      const focusedElement = children[focusedIndex] as HTMLElement;
+      if (focusedElement) {
+        focusedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [focusedIndex]);
 
   const sortOptions = [
     { id: 'date', label: 'By Date', icon: MdCalendarToday },
@@ -118,9 +167,9 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
       </div>
 
       {/* List */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6" ref={listRef}>
         <AnimatePresence mode="popLayout">
-          {filteredItems.map((item) => {
+          {filteredItems.map((item, index) => {
             // Handle relative cover image
             let finalCover = item.coverImage;
             if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
@@ -129,6 +178,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             }
             
             const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
+            const isFocused = index === focusedIndex;
 
             return (
               <motion.div
@@ -137,10 +187,15 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 key={item.slug}
+                onMouseEnter={() => setFocusedIndex(index)}
               >
                 <Link
                   href={`/${type}/${item.slug}`}
-                  className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  className={`group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border transition-all duration-300 overflow-hidden ${
+                    isFocused
+                      ? 'border-blue-500 dark:border-blue-400 bg-blue-50/30 dark:bg-blue-900/10 shadow-lg ring-1 ring-blue-500/20'
+                      : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl'
+                  }`}
                 >
                   {coverSrc && (
                     <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">

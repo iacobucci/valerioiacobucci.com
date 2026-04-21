@@ -24,7 +24,8 @@ features
 		[x] viewer
 	[x] page search
 	[x] icons
-	[ ] rss feed
+	[x] rss feed
+	[ ] github login for microblog
 
 components
 	[x] navbar
@@ -39,11 +40,13 @@ components
 terminal
 	[ ] figlets
 	[ ] pacman
+	[ ] lispv interpreter
 
 content
+	[ ] microblog
+		[ ] based on database
 	[ ] blog
-		[ ] escursioni
-		[ ] visualizzazioni modelli 3d con tresjs
+		[x] 3d visualizations
 	[ ] projects
 		[ ] README.md
 		[ ] apps
