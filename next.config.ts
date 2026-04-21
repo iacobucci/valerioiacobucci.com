@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
 	reactCompiler: true,
 	pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 	devIndicators: false,
-	allowedDevOrigins: ['msi'],
+	allowedDevOrigins: ['msi', 'valerioiacobucci.com'],
 };
 
 export default withNextIntl(withMDX(nextConfig));

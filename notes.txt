@@ -19,7 +19,7 @@ features
 			[ ]  word counting
 		[ ] other content based posts
 	[x] react three fiber
-		[ ] viewer
+		[x] viewer
 	[ ] page search
 	[ ] iconify
 	[ ] rss feed
