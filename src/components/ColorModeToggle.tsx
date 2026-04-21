@@ -10,12 +10,19 @@ export default function ColorModeToggle() {
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     
-    setTheme(initialTheme);
+    // Sincronizza immediatamente il DOM (sistema esterno)
     if (initialTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // Posticipa l'aggiornamento dello stato per evitare render a cascata sincroni (e l'errore di linting)
+    const frame = requestAnimationFrame(() => {
+      setTheme(initialTheme);
+    });
+    
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const toggleTheme = () => {
@@ -30,6 +37,7 @@ export default function ColorModeToggle() {
     }
   };
 
+  // Evita l'idratazione errata mostrando un segnaposto finché il tema non è determinato
   if (theme === null) return <div className="p-2 w-9 h-9" />;
 
   return (
