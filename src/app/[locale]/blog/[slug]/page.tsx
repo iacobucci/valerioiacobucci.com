@@ -7,13 +7,13 @@ import path from 'path';
 
 export async function generateStaticParams() {
 	const blogDir = path.join(process.cwd(), 'content/blog');
-	const slugs = fs.readdirSync(blogDir).filter(file => 
+	const slugs = fs.readdirSync(blogDir).filter(file =>
 		fs.statSync(path.join(blogDir, file)).isDirectory()
 	);
-	
+
 	const locales = ['en', 'it', 'nl'];
-	
-	return slugs.flatMap(slug => 
+
+	return slugs.flatMap(slug =>
 		locales.map(locale => ({ locale, slug }))
 	);
 }
@@ -37,7 +37,7 @@ export default async function BlogPostPage({
 
 	const components = {
 		img: (props: any) => {
-			let src = props.src;
+			const src = props.src;
 			// If src is relative (doesn't start with http, / or data:)
 			if (src && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
 				// Normalize: remove ./ if present

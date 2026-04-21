@@ -4,6 +4,8 @@ import * as React from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
+import face from './face.jpg';
+
 export default function CVPage() {
 	const t = useTranslations('cv');
 
@@ -35,11 +37,12 @@ export default function CVPage() {
 
 						<div className="w-2/3 text-left pl-3">
 							<Image
-								src="/face.jpg"
+								src={face}
 								width={160}
 								height={160}
 								className="w-40 rounded"
 								alt="Face"
+								loading='eager'
 							/>
 						</div>
 					</div>

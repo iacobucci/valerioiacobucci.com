@@ -1,8 +1,10 @@
+const extension = "md";
+
 export async function getPostMDX(slug: string, locale: string) {
 	try {
 		// Try requested locale
 		const mod = await import(
-			`@/../content/blog/${slug}/${locale}.mdx`
+			`@/../content/blog/${slug}/${locale}.${extension}`
 		);
 		return { content: mod, isFallback: false };
 	} catch (e) {
@@ -10,16 +12,16 @@ export async function getPostMDX(slug: string, locale: string) {
 		if (locale !== 'en') {
 			try {
 				const mod = await import(
-					`@/../content/blog/${slug}/en.mdx`
+					`@/../content/blog/${slug}/en.${extension}`
 				);
 				return { content: mod, isFallback: true };
 			} catch (fallbackError) {
-				console.error(`Error importing fallback MDX: content/blog/${slug}/en.mdx`, fallbackError);
+				console.error(`Error importing fallback MDX: content/blog/${slug}/en.${extension}`, fallbackError);
 				return null;
 			}
 		}
-		
-		console.error(`Error importing MDX: content/blog/${slug}/${locale}.mdx`, e);
+
+		console.error(`Error importing MDX: content/blog/${slug}/${locale}.${extension}`, e);
 		return null;
 	}
 }

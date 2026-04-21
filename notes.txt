@@ -1,7 +1,9 @@
 features
-	[ ] tailwind
+	[x] tailwind
 		[ ] dark mode
 	[ ] version
+		[ ] git rev-parse HEAD
+		[ ] caching
 	[x] i18n
 		[x] interface
 			[x] automatic user languages
@@ -10,9 +12,14 @@ features
 				[x] italian
 				[x] dutch
 	[x] mdx content
-		[x] hmr
-		[ ] fallback to english
+		[ ] blog
+			[ ] 
+			[x] hmr
+			[x] fallback to english
+			[ ]  word counting
+		[ ] other content based posts
 	[x] react three fiber
+		[x] viewer
 	[ ] iconify
 	[ ] rss feed
 	[ ] framer motion
