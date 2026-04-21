@@ -6,15 +6,17 @@ import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdSortByAlpha, MdFormatListNumbered, MdTag } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { FormattedDate } from './FormattedDate';
 
 interface ContentListProps {
   items: ContentMetadata[];
   type: string;
+  locale: string;
 }
 
 type SortBy = 'date' | 'alphabetical' | 'predefined';
 
-export default function ContentList({ items, type }: ContentListProps) {
+export default function ContentList({ items, type, locale }: ContentListProps) {
   const [sortBy, setSortBy] = useState<SortBy>('date');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
@@ -173,14 +175,10 @@ export default function ContentList({ items, type }: ContentListProps) {
                     
                     <div className="flex items-center gap-4 mt-auto">
                       {item.date && (
-                        <time className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                        <div className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
                           <MdCalendarToday className="w-3.5 h-3.5" />
-                          {new Date(item.date).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </time>
+                          <FormattedDate date={item.date} locale={locale} />
+                        </div>
                       )}
                       {item.readingTime && (
                         <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">

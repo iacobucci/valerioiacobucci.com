@@ -25,7 +25,7 @@ export default async function BlogIndexPage({
           </p>
         </header>
         
-        <ContentList items={posts} type="blog" />
+        <ContentList items={posts} type="blog" locale={locale} />
       </main>
     </div>
   );

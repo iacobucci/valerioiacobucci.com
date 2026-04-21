@@ -25,7 +25,7 @@ export default async function FavoritesIndexPage({
           </p>
         </header>
         
-        <ContentList items={favorites} type="favorites" />
+        <ContentList items={favorites} type="favorites" locale={locale} />
       </main>
     </div>
   );
