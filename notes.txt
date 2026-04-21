@@ -13,11 +13,11 @@ features
 				[x] dutch
 	[x] mdx content
 		[ ] blog
-			[ ] 
 			[x] hmr
 			[x] fallback to english
 			[ ]  word counting
-		[ ] other content based posts
+		[x] other content based posts
+			[ ] make dx even smoother
 	[x] react three fiber
 		[x] viewer
 	[ ] page search
