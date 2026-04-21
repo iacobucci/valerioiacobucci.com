@@ -1,6 +1,6 @@
 'use client';
 
-import { Search as SearchIcon } from 'lucide-react';
+import { MdSearch } from 'react-icons/md';
 
 export default function Search() {
   return (
@@ -8,7 +8,7 @@ export default function Search() {
       className="p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-colors"
       aria-label="Search"
     >
-      <SearchIcon className="h-5 w-5" />
+      <MdSearch className="h-5 w-5" />
     </button>
   );
 }

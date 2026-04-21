@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/mdx';
-import { Calendar, SortAsc, Hash } from 'lucide-react';
+import { MdCalendarToday, MdSortByAlpha, MdFormatListNumbered } from 'react-icons/md';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ContentListProps {
   items: ContentMetadata[];
@@ -32,73 +33,72 @@ export default function ContentList({ items, type }: ContentListProps) {
     return 0;
   });
 
+  const sortOptions = [
+    { id: 'date', label: 'By Date', icon: MdCalendarToday },
+    { id: 'alphabetical', label: 'A-Z', icon: MdSortByAlpha },
+    { id: 'predefined', label: 'Order', icon: MdFormatListNumbered },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex gap-4 border-b border-gray-100 dark:border-gray-800 pb-4 overflow-x-auto">
-        <button
-          onClick={() => setSortBy('date')}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-            sortBy === 'date'
-              ? 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          <Calendar className="w-3.5 h-3.5" />
-          By Date
-        </button>
-        <button
-          onClick={() => setSortBy('alphabetical')}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-            sortBy === 'alphabetical'
-              ? 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          <SortAsc className="w-3.5 h-3.5" />
-          A-Z
-        </button>
-        <button
-          onClick={() => setSortBy('predefined')}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-            sortBy === 'predefined'
-              ? 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-        >
-          <Hash className="w-3.5 h-3.5" />
-          Order
-        </button>
+        {sortOptions.map((opt) => {
+          const Icon = opt.icon;
+          const active = sortBy === opt.id;
+          return (
+            <button
+              key={opt.id}
+              onClick={() => setSortBy(opt.id as SortBy)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                active
+                  ? 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900'
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {opt.label}
+            </button>
+          );
+        })}
       </div>
 
       <ul className="space-y-4">
-        {sortedItems.map((item) => (
-          <li key={item.slug} className="group">
-            <Link
-              href={`/${type}/${item.slug}`}
-              className="block p-4 rounded-xl border border-transparent hover:border-gray-100 dark:hover:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all"
+        <AnimatePresence mode="popLayout">
+          {sortedItems.map((item) => (
+            <motion.li
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              key={item.slug}
             >
-              <div className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold text-fg-light dark:text-fg-dark group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                  {item.title}
-                </h3>
-                {item.date && (
-                  <time className="text-xs text-gray-500 dark:text-gray-400">
-                    {new Date(item.date).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </time>
-                )}
-                {item.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                    {item.description}
-                  </p>
-                )}
-              </div>
-            </Link>
-          </li>
-        ))}
+              <Link
+                href={`/${type}/${item.slug}`}
+                className="group block p-4 rounded-xl border border-transparent hover:border-gray-100 dark:hover:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-all"
+              >
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-lg font-semibold text-fg-light dark:text-fg-dark group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                    {item.title}
+                  </h3>
+                  {item.date && (
+                    <time className="text-xs text-gray-500 dark:text-gray-400">
+                      {new Date(item.date).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </time>
+                  )}
+                  {item.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </motion.li>
+          ))}
+        </AnimatePresence>
       </ul>
     </div>
   );

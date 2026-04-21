@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Cold color palette */
+  /* Original Cold color palette */
   --color-gray-50: #fafaff;
   --color-gray-100: #f1f1f7;
   --color-gray-200: #e0e0e6;
@@ -16,25 +16,19 @@
 
   /* Semantic background colors */
   --color-bg-light: #ffffff;
-  --color-bg-dark: var(--color-gray-900);
+  --color-bg-dark: #121216;
 
   /* Semantic foreground colors */
   --color-fg-light: #000000;
-  --color-fg-dark: var(--color-gray-200);
+  --color-fg-dark: #e0e0e6;
 }
 
-/* Explicitly define the dark variant for class-based dark mode in Tailwind v4 */
+/* Explicitly define the dark variant for class-based dark mode */
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
   body {
-    /* Use the semantic theme colors */
-    @apply bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark transition-colors duration-300;
-  }
-
-  /* Ensure Nuxt Studio editor inherits color correctly */
-  .ProseMirror {
-    @apply text-inherit;
+    @apply bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark transition-colors duration-200;
   }
 }
 

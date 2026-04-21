@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { MdMenu, MdClose } from 'react-icons/md';
 import { Link, usePathname } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ export default function Navbar() {
 	const navLinks = [
 		{ href: '/', label: t('home') },
 		{ href: '/blog', label: t('blog') },
-		// { href: '/cv', label: t('cv') },
+		{ href: '/cv', label: t('cv') },
 		{ href: '/favorites', label: t('favorites') },
 		{ href: '/projects', label: t('projects') },
 	];
@@ -131,7 +131,7 @@ export default function Navbar() {
 							className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition duration-150 ease-in-out"
 							aria-label="Main menu"
 						>
-							{menuOpen ? <X className="h-6 w-6 text-fg-light dark:text-fg-dark" /> : <Menu className="h-6 w-6 text-fg-light dark:text-fg-dark" />}
+							{menuOpen ? <MdClose className="h-6 w-6 text-fg-light dark:text-fg-dark" /> : <MdMenu className="h-6 w-6 text-fg-light dark:text-fg-dark" />}
 						</button>
 					</div>
 				</div>
