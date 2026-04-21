@@ -30,7 +30,8 @@ export default async function LocaleLayout({
 }) {
   const {locale} = await params;
   const cookieStore = await cookies();
-  const theme = cookieStore.get('theme')?.value;
+  const themeValue = cookieStore.get('theme')?.value;
+  const theme = themeValue === 'dark' ? 'dark' : 'light';
   const isDark = theme === 'dark';
 
   // Ensure that the incoming `locale` is valid
@@ -48,7 +49,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased ${isDark ? 'dark' : ''}`} suppressHydrationWarning>
       <head>
-        {!theme && (
+        {!themeValue && (
           <script
             dangerouslySetInnerHTML={{
               __html: `
@@ -66,7 +67,7 @@ export default async function LocaleLayout({
       </head>
       <body className="min-h-full flex flex-col bg-bg-light dark:bg-bg-dark">
         <NextIntlClientProvider messages={messages}>
-          <Navbar />
+          <Navbar initialTheme={theme} />
           {children}
         </NextIntlClientProvider>
       </body>

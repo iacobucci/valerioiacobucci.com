@@ -3,39 +3,28 @@
 import { useEffect, useState } from 'react';
 import { MdLightMode, MdDarkMode } from 'react-icons/md';
 
-export default function ColorModeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark' | null>(null);
+interface ColorModeToggleProps {
+  initialTheme: 'light' | 'dark';
+}
+
+export default function ColorModeToggle({ initialTheme }: ColorModeToggleProps) {
+  const [theme, setTheme] = useState<'light' | 'dark'>(initialTheme);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    // Sincronizza localStorage e cookie in caso di discrepanze (es. primo caricamento o modifiche esterne)
+    localStorage.setItem('theme', theme);
+    document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax`;
     
-    setTheme(initialTheme);
-    // Assicuriamoci che il cookie sia sincronizzato per i caricamenti successivi
-    document.cookie = `theme=${initialTheme}; path=/; max-age=31536000; SameSite=Lax`;
-    
-    if (initialTheme === 'dark') {
+    if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, []);
+  }, [theme]);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    // Imposta il cookie per il server
-    document.cookie = `theme=${newTheme}; path=/; max-age=31536000; SameSite=Lax`;
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
-
-  if (theme === null) return <div className="p-2 w-9 h-9" />;
 
   return (
     <button
