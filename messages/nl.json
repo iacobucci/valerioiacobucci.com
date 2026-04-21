@@ -1,8 +1,150 @@
 {
-  "HomePage": {
-    "title": "Om aan de slag te gaan, bewerk het bestand page.tsx.",
-    "description": "Op zoek naar een startpunt of meer instructies? Ga naar <templateLink>Templates</templateLink> of het <learningLink>Leercentrum</learningLink>.",
-    "deploy": "Nu implementeren",
-    "documentation": "Documentatie"
-  }
+	"nav": {
+		"home": "Home",
+		"blog": "Blog",
+		"favorites": "Favorieten",
+		"projects": "Projecten"
+	},
+	"home": {
+		"intro": "Ik ben Valerio, een student Computer Engineering aan de Universiteit van Bologna.",
+		"read_blog": "Blog Lezen",
+		"view_projects": "Projecten Bekijken",
+		"connect": "Contact met mij opnemen"
+	},
+	"blog": {
+		"title": "Blog",
+		"description": "Gedachten over engineering en al het andere.",
+		"all": "Alle",
+		"loading": "Blogberichten laden...",
+		"error": "Fout bij het laden van blogberichten:",
+		"no_posts": "Geen blogberichten gevonden.",
+		"no_posts_tag": "Geen blogberichten gevonden voor tag \"{tag}\".",
+		"reading_time": "{time} min leestijd",
+		"back": "Terug naar Blog"
+	},
+	"projects": {
+		"title": "Projecten",
+		"description": "Een overzicht van mijn open-source projecten en experimenten op GitHub.",
+		"loading": "Projecten laden...",
+		"error": "Fout bij het laden van projecten. Probeer het later opnieuw.",
+		"no_projects": "Geen projecten gevonden.",
+		"updated": "Bijgewerkt op {date}",
+		"github": "GitHub",
+		"website": "Website"
+	},
+	"favorites": {
+		"title": "Favorieten",
+		"description": "Gedachten over engineering en al het andere.",
+		"all": "Alle",
+		"loading": "Favorieten laden...",
+		"error": "Fout bij het laden van favorieten:",
+		"no_favorites": "Geen favorieten gevonden.",
+		"no_favorites_tag": "Geen favorieten gevonden voor tag \"{tag}\".",
+		"back": "Terug naar favorieten"
+	},
+	"footer": {
+		"version": "versie",
+		"made_with": "maakt met"
+	},
+	"auth": {
+		"login": "Inloggen",
+		"logout": "Uitloggen"
+	},
+	"terminal": {
+		"welcome": "Probeer \"help\" om te beginnen.",
+		"help": "Beschikbare commando's: about, blog, projects, clear, whoami",
+		"whoami": "Valerio - Software Engineer & Nuxt Liefhebber",
+		"about": "Ik ben een full-stack ontwikkelaar met een passie voor het bouwen von moderne webapplicaties met Nuxt en Vue.",
+		"redirecting_blog": "Doorsturen naar blog...",
+		"redirecting_projects": "Doorsturen naar projecten...",
+		"redirecting": "Doorsturen...",
+		"not_found": "Commando niet gevonden: {cmd}. Typ \"help\" voor een lijst met commando's."
+	},
+	"cv": {
+		"title": "Curriculum Vitae",
+		"updated_to": "Bijgewerkt vanaf",
+		"download_pdf": "Download in PDF-formaat",
+		"personal_info": {
+			"name": "Voornaam",
+			"surname": "Achternaam",
+			"birth_date": "Geboortedatum",
+			"phone": "Mobiel nummer",
+			"email": "E-mailadres",
+			"website": "Persoonlijke website",
+			"github": "GitHub-portfolio",
+			"linkedin": "LinkedIn-profiel"
+		},
+		"personal_info_values": {
+			"name": "Valerio",
+			"surname": "Iacobucci",
+			"birth_date": "02/11/2001",
+			"phone": "+39 334 999 4364"
+		},
+		"education": {
+			"title": "Opleiding",
+			"high_school": {
+				"label": "Middelbare school",
+				"desc": "\"Traditionele\" wetenschappelijke richting, aan het Liceo Scientifico A.Romita, Campobasso.",
+				"period": "(2015-2020)"
+			},
+			"english": {
+				"label": "Engelse taalopleiding",
+				"desc": "Accademia Britannica International House, Campobasso.",
+				"period": "(2013-2017)"
+			},
+			"bachelor": {
+				"label": "Bacheloropleiding",
+				"desc_prefix": "Bachelor in Computer Engineering, 9254, aan de Alma Mater Studiorum - Universiteit van Bologna. Scriptie over",
+				"thesis_link_text": "AWS, Nuxt, TypeORM",
+				"period": "(2020-2024)"
+			},
+			"master": {
+				"label": "Masteropleiding",
+				"desc": "Master in Computer Engineering, LM32, aan de Alma Mater Studiorum - Universiteit van Bologna.",
+				"period": "(2025-)"
+			}
+		},
+		"work_experience": {
+			"title": "Werkervaring",
+			"internship": {
+				"label": "Stage",
+				"desc": "Webontwikkeling en infrastructuur met AWS bij Soluzioni Futura s.r.l., Reggio Emilia.",
+				"period": "(2023)"
+			}
+		},
+		"languages": {
+			"title": "Talen",
+			"native": {
+				"label": "Moedertaal",
+				"desc": "Italiaans."
+			},
+			"other": {
+				"label": "Andere talen",
+				"desc": "Voor internationalisering gebruik ik dagelijks Engels, op C1 (CAE) niveau."
+			}
+		},
+		"technical_skills": {
+			"title": "Technische vaardigheden",
+			"programming_principles": "Programmeerprincipes",
+			"programming_principles_desc": "Algoritmen en datastructuren, computationele complexiteit, programmeerparadigma's (concurrent, declaratief, functioneel, imperatief, procedureel, reactief, objectgeoriënteerd), machine learning.",
+			"system_programming": "Systeemprogrammering",
+			"system_programming_desc": "Linux API, Bash, Python, C, C++, Java, Javascript, Rust, Go, build-systemen (CMake, Make, Maven, Gradle, Cargo, Poetry, Npm, Pnpm).",
+			"web_frameworks": "Webframeworks",
+			"web_frameworks_desc": "Angular, Next.js, Nuxt, Express, Django, FastAPI, Ruby on Rails.",
+			"frontend_web": "Webfrontend",
+			"frontend_web_desc": "Angular, React, Vue, Bootstrap, JQuery, Sass, Tailwind, Shadcn.",
+			"frontend_mobile_desktop": "Mobiele en desktop-frontend",
+			"frontend_mobile_desktop_desc": "Android SDK, Google Play Services, Flutter, Cordova, React Native, Gtk, Qt, Gnome SDK.",
+			"databases": "Databases",
+			"databases_desc": "Firebase, Supabase, MongoDB, MySQL, PostgreSQL, SQLite.",
+			"devops": "DevOps",
+			"devops_desc": "AWS (VPC, EC2, ECS, Fargate, S3, RDS, Route 53, CloudFront, Lambda, API Gateway, IAM, CloudWatch, SNS, SQS, CodePipeline, CodeBuild, CodeDeploy, CloudFormation, Node SDK), Azure, Docker, Git, GitHub Actions, Nginx, SSH, SSL, GnuPG.",
+			"data_science": "Data science",
+			"data_science_desc": "Jupyter, MatPlotLib, NumPy, PyTorch, Pandas, SciPy.",
+			"embedded": "Embedded",
+			"embedded_desc": "Arduino SDK, IoT-systemen (MQTT, Zigbee), elektronische simulaties met SPICE.",
+			"multimedia_software": "Multimediasoftware (OSS)",
+			"multimedia_software_desc": "FreeCAD, KiCAD, Blender, Cairo, Ffmpeg, Gimp, Inkscape, Imagemagick, Latex, Pandoc, Godot, Krita, Neovim, Code OSS, Ardour, Olive Video Editor, OBS Studio, Audacity."
+		}
+	}
 }

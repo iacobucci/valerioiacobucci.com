@@ -1,8 +1,150 @@
 {
-  "HomePage": {
-    "title": "Per iniziare, modifica il file page.tsx.",
-    "description": "Cerchi un punto di partenza o maggiori istruzioni? Vai ai <templateLink>Template</templateLink> o al centro di <learningLink>Apprendimento</learningLink>.",
-    "deploy": "Distribuisci ora",
-    "documentation": "Documentazione"
-  }
+	"nav": {
+		"home": "Home",
+		"blog": "Blog",
+		"favorites": "Preferiti",
+		"projects": "Progetti"
+	},
+	"home": {
+		"intro": "Sono Valerio, uno studente di Ingegneria Informatica all'Università di Bologna.",
+		"read_blog": "Leggi il Blog",
+		"view_projects": "Vedi i Progetti",
+		"connect": "Contattami"
+	},
+	"blog": {
+		"title": "Blog",
+		"description": "Pensieri sull'ingegneria e tutto il resto.",
+		"all": "Tutti",
+		"loading": "Caricamento post...",
+		"error": "Errore nel caricamento dei post:",
+		"no_posts": "Nessun post trovato.",
+		"no_posts_tag": "Nessun post trovato per il tag \"{tag}\".",
+		"reading_time": "{time} min di lettura",
+		"back": "Torna al Blog"
+	},
+	"projects": {
+		"title": "Progetti",
+		"description": "Una vetrina dei miei progetti open-source ed esperimenti su GitHub.",
+		"loading": "Caricamento progetti...",
+		"error": "Errore nel caricamento dei progetti. Riprova più tardi.",
+		"no_projects": "Nessun progetto trovato.",
+		"updated": "Aggiornato il {date}",
+		"github": "GitHub",
+		"website": "Sito Web"
+	},
+	"favorites": {
+		"title": "Preferiti",
+		"description": "Pensieri sull'ingegneria e tutto il resto.",
+		"all": "Tutti",
+		"loading": "Caricamento preferiti...",
+		"error": "Errore nel caricamento dei preferiti:",
+		"no_favorites": "Nessun preferito trovato.",
+		"no_favorites_tag": "Nessun preferito trovato per il tag \"{tag}\".",
+		"back": "Torna ai Preferiti"
+	},
+	"footer": {
+		"version": "versione",
+		"made_with": "realizzato con"
+	},
+	"auth": {
+		"login": "Accedi",
+		"logout": "Esci"
+	},
+	"terminal": {
+		"welcome": "Prova \"help\" per iniziare.",
+		"help": "Comandi disponibili: about, blog, projects, clear, whoami",
+		"whoami": "Valerio - Software Engineer & Appassionato di Nuxt",
+		"about": "Sono uno sviluppatore full-stack appassionato nella creazione di applicazioni web moderne con Nuxt e Vue.",
+		"redirecting_blog": "Reindirizzamento al blog...",
+		"redirecting_projects": "Reindirizzamento ai progetti...",
+		"redirecting": "Reindirizzamento...",
+		"not_found": "Comando non trovato: {cmd}. Digita \"help\" per la lista dei comandi."
+	},
+	"cv": {
+		"title": "Curriculum",
+		"updated_to": "Aggiornato al",
+		"download_pdf": "Scarica in formato PDF",
+		"personal_info": {
+			"name": "Nome",
+			"surname": "Cognome",
+			"birth_date": "Data di nascita",
+			"phone": "Telefono cellulare",
+			"email": "Indirizzo di posta elettronica",
+			"website": "Sito web personale",
+			"github": "Portfolio GitHub",
+			"linkedin": "Profilo LinkedIn"
+		},
+		"personal_info_values": {
+			"name": "Valerio",
+			"surname": "Iacobucci",
+			"birth_date": "02/11/2001",
+			"phone": "+39 334 999 4364"
+		},
+		"education": {
+			"title": "Formazione",
+			"high_school": {
+				"label": "Scuola secondaria di secondo grado",
+				"desc": "Indirizzo \"Tradizionale\", presso Liceo Scientifico A.Romita, Campobasso.",
+				"period": "(2015-2020)"
+			},
+			"english": {
+				"label": "Formazione di lingua inglese",
+				"desc": "Accademia Britannica International House, Campobasso.",
+				"period": "(2013-2017)"
+			},
+			"bachelor": {
+				"label": "Università triennale",
+				"desc_prefix": "Corso di Laurea triennale in Ingegneria Informatica, 9254, presso Alma Mater Studiorum - Università di Bologna. Tesi su",
+				"thesis_link_text": "AWS, Nuxt, TypeORM",
+				"period": "(2020-2024)"
+			},
+			"master": {
+				"label": "Università magistrale",
+				"desc": "Corso di Laurea magistrale in Ingegneria Informatica, LM32, presso Alma Mater Studiorum - Università di Bologna.",
+				"period": "(2025-)"
+			}
+		},
+		"work_experience": {
+			"title": "Esperienza lavorativa",
+			"internship": {
+				"label": "Tirocinio",
+				"desc": "Sviluppo ed infrastruttura web con AWS presso Soluzioni Futura s.r.l., Reggio Emilia.",
+				"period": "(2023)"
+			}
+		},
+		"languages": {
+			"title": "Lingue",
+			"native": {
+				"label": "Madrelingua",
+				"desc": "Italiano."
+			},
+			"other": {
+				"label": "Altre lingue",
+				"desc": "Per internazionalizzazione, uso la lingua inglese quotidianamente, con livello C1 (CAE)."
+			}
+		},
+		"technical_skills": {
+			"title": "Competenze tecniche",
+			"programming_principles": "Principi di programmazione",
+			"programming_principles_desc": "Algoritmi e strutture dati, complessità computazionale, paradigmi di programmazione (concorrente, dichiarativa, funzionale, imperativa, procedurale, reattiva, orientata agli oggetti), machine learning.",
+			"system_programming": "Programmazione di sistema",
+			"system_programming_desc": "API Linux, Bash, Python, C, C++, Java, Javascript, Rust, Go, sistemi di build (CMake, Make, Maven, Gradle, Cargo, Poetry, Npm, Pnpm).",
+			"web_frameworks": "Framework web",
+			"web_frameworks_desc": "Angular, Next.js, Nuxt, Express, Django, FastAPI, Ruby on Rails.",
+			"frontend_web": "Frontend web",
+			"frontend_web_desc": "Angular, React, Vue, Bootstrap, JQuery, Sass, Tailwind, Shadcn.",
+			"frontend_mobile_desktop": "Frontend mobile e desktop",
+			"frontend_mobile_desktop_desc": "Android SDK, Google Play Services, Flutter, Cordova, React Native, Gtk, Qt, Gnome SDK.",
+			"databases": "Basi di dati",
+			"databases_desc": "Firebase, Supabase, MongoDB, Mysql, PostgreSQL, Sqlite.",
+			"devops": "Devops",
+			"devops_desc": "AWS (VPC, EC2, ECS, Fargate, S3, RDS, Route 53, CloudFront, Lambda, API Gateway, IAM, CloudWatch, SNS, SQS, CodePipeline, CodeBuild, CodeDeploy, CloudFormation, SDK Node), Azure, Docker, Git, Github Actions, Nginx, SSH, SSL, GnuPG.",
+			"data_science": "Data science",
+			"data_science_desc": "Jupyter, MatPlotLib, NumPy, Pytorch, Pandas, SciPy.",
+			"embedded": "Embedded",
+			"embedded_desc": "Arduino SDK, Sistemi IOT (MQTT, Zigbee), simulazioni elettroniche con SPICE.",
+			"multimedia_software": "Software multimediali (OSS)",
+			"multimedia_software_desc": "FreeCAD, KiCAD, Blender, Cairo, Ffmpeg, Gimp, Inkscape, Imagemagick, Latex, Pandoc, Godot, Krita, Neovim, Code OSS, Ardour, Olive Video Editor, OBS Studio, Audacity."
+		}
+	}
 }

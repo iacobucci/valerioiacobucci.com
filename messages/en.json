@@ -1,8 +1,150 @@
 {
-  "HomePage": {
-    "title": "To get CANE, edit the page.tsx file.",
-    "description": "Looking for a starting point or more instructions? Head over to <templateLink>Templates</templateLink> or the <learningLink>Learning</learningLink> center.",
-    "deploy": "Deploy Now",
-    "documentation": "Documentation"
-  }
+	"nav": {
+		"home": "Home",
+		"blog": "Blog",
+		"favorites": "Favorites",
+		"projects": "Projects"
+	},
+	"home": {
+		"intro": "I'm Valerio, a Computer Engineering student at the University of Bologna.",
+		"read_blog": "Read Blog",
+		"view_projects": "View Projects",
+		"connect": "Connect with me"
+	},
+	"blog": {
+		"title": "Blog",
+		"description": "Thoughts on engineering and whatever else.",
+		"all": "All",
+		"loading": "Loading blog posts...",
+		"error": "Error loading blog posts:",
+		"no_posts": "No blog posts found.",
+		"no_posts_tag": "No blog posts found for tag \"{tag}\".",
+		"reading_time": "{time} min read",
+		"back": "Back to Blog"
+	},
+	"projects": {
+		"title": "Projects",
+		"description": "A showcase of my open-source projects and experiments on GitHub.",
+		"loading": "Loading projects...",
+		"error": "Error loading projects. Please try again later.",
+		"no_projects": "No projects found.",
+		"updated": "Updated {date}",
+		"github": "GitHub",
+		"website": "Website"
+	},
+	"favorites": {
+		"title": "Favorites",
+		"description": "Thoughts on engineering and whatever else.",
+		"all": "All",
+		"loading": "Loading favorites...",
+		"error": "Error loading favorites:",
+		"no_favorites": "No favorites found.",
+		"no_favorites_tag": "No favorites found for tag \"{tag}\".",
+		"back": "Back to Favorites"
+	},
+	"footer": {
+		"version": "version",
+		"made_with": "made with"
+	},
+	"auth": {
+		"login": "Login",
+		"logout": "Logout"
+	},
+	"terminal": {
+		"welcome": "Try \"help\" to start.",
+		"help": "Available commands: about, blog, projects, clear, whoami",
+		"whoami": "Valerio - Software Engineer & Nuxt Enthusiast",
+		"about": "I am a full-stack developer passionate about building modern web applications with Nuxt and Vue.",
+		"redirecting_blog": "Redirecting to blog...",
+		"redirecting_projects": "Redirecting to projects...",
+		"redirecting": "Redirecting...",
+		"not_found": "Command not found: {cmd}. Type \"help\" for a list of commands."
+	},
+	"cv": {
+		"title": "Curriculum Vitae",
+		"updated_to": "Updated to",
+		"download_pdf": "Download PDF",
+		"personal_info": {
+			"name": "First Name",
+			"surname": "Surname",
+			"birth_date": "Date of birth",
+			"phone": "Mobile phone",
+			"email": "Email address",
+			"website": "Personal website",
+			"github": "GitHub Portfolio",
+			"linkedin": "LinkedIn Profile"
+		},
+		"personal_info_values": {
+			"name": "Valerio",
+			"surname": "Iacobucci",
+			"birth_date": "02/11/2001",
+			"phone": "+39 334 999 4364"
+		},
+		"education": {
+			"title": "Education",
+			"high_school": {
+				"label": "Secondary school",
+				"desc": "\"Scientific\" high school, Liceo Scientiﬁco A.Romita, Campobasso, Italy.",
+				"period": "(2015-2020)"
+			},
+			"english": {
+				"label": "English language training",
+				"desc": "Accademia Britannica International House, Campobasso.",
+				"period": "(2013-2017)"
+			},
+			"bachelor": {
+				"label": "Bachelor's degree",
+				"desc_prefix": "Bachelor's Degree in Computer Engineering, 9254, at Alma Mater Studiorum - University of Bologna. Thesis on",
+				"thesis_link_text": "AWS, Nuxt, TypeORM",
+				"period": "(2020-2024)"
+			},
+			"master": {
+				"label": "Master's degree",
+				"desc": "Master's Degree in Computer Engineering, LM32, at Alma Mater Studiorum - University of Bologna.",
+				"period": "(2025-)"
+			}
+		},
+		"work_experience": {
+			"title": "Work Experience",
+			"internship": {
+				"label": "Internship",
+				"desc": "Web development and infrastructure with AWS at Soluzioni Futura s.r.l., Reggio Emilia.",
+				"period": "(2023)"
+			}
+		},
+		"languages": {
+			"title": "Languages",
+			"native": {
+				"label": "Native language",
+				"desc": "Italian."
+			},
+			"other": {
+				"label": "Other languages",
+				"desc": "For internationalization, I use English daily, at a C1 (CAE) level."
+			}
+		},
+		"technical_skills": {
+			"title": "Technical Skills",
+			"programming_principles": "Programming principles",
+			"programming_principles_desc": "Algorithms and data structures, space and computational complexity, programming paradigms (concurrent, declarative, functional, imperative, reactive, object oriented), software engineering design patterns, symbolic AI and various machine learning methods.",
+			"system_programming": "Systems programming",
+			"system_programming_desc": "Linux API, Bash, Python, C, C++, Java, Javascript, Rust, Go, build systems (CMake, Make, Maven, Gradle, Cargo, Poetry, Npm, Pnpm).",
+			"web_frameworks": "Web frameworks",
+			"web_frameworks_desc": "Angular, Next.js, Nuxt, Express, Django, FastAPI, Ruby on Rails.",
+			"frontend_web": "Web frontend",
+			"frontend_web_desc": "Angular, React, Vue, Bootstrap, JQuery, Sass, Tailwind, Shadcn.",
+			"frontend_mobile_desktop": "Mobile and desktop frontend",
+			"frontend_mobile_desktop_desc": "Android SDK, Google Play Services, Flutter, Cordova, React Native, Gtk, Qt, Gnome SDK.",
+			"databases": "Databases",
+			"databases_desc": "Firebase, Supabase, MongoDB, MySQL, PostgreSQL, SQLite.",
+			"devops": "DevOps",
+			"devops_desc": "AWS (VPC, EC2, ECS, Fargate, S3, RDS, Route 53, CloudFront, Lambda, API Gateway, IAM, CloudWatch, SNS, SQS, CodePipeline, CodeBuild, CodeDeploy, CloudFormation, Node SDK), Azure, Docker, Git, GitHub Actions, Nginx, SSH, SSL, GnuPG.",
+			"data_science": "Data science",
+			"data_science_desc": "Jupyter, MatPlotLib, NumPy, PyTorch, Pandas, SciPy.",
+			"embedded": "Embedded",
+			"embedded_desc": "I have experience with various development boards such as Arduino, Raspberry Pi, ESP32 based systems, with which I design and manufacture 3d-printed IoT solutions integrating them with electronic components and setting them in computer networks with protocols such as TCP/IP, WiFi, BLE, Zigbee, MQTT.  I'm interested in computer architectures, with particular regard to data and compute parallelism.",
+			"multimedia_software": "Multimedia software (OSS)",
+			"multimedia_software_desc": "FreeCAD, KiCAD, Blender, Cairo, Ffmpeg, Gimp, Inkscape, Imagemagick, Latex, Pandoc, Godot, Krita, Neovim, Code OSS, Ardour, Olive Video Editor, OBS Studio, Audacity."
+		}
+	}
 }

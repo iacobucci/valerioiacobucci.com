@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+@tailwind utilities;
+
+@layer base {
+	body {
+		/* Imposta i colori di default globali per light e dark mode */
+		@apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+	}
+
+	/* Assicura che l'editor di Nuxt Studio erediti correttamente il colore */
+	.ProseMirror {
+		@apply text-inherit;
+	}
+}
