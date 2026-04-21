@@ -20,9 +20,9 @@
 		"no_posts": "Nessun post trovato.",
 		"no_posts_tag": "Nessun post trovato per il tag \"{tag}\".",
 		"reading_time": "{time} min di lettura",
-		"back": "Torna al Blog"
-	},
-	"projects": {
+		"back": "Torna al Blog",
+		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
+		},	"projects": {
 		"title": "Progetti",
 		"description": "Una vetrina dei miei progetti open-source ed esperimenti su GitHub.",
 		"loading": "Caricamento progetti...",

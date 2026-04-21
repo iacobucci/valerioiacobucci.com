@@ -20,9 +20,9 @@
 		"no_posts": "No blog posts found.",
 		"no_posts_tag": "No blog posts found for tag \"{tag}\".",
 		"reading_time": "{time} min read",
-		"back": "Back to Blog"
-	},
-	"projects": {
+		"back": "Back to Blog",
+		"fallback_warning": "This post is not available in your language. Showing the English version instead."
+		},	"projects": {
 		"title": "Projects",
 		"description": "A showcase of my open-source projects and experiments on GitHub.",
 		"loading": "Loading projects...",
