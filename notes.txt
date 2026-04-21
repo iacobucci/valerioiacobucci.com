@@ -9,14 +9,13 @@ features
 				[x] english
 				[x] italian
 				[x] dutch
-	[ ] mdx content
-		[ ] hmr
+	[x] mdx content
+		[x] hmr
 		[ ] fallback to english
-
+	[x] react three fiber
 	[ ] iconify
 	[ ] rss feed
 	[ ] framer motion
-	[ ] react three fiber
 
 deploy
 	[ ] secrets submodule

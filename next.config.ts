@@ -10,7 +10,8 @@ const withMDX = createMDX({
 const nextConfig: NextConfig = {
 	reactCompiler: true,
 	pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-	devIndicators: false
+	devIndicators: false,
+	allowedDevOrigins: ['msi'],
 };
 
 export default withNextIntl(withMDX(nextConfig));
