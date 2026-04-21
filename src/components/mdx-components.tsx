@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
+import Mermaid from './mdx/Mermaid';
 
 export const mdxComponents = {
   h1: (props: any) => (
@@ -27,12 +28,21 @@ export const mdxComponents = {
   blockquote: (props: any) => (
     <blockquote className="border-l-4 border-gray-200 dark:border-gray-700 pl-4 italic my-6 text-gray-600 dark:text-gray-400" {...props} />
   ),
-  code: (props: any) => (
-    <code className="bg-gray-100 dark:bg-gray-800 rounded px-1.5 py-0.5 font-mono text-sm" {...props} />
-  ),
-  pre: (props: any) => (
-    <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 overflow-x-auto my-6 text-sm" {...props} />
-  ),
+  code: (props: any) => {
+    if (props.className === 'language-mermaid') {
+      return <Mermaid chart={props.children.toString()} />;
+    }
+    return <code className="bg-gray-100 dark:bg-gray-800 rounded px-1.5 py-0.5 font-mono text-sm" {...props} />;
+  },
+  pre: (props: any) => {
+    const isMermaid = React.isValidElement(props.children) && 
+                      (props.children.props as any)?.className === 'language-mermaid';
+    
+    if (isMermaid) {
+      return <>{props.children}</>;
+    }
+    return <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 overflow-x-auto my-6 text-sm" {...props} />;
+  },
   a: ({ href, ...props }: any) => {
     if (href?.startsWith('/')) {
       return (
