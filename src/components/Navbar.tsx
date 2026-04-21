@@ -18,7 +18,7 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 	const navLinks = [
 		{ href: '/', label: t('home') },
 		{ href: '/blog', label: t('blog') },
-		{ href: '/cv', label: t('cv') },
+		// { href: '/cv', label: t('cv') },
 		{ href: '/favorites', label: t('favorites') },
 		{ href: '/projects', label: t('projects') },
 	];

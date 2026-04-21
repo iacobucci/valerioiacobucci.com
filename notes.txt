@@ -12,9 +12,11 @@ features
 				[x] italian
 				[x] dutch
 	[x] mdx content
-		[ ] blog
+		[x] blog
 			[x] hmr
 			[x] fallback to english
+			[x] tag filtering
+			[x] descriptions and cover images
 			[ ]  word counting
 		[x] other content based posts
 			[ ] make dx even smoother

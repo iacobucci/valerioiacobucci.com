@@ -15,7 +15,7 @@ export default async function FavoritesIndexPage({
 
   return (
     <div className="flex flex-col flex-1 bg-bg-light dark:bg-bg-dark font-sans">
-      <main className="flex-1 w-full max-w-3xl mx-auto py-20 px-6 sm:px-16">
+      <main className="flex-1 w-full max-w-4xl mx-auto py-20 px-6 sm:px-16">
         <header className="mb-12">
           <h1 className="text-4xl font-bold text-fg-light dark:text-fg-dark mb-4">
             {t('title')}
