@@ -3,7 +3,7 @@
 		"home": "Home",
 		"blog": "Blog",
 		"cv": "CV",
-		"favorites": "Favorieten",
+		"microblog": "Microblog",
 		"projects": "Projecten"
 	},
 	"home": {
@@ -56,17 +56,13 @@
 			}
 		}
 	},
-	"favorites": {
-		"title": "Favorieten",
-		"description": "Gedachten over engineering en al het andere.",
-		"all": "Alle",
-		"loading": "Favorieten laden...",
-		"error": "Fout bij het laden van favorieten:",
-		"no_favorites": "Geen favorieten gevonden.",
-		"no_favorites_tag": "Geen favorieten gevonden voor tag \"{tag}\".",
-		"back": "Terug naar favorieten",
-		"fallback_warning": "Deze pagina is niet beschikbaar in uw taal. De Engelse versie wordt in plaats daarvan weergegeven."
+	"microblog": {
+		"title": "Microblog",
+		"description": "Korte gedachten en updates.",
+		"no_posts": "Nog geen berichten.",
+		"load_more": "Meer laden"
 	},
+
 	"footer": {
 		"version": "versie",
 		"made_with": "maakt met"

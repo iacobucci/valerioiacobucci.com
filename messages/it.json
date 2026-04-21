@@ -3,7 +3,7 @@
 		"home": "Home",
 		"blog": "Blog",
 		"cv": "CV",
-		"favorites": "Preferiti",
+		"microblog": "Microblog",
 		"projects": "Progetti"
 	},
 	"home": {
@@ -55,17 +55,13 @@
 			}
 		}
 	},
-	"favorites": {
-		"title": "Preferiti",
-		"description": "Pensieri sull'ingegneria e tutto il resto.",
-		"all": "Tutti",
-		"loading": "Caricamento preferiti...",
-		"error": "Errore nel caricamento dei preferiti:",
-		"no_favorites": "Nessun preferito trovato.",
-		"no_favorites_tag": "Nessun preferito trovato per il tag \"{tag}\".",
-		"back": "Torna ai Preferiti",
-		"fallback_warning": "Questa pagina non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
+	"microblog": {
+		"title": "Microblog",
+		"description": "Pensieri brevi e aggiornamenti.",
+		"no_posts": "Ancora nessun post.",
+		"load_more": "Carica altri"
 	},
+
 	"footer": {
 		"version": "versione",
 		"made_with": "realizzato con"

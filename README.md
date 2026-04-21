@@ -33,6 +33,7 @@ WorkingDirectory=/home/valerio/source/web/valerioiacobucci.com
 ExecStart=pnpm run start
 Restart=always
 Environment=PORT=8080
+; EnvironmentFile=/home/valerio/source/web/valerioiacobucci.com/.env
 RestartSec=3
 
 KillSignal=SIGINT

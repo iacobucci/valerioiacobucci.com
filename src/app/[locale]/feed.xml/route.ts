@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPosts } from '@/lib/content';
+import { getMicroblogPosts } from '@/lib/microblog';
 
 export async function GET(
   request: Request,
@@ -9,24 +10,42 @@ export async function GET(
   const siteUrl = 'https://valerioiacobucci.com';
   
   const blogPosts = await getPosts('blog', locale);
-  const favorites = await getPosts('favorites', locale);
+  const microblogPosts = await getMicroblogPosts(50);
   
-  const allPosts = [...blogPosts, ...favorites].sort((a, b) => {
+  // Combine and sort all types of posts
+  const allItems = [
+    ...blogPosts.map(p => ({ 
+      title: p.title,
+      slug: p.slug,
+      date: p.date,
+      description: p.description,
+      feedType: 'blog' as const,
+      url: `${siteUrl}/${locale}/blog/${p.slug}`
+    })),
+    ...microblogPosts.map(p => ({
+      title: p.content.slice(0, 50),
+      slug: '', 
+      date: p.created_at,
+      description: p.content,
+      feedType: 'microblog' as const,
+      url: `${siteUrl}/${locale}/microblog`
+    }))
+  ].sort((a, b) => {
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
     return dateB - dateA;
   });
 
-  const feedItems = allPosts.map((post) => {
-    const url = `${siteUrl}/${locale}/${post.type}/${post.slug}`;
-    const description = (post.description as string) || '';
-    const date = post.date ? new Date(post.date).toUTCString() : new Date().toUTCString();
+  const feedItems = allItems.map((item) => {
+    const url = item.url;
+    const description = (item.description as string) || '';
+    const date = item.date ? new Date(item.date).toUTCString() : new Date().toUTCString();
     
     return `
     <item>
-      <title><![CDATA[${post.title}]]></title>
+      <title><![CDATA[${item.title}]]></title>
       <link>${url}</link>
-      <guid isPermaLink="true">${url}</guid>
+      <guid isPermaLink="false">${url}-${item.date}</guid>
       <pubDate>${date}</pubDate>
       <description><![CDATA[${description}]]></description>
     </item>`;

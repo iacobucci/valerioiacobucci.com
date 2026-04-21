@@ -135,10 +135,10 @@ export default function HomePage() {
 							<div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
 						</Link>
 						<Link
-							href="/favorites"
+							href="/projects"
 							className="px-10 py-4 border-2 border-gray-200 dark:border-gray-800 text-fg-light dark:text-fg-dark font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-95"
 						>
-							{t("favorites.title")}
+							{t("projects.title")}
 						</Link>
 					</motion.div>
 				</div>
