@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
 	pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 	devIndicators: false,
 	allowedDevOrigins: ['msi', 'valerioiacobucci.com'],
+	serverExternalPackages: ['better-sqlite3'],
 };
 
 export default withNextIntl(withMDX(nextConfig));

@@ -2,6 +2,8 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getMicroblogPosts } from '@/lib/microblog';
 import MicroblogList from '@/components/MicroblogList';
 
+export const dynamic = 'force-dynamic';
+
 export default async function MicroblogPage({
   params,
 }: {

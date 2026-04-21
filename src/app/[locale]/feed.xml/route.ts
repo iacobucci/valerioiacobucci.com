@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getPosts } from '@/lib/content';
 import { getMicroblogPosts } from '@/lib/microblog';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ locale: string }> }
