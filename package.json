@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 8080",
     "build": "next build",
-    "start": "PORT=8080 next start",
+    "start": "next start",
+	"publish": "scripts/update.sh --publish",
     "lint": "eslint"
   },
   "dependencies": {
