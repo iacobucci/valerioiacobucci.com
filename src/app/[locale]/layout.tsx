@@ -5,7 +5,9 @@ import {routing} from '@/i18n/routing';
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { cookies } from 'next/headers';
+import { COMMIT_HASH } from '@/lib/env';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,7 +70,10 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col bg-bg-light dark:bg-bg-dark">
         <NextIntlClientProvider messages={messages}>
           <Navbar initialTheme={theme} />
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer commitHash={COMMIT_HASH} />
         </NextIntlClientProvider>
       </body>
     </html>

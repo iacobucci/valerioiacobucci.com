@@ -26,14 +26,14 @@ features
 	[ ] framer motion
 
 components
-	[ ] navbar
-		[ ] dark mode switcher
-		[ ] language switcher
+	[x] navbar
+		[x] dark mode switcher
+		[x] language switcher
 		[ ] user menu
 		[ ] searchbar
 	[ ] terminal
 	[ ] footer
-	[ ] post list
+	[x] post list
 
 deploy
 	[ ] secrets submodule
