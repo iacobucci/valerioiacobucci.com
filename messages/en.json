@@ -22,7 +22,8 @@
 		"reading_time": "{time} min read",
 		"back": "Back to Blog",
 		"fallback_warning": "This post is not available in your language. Showing the English version instead."
-		},	"projects": {
+	},
+	"projects": {
 		"title": "Projects",
 		"description": "A showcase of my open-source projects and experiments on GitHub.",
 		"loading": "Loading projects...",
@@ -128,11 +129,11 @@
 			"programming_principles": "Programming principles",
 			"programming_principles_desc": "Algorithms and data structures, space and computational complexity, programming paradigms (concurrent, declarative, functional, imperative, reactive, object oriented), software engineering design patterns, symbolic AI and various machine learning methods.",
 			"system_programming": "Systems programming",
-			"system_programming_desc": "Linux API, Bash, Python, C, C++, Java, Javascript, Rust, Go, build systems (CMake, Make, Maven, Gradle, Cargo, Poetry, Npm, Pnpm).",
+			"system_programming_desc": "Linux API, Bash, Python, C, C++, Java, Javascript, Typescript, Rust, Go, various build systems (CMake, Make, Maven, Gradle, Cargo, Poetry, Npm, Pnpm).",
 			"web_frameworks": "Web frameworks",
 			"web_frameworks_desc": "Angular, Next.js, Nuxt, Express, Django, FastAPI, Ruby on Rails.",
 			"frontend_web": "Web frontend",
-			"frontend_web_desc": "Angular, React, Vue, Bootstrap, JQuery, Sass, Tailwind, Shadcn.",
+			"frontend_web_desc": "Angular, React, Vue, Bootstrap, JQuery, Tailwind.",
 			"frontend_mobile_desktop": "Mobile and desktop frontend",
 			"frontend_mobile_desktop_desc": "Android SDK, Google Play Services, Flutter, Cordova, React Native, Gtk, Qt, Gnome SDK.",
 			"databases": "Databases",
@@ -142,9 +143,9 @@
 			"data_science": "Data science",
 			"data_science_desc": "Jupyter, MatPlotLib, NumPy, PyTorch, Pandas, SciPy.",
 			"embedded": "Embedded",
-			"embedded_desc": "I have experience with various development boards such as Arduino, Raspberry Pi, ESP32 based systems, with which I design and manufacture 3d-printed IoT solutions integrating them with electronic components and setting them in computer networks with protocols such as TCP/IP, WiFi, BLE, Zigbee, MQTT.  I'm interested in computer architectures, with particular regard to data and compute parallelism.",
+			"embedded_desc": "I have experience with various development boards such as Arduino Uno, Raspberry Pi, ESP32 based systems, with which I design and manufacture 3d-printed IoT solutions integrating them with electronic components and deploying them in computer networks with protocols such as TCP/IP, WiFi, BLE, Zigbee, MQTT. I'm also interested in computer architectures, with particular regard to data and compute parallelism.",
 			"multimedia_software": "Multimedia software (OSS)",
-			"multimedia_software_desc": "FreeCAD, KiCAD, Blender, Cairo, Ffmpeg, Gimp, Inkscape, Imagemagick, Latex, Pandoc, Godot, Krita, Neovim, Code OSS, Ardour, Olive Video Editor, OBS Studio, Audacity."
+			"multimedia_software_desc": "FreeCAD, KiCAD, Blender, Cairo, Ffmpeg, Gimp, Inkscape, Imagemagick, Latex, Pandoc, Godot, Neovim, Code OSS, Ardour, OBS Studio, Audacity."
 		}
 	}
 }
