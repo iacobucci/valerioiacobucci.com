@@ -1,0 +1,34 @@
+features
+	[ ] tailwind
+		[ ] dark mode
+	[ ] version
+	[x] i18n
+		[x] hot module replacement
+		[x] interface
+			[x] automatic user languages
+			translations
+				[x] english
+				[x] italian
+				[x] dutch
+		[ ] content
+			[ ] fallback to english
+	[ ] mdx content
+	[ ] iconify
+	[ ] rss feed
+	[ ] framer motion
+	[ ] react three fiber
+
+deploy
+	[ ] secrets submodule
+	[ ] content submodule
+
+terminal
+	[ ] figlets
+
+content
+	[ ] blog
+		[ ] escursioni
+		[ ] visualizzazioni modelli 3d con tresjs
+	[ ] projects
+		[ ] README.md
+		[ ] apps

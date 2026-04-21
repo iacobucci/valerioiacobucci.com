@@ -1,0 +1,8 @@
+{
+  "HomePage": {
+    "title": "Om aan de slag te gaan, bewerk het bestand page.tsx.",
+    "description": "Op zoek naar een startpunt of meer instructies? Ga naar <templateLink>Templates</templateLink> of het <learningLink>Leercentrum</learningLink>.",
+    "deploy": "Nu implementeren",
+    "documentation": "Documentatie"
+  }
+}

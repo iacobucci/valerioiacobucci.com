@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# valerioiacobucci.com
+
+This document provides guidance for humans and AI agents with the `valerioiacobucci.com` codebase.
+
+The file `notes.txt` is also important for monitoring the state of the project, though it is written in the form of a TODO list with boxes to check on completion, and has a tree structure for problem decomposition. It should ALWAYS be checked first for open issues.
+
+## Project Overview
+
+This is the source code for the personal website of Valerio Iacobucci, available at valerioiacobucci.com. It showcases projects, articles, and professional information.
+
+## Tech Stack
+
+The project is built with the following technologies:
+
+- **Framework**: Next.js
+- **Reactive components Library**: React
+- **Language**: TypeScript (with strict type checking enabled)
+- **Package Manager**: pnpm
+- **Linting**: ESLint with TypeScript support.
+
+## Deployment
+
+The website is deployed on a low-end VPS. There is currently NO DOCKERization INVOLVED in the production deployment. The repository is cloned on valerio@valerioiacobucci.com:/home/valerio/web/valerioiacobucci.com and the server is started with the following systemd service.
+
+```ini
+[Unit]
+Description=valerioiacobucci.com
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/valerio/source/web/valerioiacobucci.com
+EnvironmentFile=/home/valerio/source/web/valerioiacobucci.com/.env
+ExecStart=/usr/bin/node .output/server/index.mjs
+Restart=always
+RestartSec=3
+
+KillSignal=SIGINT
+
+[Install]
+WantedBy=default.target
+```
+
+The node process exposes a server at TCP port 8080, but the access to valerioiacobucci.com is behind a nginx proxy, and the connection is secured with SSL:
+
+```nginx
+   server {
+       server_name valerioiacobucci.com www.valerioiacobucci.com;
+
+       location / {
+            proxy_pass http://127.0.0.1:8080;
+
+            proxy_set_header Host              $host;
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host  $host;
+       }
+
+       listen 443 ssl; # managed by Certbot
+       ssl_certificate /etc/letsencrypt/live/ip.valerioiacobucci.com/fullchain.pem; # managed by Certbot
+       ssl_certificate_key /etc/letsencrypt/live/ip.valerioiacobucci.com/privkey.pem; # managed by Certbot
+       include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+       ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+   }
+```
+
+### Secrets
+
+The `secrets` git submodule has two branches: production and development, used respectively. It contains a `.env` file that is symlinked to the main repository.
+
+### Content
+
+The `content` git submodule has a Github remote, so the content of the site can be authored collaboratively. There, some Github actions are used to refresh the site upon content update.
 
 ## Getting Started
 
-First, run the development server:
+To run the project locally, follow these steps:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1.  **Install Dependencies**: Ensure you have `pnpm` installed. Then, from the root of the project, run:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    ```bash
+    pnpm install
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1.  **Rebuild gyp Dependencies**:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+    ```bash
+    pnpm rebuild
+    ```
 
-## Learn More
+    The project makes use of `better-sqlite3`, that has glib-specific bindings.
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Run Development Server**:
+    ```bash
+    pnpm dev
+    ```
+    The application will be available at `http://localhost:8080`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 5. Coding Conventions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **TypeScript First**: All new code should be written in TypeScript with strict types.
+- **Vue 3 Composition API**: Use `<script setup>` and the Composition API for all new components.
+- **ESLint**: Adhere to the ESLint rules configured in the project. Run the linter to check your changes.
+- **Follow Existing Patterns**: When adding new features, please observe and replicate the coding style and architectural patterns found in the existing codebase.
