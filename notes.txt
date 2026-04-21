@@ -12,7 +12,7 @@ features
 				[x] dutch
 		[ ] content
 			[ ] fallback to english
-	[ ] mdx content
+	[x] mdx content
 	[ ] iconify
 	[ ] rss feed
 	[ ] framer motion
