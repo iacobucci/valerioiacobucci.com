@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getPostMDX } from '@/lib/mdx';
+import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 
 import fs from 'fs';
 import path from 'path';
@@ -36,15 +37,24 @@ export default async function BlogPostPage({
 	const Content = content.default;
 
 	const components = {
-		img: (props: any) => {
-			const src = props.src;
+		ModelViewer: (props: { url: string; [key: string]: unknown }) => {
+			let url = props.url;
+			if (url && !url.startsWith('http') && !url.startsWith('/') && !url.startsWith('data:')) {
+				const normalizedUrl = url.startsWith('./') ? url.slice(2) : url;
+				url = `/blog-images/${slug}/${normalizedUrl}`;
+			}
+			return <ModelViewerWrapper {...props} url={url} />;
+		},
+		img: ({ src, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+			let finalSrc = src;
 			// If src is relative (doesn't start with http, / or data:)
 			if (src && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
 				// Normalize: remove ./ if present
 				const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
-				return <img {...props} src={`/blog-images/${slug}/${normalizedSrc}`} />;
+				finalSrc = `/blog-images/${slug}/${normalizedSrc}`;
 			}
-			return <img {...props} />;
+			// eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+			return <img {...props} src={finalSrc} />;
 		}
 	};
 

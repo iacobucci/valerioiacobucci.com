@@ -30,6 +30,8 @@ export async function GET(
     '.gif': 'image/gif',
     '.webp': 'image/webp',
     '.svg': 'image/svg+xml',
+    '.glb': 'model/gltf-binary',
+    '.gltf': 'model/gltf+json',
   };
 
   const contentType = contentTypes[extension] || 'application/octet-stream';

@@ -19,10 +19,21 @@ features
 			[ ]  word counting
 		[ ] other content based posts
 	[x] react three fiber
-		[x] viewer
+		[ ] viewer
+	[ ] page search
 	[ ] iconify
 	[ ] rss feed
 	[ ] framer motion
+
+components
+	[ ] navbar
+		[ ] dark mode switcher
+		[ ] language switcher
+		[ ] user menu
+		[ ] searchbar
+	[ ] terminal
+	[ ] footer
+	[ ] post list
 
 deploy
 	[ ] secrets submodule
@@ -30,6 +41,7 @@ deploy
 
 terminal
 	[ ] figlets
+	[ ] pacman
 
 content
 	[ ] blog

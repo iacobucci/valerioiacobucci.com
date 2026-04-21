@@ -1,4 +1,4 @@
-const extension = "md";
+const extension = "mdx";
 
 export async function getPostMDX(slug: string, locale: string) {
 	try {
