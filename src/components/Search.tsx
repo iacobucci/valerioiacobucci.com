@@ -9,7 +9,7 @@ import { useLocale } from 'next-intl';
 
 interface SearchResult {
   title: string;
-  type: 'blog' | 'favorites' | 'page';
+  type: 'blog' | 'page';
   href: string;
   description?: string;
 }

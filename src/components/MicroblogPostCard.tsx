@@ -32,12 +32,12 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
         </div>
         
         {post.image_url && (
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden mt-2">
-            <Image
+          <div className="rounded-xl overflow-hidden mt-2 border border-gray-100 dark:border-gray-800">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={post.image_url}
               alt="Post image"
-              fill
-              className="object-cover"
+              className="w-full h-auto block"
             />
           </div>
         )}

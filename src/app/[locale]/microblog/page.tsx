@@ -1,6 +1,6 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getMicroblogPosts } from '@/lib/microblog';
-import MicroblogPostCard from '@/components/MicroblogPostCard';
+import MicroblogList from '@/components/MicroblogList';
 
 export default async function MicroblogPage({
   params,
@@ -25,19 +25,11 @@ export default async function MicroblogPage({
           </p>
         </header>
 
-        <div className="space-y-6">
-          {posts.length > 0 ? (
-            posts.map((post) => (
-              <MicroblogPostCard key={post.id} post={post} locale={locale} />
-            ))
-          ) : (
-            <div className="text-center py-20 bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800">
-              <p className="text-gray-500 dark:text-gray-400 font-medium">
-                {t('no_posts')}
-              </p>
-            </div>
-          )}
-        </div>
+        <MicroblogList 
+          posts={posts} 
+          locale={locale} 
+          noPostsMessage={t('no_posts')} 
+        />
       </main>
     </div>
   );
