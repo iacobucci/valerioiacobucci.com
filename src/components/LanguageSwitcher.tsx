@@ -24,9 +24,9 @@ export default function LanguageSwitcher() {
         <button
           key={cur}
           onClick={() => onSelectChange(cur)}
-          className={`px-2 py-1 text-xs font-medium rounded ${
+          className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
             locale === cur
-              ? 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white'
+              ? 'bg-gray-200 dark:bg-gray-800 text-fg-light dark:text-fg-dark'
               : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
           }`}
         >

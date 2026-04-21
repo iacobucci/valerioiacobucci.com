@@ -1,29 +1,49 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
 
+@theme {
+  /* Cold color palette */
+  --color-gray-50: #fafaff;
+  --color-gray-100: #f1f1f7;
+  --color-gray-200: #e0e0e6;
+  --color-gray-300: #b1b1b6;
+  --color-gray-400: #9c9ca1;
+  --color-gray-500: #55555a;
+  --color-gray-600: #434347;
+  --color-gray-700: #37373c;
+  --color-gray-800: #222226;
+  --color-gray-900: #121216;
+  --color-gray-950: #0c0c11;
+
+  /* Semantic background colors */
+  --color-bg-light: #ffffff;
+  --color-bg-dark: var(--color-gray-900);
+
+  /* Semantic foreground colors */
+  --color-fg-light: #000000;
+  --color-fg-dark: var(--color-gray-200);
+}
+
+/* Explicitly define the dark variant for class-based dark mode in Tailwind v4 */
 @variant dark (&:where(.dark, .dark *));
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  body {
+    /* Use the semantic theme colors */
+    @apply bg-bg-light text-fg-light dark:bg-bg-dark dark:text-fg-dark transition-colors duration-300;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Ensure Nuxt Studio editor inherits color correctly */
+  .ProseMirror {
+    @apply text-inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+}
+
+.dark {
+  --background: #121216;
+  --foreground: #e0e0e6;
 }
