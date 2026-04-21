@@ -9,6 +9,8 @@ function --publish {
 	fi
 
 	ssh valerio@valerioiacobucci.com "bash /home/valerio/source/web/valerioiacobucci.com/scripts/update.sh --setup --full"
+
+	--watch
 }
 
 function --setup {

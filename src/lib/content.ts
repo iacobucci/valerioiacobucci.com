@@ -6,6 +6,7 @@ const extension = "mdx";
 
 export interface ContentMetadata {
   slug: string;
+  type: string;
   title: string;
   date?: string;
   readingTime?: number;
@@ -42,6 +43,7 @@ export async function getPost(type: string, locale: string, slug: string): Promi
 
   return {
     slug,
+    type,
     isFallback,
     title: data.title || slug,
     date: data.date ? (data.date instanceof Date ? data.date.toISOString() : data.date) : undefined,

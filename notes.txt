@@ -1,9 +1,9 @@
 features
 	[x] tailwind
-		[ ] dark mode
-	[ ] version
-		[ ] git rev-parse HEAD
-		[ ] caching
+		[x] dark mode
+	[x] framer motion
+	[x] version
+		[x] git rev-parse HEAD
 	[x] i18n
 		[x] interface
 			[x] automatic user languages
@@ -17,15 +17,14 @@ features
 			[x] fallback to english
 			[x] tag filtering
 			[x] descriptions and cover images
-			[ ]  word counting
+			[x]  word counting
 		[x] other content based posts
 			[ ] make dx even smoother
 	[x] react three fiber
 		[x] viewer
-	[ ] page search
-	[ ] iconify
+	[x] page search
+	[x] icons
 	[ ] rss feed
-	[ ] framer motion
 
 components
 	[x] navbar
@@ -33,13 +32,9 @@ components
 		[x] language switcher
 		[ ] user menu
 		[ ] searchbar
-	[ ] terminal
-	[ ] footer
+	[x] terminal
+	[x] footer
 	[x] post list
-
-deploy
-	[ ] secrets submodule
-	[ ] content submodule
 
 terminal
 	[ ] figlets

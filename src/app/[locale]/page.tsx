@@ -5,11 +5,13 @@ import { Terminal } from '@/components/Terminal';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Link } from '@/i18n/routing';
-import { FaGithub, FaYoutube } from 'react-icons/fa6';
+import { FaGithub, FaYoutube, FaRss } from 'react-icons/fa6';
 import { MdEmail } from 'react-icons/md';
+import { useLocale } from 'next-intl';
 
 export default function HomePage() {
 	const t = useTranslations();
+	const locale = useLocale();
 
 	const socialLinks = [
 		{
@@ -29,6 +31,12 @@ export default function HomePage() {
 			icon: MdEmail,
 			label: 'Email',
 			color: 'hover:text-accent-light dark:hover:text-accent-dark'
+		},
+		{
+			href: `/${locale}/feed.xml`,
+			icon: FaRss,
+			label: 'RSS',
+			color: 'hover:text-[#ee802f]'
 		},
 	];
 
@@ -68,8 +76,16 @@ export default function HomePage() {
 							transition={{ delay: 0.2 }}
 							className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-fg-light dark:text-fg-dark leading-[0.9]"
 						>
-							{t("home.intro")}
+							Valerio Iacobucci
 						</motion.h1>
+						<motion.h2
+							initial={{ opacity: 0, y: 20 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ delay: 0.25 }}
+							className="text-xl sm:text-2xl lg:text-3xl tracking-tighter text-fg-light dark:text-fg-dark leading-[0.95]"
+						>
+							{t("home.intro")}
+						</motion.h2>
 						<div className="space-y-4 w-full flex flex-col items-center lg:items-start">
 							<motion.p
 								initial={{ opacity: 0, y: 20 }}
