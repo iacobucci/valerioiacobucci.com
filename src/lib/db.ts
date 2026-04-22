@@ -1,7 +1,6 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { MicroblogPost } from './entities/MicroblogPost';
-import { MicroblogReaction } from './entities/MicroblogReaction';
+import { MicroblogPost, MicroblogReaction } from './entities/microblog';
 
 const isProduction = process.env.NODE_ENV === 'production';
 

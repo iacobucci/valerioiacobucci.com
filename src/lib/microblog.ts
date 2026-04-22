@@ -1,6 +1,5 @@
 import { AppDataSource, getDataSource, MicroblogPostSerializable } from './db';
-import { MicroblogPost } from './entities/MicroblogPost';
-import { MicroblogReaction } from './entities/MicroblogReaction';
+import { MicroblogPost, MicroblogReaction } from './entities/microblog';
 
 export async function getMicroblogPosts(limit = 20, offset = 0): Promise<MicroblogPostSerializable[]> {
   await getDataSource();
