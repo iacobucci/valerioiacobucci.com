@@ -168,7 +168,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
 
       {/* List */}
       <div className="grid grid-cols-1 gap-6" ref={listRef}>
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="popLayout" initial={false}>
           {filteredItems.map((item, index) => {
             // Handle relative cover image
             let finalCover = item.coverImage;

@@ -31,13 +31,11 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 					</Linkify>
 				</div>
 
-				{(post.image_url || post.image_data) && (
+				{post.image_data && (
 					<div className="rounded-xl overflow-hidden mt-2 border border-gray-100 dark:border-gray-800">
 						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img
-							src={post.image_data 
-								? `data:image/webp;base64,${post.image_data}` 
-								: (post.image_url || '')}
+							src={`data:image/webp;base64,${post.image_data}`}
 							alt="Post image"
 							className="w-full h-auto block"
 						/>
