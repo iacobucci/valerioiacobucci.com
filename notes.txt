@@ -25,14 +25,16 @@ features
 	[x] page search
 	[x] icons
 	[x] rss feed
-	[ ] github login for microblog
+	[x] postgres
+		[ ] typeorm
+		[ ] github login for posting and adding reactions
 
 components
 	[x] navbar
 		[x] dark mode switcher
 		[x] language switcher
+		[x] searchbar
 		[ ] user menu
-		[ ] searchbar
 	[x] terminal
 	[x] footer
 	[x] post list
@@ -43,8 +45,7 @@ terminal
 	[ ] lispv interpreter
 
 content
-	[ ] microblog
-		[ ] based on database
+	[x] microblog
 	[ ] blog
 		[x] 3d visualizations
 	[ ] projects
