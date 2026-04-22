@@ -3,8 +3,7 @@ import { Pool } from 'pg';
 export interface MicroblogPost {
   id: number;
   content: string;
-  image_url: string | null;
-  image_data: Buffer | null;
+  image_data: string | null; // Stored as Base64 string for serializability
   created_at: string;
 }
 
@@ -34,26 +33,14 @@ export async function initDb() {
   try {
     const client = await pool.connect();
     try {
-      // Create table if not exists
+      // Create table if not exists with all columns
       await client.query(`
         CREATE TABLE IF NOT EXISTS microblog_posts (
           id SERIAL PRIMARY KEY,
           content TEXT NOT NULL,
-          image_url TEXT,
           image_data BYTEA,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         )
-      `);
-
-      // Migration: add image_data if it doesn't exist (for existing tables)
-      await client.query(`
-        DO $$ 
-        BEGIN 
-          IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-            WHERE table_name='microblog_posts' AND column_name='image_data') THEN
-            ALTER TABLE microblog_posts ADD COLUMN image_data BYTEA;
-          END IF;
-        END $$;
       `);
     } finally {
       client.release();
