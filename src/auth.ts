@@ -10,4 +10,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: isProduction ? process.env.AUTH_GITHUB_SECRET : (process.env.AUTH_GITHUB_SECRET_DEV || process.env.AUTH_GITHUB_SECRET),
     }),
   ],
+  trustHost: true,
 })
