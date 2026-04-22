@@ -17,7 +17,7 @@ export default async function MicroblogPage({
   const session = await auth();
   const user = session?.user as { email?: string | null; username?: string } | undefined;
 
-  const posts = await getMicroblogPosts(50);
+  const posts = await getMicroblogPosts(20, 0);
   
   // Controllo autorizzazione basato su email o username GitHub
   const isAuthor = 
