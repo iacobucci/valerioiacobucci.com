@@ -71,3 +71,15 @@ export async function toggleMicroblogReaction(postId: number, userId: string, us
     await reactionRepository.save(reaction);
   }
 }
+
+export async function deleteMicroblogPost(id: number): Promise<void> {
+  await getDataSource();
+  const repository = AppDataSource.getRepository(MicroblogPost);
+  await repository.delete(id);
+}
+
+export async function updateMicroblogPost(id: number, content: string): Promise<void> {
+  await getDataSource();
+  const repository = AppDataSource.getRepository(MicroblogPost);
+  await repository.update(id, { content });
+}

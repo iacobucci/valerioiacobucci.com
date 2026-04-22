@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { createPostAction } from '@/lib/actions/microblog';
 import { MdImage, MdSend, MdClose } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
+import { toast } from '@/lib/toast';
 
 export default function MicroblogEditor() {
   const t = useTranslations('microblog');
@@ -18,7 +19,7 @@ export default function MicroblogEditor() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert(t('image_too_large'));
+        toast.error(t('image_too_large'));
         return;
       }
       const reader = new FileReader();
@@ -41,10 +42,11 @@ export default function MicroblogEditor() {
         setContent('');
         setImagePreview(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
+        toast.success('Post published!');
       }
     } catch (error) {
       console.error('Failed to post:', error);
-      alert('Failed to post. Check console.');
+      toast.error('Failed to post');
     } finally {
       setIsSubmitting(false);
     }
