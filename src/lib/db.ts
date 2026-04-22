@@ -14,7 +14,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-  synchronize: !isProduction, // In production, use migrations
+  synchronize: false, // Disabilitato per evitare DeprecationWarning di pg durante l'inizializzazione concorrente
   logging: !isProduction,
   entities: [MicroblogPost, MicroblogReaction],
   subscribers: [],

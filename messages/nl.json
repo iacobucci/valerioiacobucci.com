@@ -60,7 +60,11 @@
 		"title": "Microblog",
 		"description": "Korte gedachten en updates.",
 		"no_posts": "Nog geen berichten.",
-		"load_more": "Meer laden"
+		"load_more": "Meer laden",
+		"editor_placeholder": "Wat is er gaande?",
+		"publish": "Publiceren",
+		"add_image": "Afbeelding toevoegen",
+		"image_too_large": "Afbeelding te groot (max 5MB)"
 	},
 
 	"footer": {

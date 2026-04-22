@@ -3,8 +3,10 @@
 import { useState, useRef } from 'react';
 import { createPostAction } from '@/lib/actions/microblog';
 import { MdImage, MdSend, MdClose } from 'react-icons/md';
+import { useTranslations } from 'next-intl';
 
 export default function MicroblogEditor() {
+  const t = useTranslations('microblog');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export default function MicroblogEditor() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("Image too large (max 5MB)");
+        alert(t('image_too_large'));
         return;
       }
       const reader = new FileReader();
@@ -57,7 +59,7 @@ export default function MicroblogEditor() {
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Cosa sta succedendo?"
+            placeholder={t('editor_placeholder')}
             className="w-full min-h-[100px] p-3 bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-200 resize-none text-lg"
             disabled={isSubmitting}
           />
@@ -90,7 +92,7 @@ export default function MicroblogEditor() {
               onClick={() => fileInputRef.current?.click()}
               className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
               disabled={isSubmitting}
-              title="Aggiungi immagine"
+              title={t('add_image')}
             >
               <MdImage className="w-6 h-6" />
             </button>
@@ -113,7 +115,7 @@ export default function MicroblogEditor() {
             ) : (
               <MdSend className="w-5 h-5" />
             )}
-            Pubblica
+            {t('publish')}
           </button>
         </div>
       </form>

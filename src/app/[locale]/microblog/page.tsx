@@ -15,13 +15,14 @@ export default async function MicroblogPage({
   setRequestLocale(locale);
   const t = await getTranslations('microblog');
   const session = await auth();
+  const user = session?.user as { email?: string | null; username?: string } | undefined;
 
   const posts = await getMicroblogPosts(50);
   
   // Controllo autorizzazione basato su email o username GitHub
   const isAuthor = 
-    session?.user?.email?.toLowerCase().trim() === 'iacobuccivalerio@gmail.com' ||
-    (session?.user as any)?.username === 'iacobucci';
+    user?.email?.toLowerCase().trim() === 'iacobuccivalerio@gmail.com' ||
+    user?.username === 'iacobucci';
 
   return (
     <div className="flex flex-col flex-1 bg-bg-light dark:bg-bg-dark font-sans">

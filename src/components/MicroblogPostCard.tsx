@@ -72,20 +72,6 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 
 				<div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-50 dark:border-gray-800/50">
 					<div className="flex items-center gap-3">
-						<button
-							onClick={handleReaction}
-							disabled={isPending}
-							className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-sm font-medium ${
-								hasReacted 
-									? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-1 ring-purple-200 dark:ring-purple-800' 
-									: 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-							} ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-							title="Invadivote!"
-						>
-							<span className={hasReacted ? 'animate-pulse' : ''}>👾</span>
-							<span>{reactionsCount > 0 ? reactionsCount : 'Invotes'}</span>
-						</button>
-
 						{post.reactions && post.reactions.length > 0 && (
 							<div className="flex -space-x-2 overflow-hidden">
 								{post.reactions.slice(0, 5).map((reaction) => (
@@ -117,6 +103,20 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 							</div>
 						)}
 					</div>
+
+					<button
+						onClick={handleReaction}
+						disabled={isPending}
+						className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all text-sm font-medium ${
+							hasReacted 
+								? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-1 ring-purple-200 dark:ring-purple-800' 
+								: 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+						} ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+						title="Invadivote!"
+					>
+						<span className={hasReacted ? 'animate-pulse' : ''}>👾</span>
+						{reactionsCount > 0 && <span>{reactionsCount}</span>}
+					</button>
 				</div>
 			</div>
 		</div>

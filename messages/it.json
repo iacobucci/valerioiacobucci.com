@@ -58,9 +58,14 @@
 	"microblog": {
 		"title": "Microblog",
 		"description": "Pensieri brevi e aggiornamenti.",
-		"no_posts": "Ancora nessun post.",
-		"load_more": "Carica altri"
+		"no_posts": "Nessun post trovato.",
+		"load_more": "Carica altri",
+		"editor_placeholder": "Cosa sta succedendo?",
+		"publish": "Pubblica",
+		"add_image": "Aggiungi immagine",
+		"image_too_large": "Immagine troppo grande (max 5MB)"
 	},
+
 
 	"footer": {
 		"version": "versione",

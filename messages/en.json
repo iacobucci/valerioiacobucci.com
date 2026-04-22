@@ -28,7 +28,11 @@
 		"title": "Microblog",
 		"description": "Short thoughts and updates.",
 		"no_posts": "No posts yet.",
-		"load_more": "Load more"
+		"load_more": "Load more",
+		"editor_placeholder": "What's happening?",
+		"publish": "Publish",
+		"add_image": "Add image",
+		"image_too_large": "Image too large (max 5MB)"
 	},
 	"projects": {
 		"title": "Projects",
