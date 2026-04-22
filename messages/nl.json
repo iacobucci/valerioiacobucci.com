@@ -64,7 +64,8 @@
 		"editor_placeholder": "Wat is er gaande?",
 		"publish": "Publiceren",
 		"add_image": "Afbeelding toevoegen",
-		"image_too_large": "Afbeelding te groot (max 5MB)"
+		"image_too_large": "Afbeelding te groot (max 5MB)",
+		"back_to_microblog": "Terug naar Microblog"
 	},
 
 	"footer": {

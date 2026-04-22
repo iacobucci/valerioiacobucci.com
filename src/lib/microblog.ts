@@ -52,6 +52,32 @@ export async function addMicroblogPost(content: string, imageData?: Buffer | nul
   return savedPost.id;
 }
 
+export async function getMicroblogPost(id: number): Promise<MicroblogPostSerializable | null> {
+  await getDataSource();
+  const repository = AppDataSource.getRepository(MicroblogPost);
+  
+  const post = await repository.findOne({
+    where: { id },
+    relations: ['reactions']
+  });
+  
+  if (!post) return null;
+  
+  return {
+    id: post.id,
+    content: post.content,
+    image_data: post.image_data ? post.image_data.toString('base64') : null,
+    created_at: post.created_at.toISOString(),
+    reactions: post.reactions?.map(r => ({
+      id: r.id,
+      userId: r.userId,
+      username: r.username,
+      userImage: r.userImage || null,
+      emoji: r.emoji
+    }))
+  };
+}
+
 export async function toggleMicroblogReaction(postId: number, userId: string, username: string, userImage?: string): Promise<void> {
   await getDataSource();
   const reactionRepository = AppDataSource.getRepository(MicroblogReaction);

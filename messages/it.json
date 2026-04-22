@@ -63,7 +63,8 @@
 		"editor_placeholder": "Cosa sta succedendo?",
 		"publish": "Pubblica",
 		"add_image": "Aggiungi immagine",
-		"image_too_large": "Immagine troppo grande (max 5MB)"
+		"image_too_large": "Immagine troppo grande (max 5MB)",
+		"back_to_microblog": "Torna al Microblog"
 	},
 
 

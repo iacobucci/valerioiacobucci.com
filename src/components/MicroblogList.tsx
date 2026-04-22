@@ -167,7 +167,7 @@ export default function MicroblogList({ posts: initialPosts, locale, noPostsMess
 					</div>
 				)}
 				{!hasMore && posts.length > 0 && (
-					<p className="text-gray-400 text-sm italic">You reached the end of the void.</p>
+					<p className="text-gray-400 text-sm italic">Lorem ipsum.</p>
 				)}
 			</div>
 		</div >

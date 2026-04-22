@@ -103,11 +103,12 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	};
 
 	const handleShare = () => {
-		const url = `${window.location.origin}/${locale}/microblog#post-${post.id}`;
+		const publicId = post.id - 1;
+		const url = `${window.location.origin}/${locale}/microblog/${publicId}`;
 		
 		if (navigator.share) {
 			navigator.share({
-				title: 'Valerio Iacobucci - Microblog',
+				title: `Valerio Iacobucci - Microblog Post #${publicId}`,
 				text: post.content.substring(0, 100) + '...',
 				url: url,
 			}).catch(console.error);
@@ -121,7 +122,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 
 	return (
 		<div 
-			id={`post-${post.id}`}
+			id={`post-${post.id - 1}`}
 			className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow text-left group scroll-mt-24"
 		>
 			<div className="flex flex-col gap-4">

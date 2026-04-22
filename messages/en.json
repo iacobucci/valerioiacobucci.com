@@ -32,7 +32,8 @@
 		"editor_placeholder": "What's happening?",
 		"publish": "Publish",
 		"add_image": "Add image",
-		"image_too_large": "Image too large (max 5MB)"
+		"image_too_large": "Image too large (max 5MB)",
+		"back_to_microblog": "Back to Microblog"
 	},
 	"projects": {
 		"title": "Projects",
