@@ -1,6 +1,8 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getMicroblogPosts } from '@/lib/microblog';
 import MicroblogList from '@/components/MicroblogList';
+import { auth } from '@/auth';
+import MicroblogEditor from '@/components/MicroblogEditor';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,8 +14,14 @@ export default async function MicroblogPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('microblog');
+  const session = await auth();
 
   const posts = await getMicroblogPosts(50);
+  
+  // Controllo autorizzazione basato su email o username GitHub
+  const isAuthor = 
+    session?.user?.email?.toLowerCase().trim() === 'iacobuccivalerio@gmail.com' ||
+    (session?.user as any)?.username === 'iacobucci';
 
   return (
     <div className="flex flex-col flex-1 bg-bg-light dark:bg-bg-dark font-sans">
@@ -26,6 +34,8 @@ export default async function MicroblogPage({
             {t('description')}
           </p>
         </header>
+
+        {isAuthor && <MicroblogEditor />}
 
         <MicroblogList 
           posts={posts} 
