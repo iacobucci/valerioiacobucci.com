@@ -9,6 +9,7 @@ import Image from 'next/image';
 import LanguageSwitcher from './LanguageSwitcher';
 import ColorModeToggle from './ColorModeToggle';
 import Search from './Search';
+import UserMenu from './UserMenu';
 
 export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark' | undefined }) {
 	const t = useTranslations('nav');
@@ -119,12 +120,14 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 						<Search />
 						<LanguageSwitcher />
 						<ColorModeToggle initialTheme={initialTheme} />
+						<UserMenu />
 					</div>
 
 					<div className="-mr-2 flex items-center md:hidden gap-1">
 						<Search />
 						<LanguageSwitcher />
 						<ColorModeToggle initialTheme={initialTheme} />
+						<UserMenu />
 						<button
 							onClick={() => setMenuOpen(!menuOpen)}
 							className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition duration-150 ease-in-out"

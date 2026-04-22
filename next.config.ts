@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
 	pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 	devIndicators: false,
 	allowedDevOrigins: ['msi', 'valerioiacobucci.com'],
+	images: {
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'avatars.githubusercontent.com',
+				pathname: '/u/**',
+			},
+		],
+	},
 };
 
 export default withNextIntl(withMDX(nextConfig));
