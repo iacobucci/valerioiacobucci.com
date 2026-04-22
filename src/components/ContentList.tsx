@@ -195,6 +195,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
               >
                 <Link
                   href={`/${type}/${item.slug}`}
+                  onMouseEnter={() => router.prefetch(`/${type}/${item.slug}`)}
                   className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
                   {coverSrc && (

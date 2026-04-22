@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdMenu, MdClose } from 'react-icons/md';
-import { Link, usePathname } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -14,6 +14,7 @@ import UserMenu from './UserMenu';
 export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark' | undefined }) {
 	const t = useTranslations('nav');
 	const pathname = usePathname();
+	const router = useRouter();
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	const navLinks = [
@@ -22,6 +23,15 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 		{ href: '/microblog', label: t('microblog') },
 		{ href: '/projects', label: t('projects') },
 	];
+
+	useEffect(() => {
+		// Prefetch main links on mount for instant feel
+		navLinks.forEach(link => {
+			if (link.href !== pathname) {
+				router.prefetch(link.href);
+			}
+		});
+	}, []);
 
 	const isHome = pathname === '/';
 
@@ -105,6 +115,7 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 								<Link
 									key={link.href}
 									href={link.href}
+									onMouseEnter={() => router.prefetch(link.href)}
 									className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150 ease-in-out ${pathname === link.href
 											? 'border-gray-800 dark:border-fg-dark text-fg-light dark:text-fg-dark'
 											: 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-fg-dark hover:border-gray-300'
@@ -153,6 +164,7 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 								<Link
 									key={link.href}
 									href={link.href}
+									onMouseEnter={() => router.prefetch(link.href)}
 									onClick={() => setMenuOpen(false)}
 									className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition duration-150 ease-in-out ${pathname === link.href
 											? 'border-gray-800 dark:border-fg-dark text-fg-light dark:text-fg-dark bg-gray-50 dark:bg-gray-800'
