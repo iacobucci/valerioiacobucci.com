@@ -24,15 +24,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    session({ session, user, token }) {
+    session({ session, token }) {
       if (token?.username) {
         (session.user as any).username = token.username;
+      }
+      if (token?.sub) {
+        (session.user as any).id = token.sub;
       }
       return session;
     },
     jwt({ token, profile }) {
       if (profile) {
         token.username = profile.login;
+        token.id = profile.id?.toString();
       }
       return token;
     },

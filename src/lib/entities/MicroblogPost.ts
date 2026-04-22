@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import type { MicroblogReaction } from './MicroblogReaction';
 
 @Entity('microblog_posts')
 export class MicroblogPost {
@@ -13,4 +14,7 @@ export class MicroblogPost {
 
   @CreateDateColumn({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;
+
+  @OneToMany('MicroblogReaction', 'post')
+  reactions!: MicroblogReaction[];
 }

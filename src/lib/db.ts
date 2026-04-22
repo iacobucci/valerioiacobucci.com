@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { MicroblogPost } from './entities/MicroblogPost';
+import { MicroblogReaction } from './entities/MicroblogReaction';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   synchronize: !isProduction, // In production, use migrations
   logging: !isProduction,
-  entities: [MicroblogPost],
+  entities: [MicroblogPost, MicroblogReaction],
   subscribers: [],
   migrations: [],
 });
@@ -43,10 +44,20 @@ export async function getDataSource() {
 
 // Keep the interface for compatibility or refine it
 export type { MicroblogPost as MicroblogPostEntity };
+export type { MicroblogReaction as MicroblogReactionEntity };
 
 export interface MicroblogPostSerializable {
   id: number;
   content: string;
   image_data: string | null;
   created_at: string;
+  reactions?: MicroblogReactionSerializable[];
+}
+
+export interface MicroblogReactionSerializable {
+  id: number;
+  userId: string;
+  username: string;
+  userImage: string | null;
+  emoji: string;
 }

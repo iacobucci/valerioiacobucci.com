@@ -26,15 +26,15 @@ features
 	[x] icons
 	[x] rss feed
 	[x] postgres
-		[ ] typeorm
-		[ ] github login for posting and adding reactions
+		[x] typeorm
+		[x] github login for posting and adding reactions
 
 components
 	[x] navbar
 		[x] dark mode switcher
 		[x] language switcher
 		[x] searchbar
-		[ ] user menu
+		[x] user menu
 	[x] terminal
 	[x] footer
 	[x] post list

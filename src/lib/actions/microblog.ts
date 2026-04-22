@@ -1,16 +1,17 @@
 'use server';
 
 import { auth } from "@/auth";
-import { addMicroblogPost } from "@/lib/microblog";
+import { addMicroblogPost, toggleMicroblogReaction } from "@/lib/microblog";
 import { revalidatePath } from "next/cache";
 
 export async function createPostAction(content: string, imageBase64?: string | null) {
   const session = await auth();
   
+  const user = session?.user as { email?: string | null; username?: string } | undefined;
   // Controllo autorizzazione: aggiungo sia l'email che un possibile check su username se lo implementiamo
   const isAuthorized = 
-    session?.user?.email?.toLowerCase().trim() === "iacobuccivalerio@gmail.com" || 
-    (session?.user as any)?.username === "iacobucci";
+    user?.email?.toLowerCase().trim() === "iacobuccivalerio@gmail.com" || 
+    user?.username === "iacobucci";
 
   if (!isAuthorized) {
     throw new Error("Unauthorized");
@@ -24,6 +25,27 @@ export async function createPostAction(content: string, imageBase64?: string | n
   }
 
   await addMicroblogPost(content, imageBuffer);
+  
+  revalidatePath("/[locale]/microblog", "page");
+  return { success: true };
+}
+
+export async function toggleReactionAction(postId: number) {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("You must be logged in to vote");
+  }
+
+  const user = session.user as { id?: string; sub?: string; username?: string; name?: string | null; image?: string | null };
+  const userId = user.id || user.sub;
+  const username = user.username || user.name || "Unknown";
+  const userImage = user.image || undefined;
+
+  if (!userId) {
+    throw new Error("User ID not found in session");
+  }
+
+  await toggleMicroblogReaction(postId, userId, username, userImage);
   
   revalidatePath("/[locale]/microblog", "page");
   return { success: true };
