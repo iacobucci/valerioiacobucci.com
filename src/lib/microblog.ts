@@ -35,7 +35,16 @@ export async function addMicroblogPost(content: string, imageData?: Buffer | nul
   await getDataSource();
   const repository = AppDataSource.getRepository(MicroblogPost);
   
+  // Trova l'ID più alto per garantire una sequenza senza buchi
+  const lastPost = await repository.findOne({
+    where: {},
+    order: { id: 'DESC' }
+  });
+  
+  const nextId = lastPost ? lastPost.id + 1 : 1;
+  
   const post = new MicroblogPost();
+  post.id = nextId;
   post.content = content;
   post.image_data = imageData || null;
   

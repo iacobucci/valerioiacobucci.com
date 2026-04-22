@@ -7,6 +7,7 @@ import { FormattedDate } from './FormattedDate';
 import { useSession } from 'next-auth/react';
 import { toggleReactionAction, updatePostAction, deletePostAction } from '@/lib/actions/microblog';
 import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert } from 'react-icons/md';
+import { Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/lib/toast';
 
@@ -156,7 +157,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 												onClick={handleShare}
 												className="flex items-center w-full gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
 											>
-												<MdMoreVert className="w-4 h-4 rotate-90" />
+												<Share2 className="w-4 h-4" />
 												Share
 											</button>
 											
