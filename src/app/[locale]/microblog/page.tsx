@@ -3,8 +3,15 @@ import { getMicroblogPosts } from '@/lib/microblog';
 import MicroblogList from '@/components/MicroblogList';
 import { auth } from '@/auth';
 import MicroblogEditor from '@/components/MicroblogEditor';
+import { Suspense } from 'react';
+import MicroblogSkeleton from '@/components/MicroblogSkeleton';
 
 export const dynamic = 'force-dynamic';
+
+async function MicroblogListWrapper({ locale, noPostsMessage }: { locale: string, noPostsMessage: string }) {
+  const posts = await getMicroblogPosts(20, 0);
+  return <MicroblogList posts={posts} locale={locale} noPostsMessage={noPostsMessage} />;
+}
 
 export default async function MicroblogPage({
   params,
@@ -17,8 +24,6 @@ export default async function MicroblogPage({
   const session = await auth();
   const user = session?.user as { email?: string | null; username?: string } | undefined;
 
-  const posts = await getMicroblogPosts(20, 0);
-  
   // Controllo autorizzazione basato su email o username GitHub
   const isAuthor = 
     user?.email?.toLowerCase().trim() === 'iacobuccivalerio@gmail.com' ||
@@ -38,11 +43,9 @@ export default async function MicroblogPage({
 
         {isAuthor && <MicroblogEditor />}
 
-        <MicroblogList 
-          posts={posts} 
-          locale={locale} 
-          noPostsMessage={t('no_posts')} 
-        />
+        <Suspense fallback={<MicroblogSkeleton />}>
+          <MicroblogListWrapper locale={locale} noPostsMessage={t('no_posts')} />
+        </Suspense>
       </main>
     </div>
   );

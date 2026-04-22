@@ -183,12 +183,11 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             return (
               <motion.div
                 layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 key={item.slug}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`transition-all duration-200 rounded-2xl ${
+                style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
+                className={`card-enter transition-all duration-200 rounded-2xl ${
                   isFocused 
                     ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.01]' 
                     : ''
