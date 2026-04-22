@@ -20,13 +20,25 @@ export const AppDataSource = new DataSource({
   migrations: [],
 });
 
-// let initialized = false;
+let initializationPromise: Promise<DataSource> | null = null;
 
 export async function getDataSource() {
-  if (!AppDataSource.isInitialized) {
-    await AppDataSource.initialize();
+  if (AppDataSource.isInitialized) {
+    return AppDataSource;
   }
-  return AppDataSource;
+
+  if (initializationPromise) {
+    return initializationPromise;
+  }
+
+  initializationPromise = AppDataSource.initialize().then((ds) => {
+    return ds;
+  }).catch(err => {
+    initializationPromise = null;
+    throw err;
+  });
+
+  return initializationPromise;
 }
 
 // Keep the interface for compatibility or refine it
