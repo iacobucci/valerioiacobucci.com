@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MicroblogPost } from '@/lib/db';
+import { MicroblogPostSerializable } from '@/lib/db';
 import MicroblogPostCard from './MicroblogPostCard';
 
 interface MicroblogListProps {
-  posts: MicroblogPost[];
+  posts: MicroblogPostSerializable[];
   locale: string;
   noPostsMessage: string;
 }

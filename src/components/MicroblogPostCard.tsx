@@ -1,12 +1,12 @@
 import React from 'react';
-import { MicroblogPost } from '@/lib/db';
+import { MicroblogPostSerializable } from '@/lib/db';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 
 import Linkify from 'linkify-react';
 
 interface MicroblogPostCardProps {
-	post: MicroblogPost;
+	post: MicroblogPostSerializable;
 	locale: string;
 }
 

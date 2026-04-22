@@ -26,7 +26,7 @@ features
 	[x] icons
 	[x] rss feed
 	[x] postgres
-		[ ] typeorm
+		[x] typeorm
 		[ ] github login for posting and adding reactions
 
 components

@@ -1,33 +1,36 @@
-import pool, { initDb, MicroblogPost } from './db';
+import { AppDataSource, getDataSource, MicroblogPostSerializable } from './db';
+import { MicroblogPost } from './entities/MicroblogPost';
 
-// Ensure the table exists on first use
-let isInitialized = false;
-async function ensureInitialized() {
-  if (!isInitialized) {
-    await initDb();
-    isInitialized = true;
-  }
-}
-
-export async function getMicroblogPosts(limit = 20, offset = 0): Promise<MicroblogPost[]> {
-  await ensureInitialized();
-  const res = await pool.query(
-    'SELECT * FROM microblog_posts ORDER BY created_at DESC LIMIT $1 OFFSET $2',
-    [limit, offset]
-  );
+export async function getMicroblogPosts(limit = 20, offset = 0): Promise<MicroblogPostSerializable[]> {
+  await getDataSource();
+  const repository = AppDataSource.getRepository(MicroblogPost);
+  
+  const posts = await repository.find({
+    order: {
+      created_at: 'DESC'
+    },
+    take: limit,
+    skip: offset
+  });
   
   // Convert binary image_data (Buffer) to Base64 string to be serializable
-  return res.rows.map(row => ({
-    ...row,
-    image_data: row.image_data ? row.image_data.toString('base64') : null
+  // And convert Date to ISO string
+  return posts.map(post => ({
+    id: post.id,
+    content: post.content,
+    image_data: post.image_data ? post.image_data.toString('base64') : null,
+    created_at: post.created_at.toISOString()
   }));
 }
 
 export async function addMicroblogPost(content: string, imageData?: Buffer | null): Promise<number> {
-  await ensureInitialized();
-  const res = await pool.query(
-    'INSERT INTO microblog_posts (content, image_data) VALUES ($1, $2) RETURNING id',
-    [content, imageData || null]
-  );
-  return res.rows[0].id;
+  await getDataSource();
+  const repository = AppDataSource.getRepository(MicroblogPost);
+  
+  const post = new MicroblogPost();
+  post.content = content;
+  post.image_data = imageData || null;
+  
+  const savedPost = await repository.save(post);
+  return savedPost.id;
 }
