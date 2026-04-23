@@ -5,6 +5,7 @@ import { ProjectGitHubData } from '@/lib/projects';
 import ProjectCard from './ProjectCard';
 import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
+import ProjectReadmeModal from './ProjectReadmeModal';
 
 interface ProjectListProps {
   projects: ProjectGitHubData[];
@@ -13,8 +14,16 @@ interface ProjectListProps {
 export default function ProjectList({ projects }: ProjectListProps) {
   const t = useTranslations('projects');
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [selectedProject, setSelectedProject] = useState<ProjectGitHubData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const openProject = (project: ProjectGitHubData) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -35,8 +44,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
       } else if (e.key === 'Enter' && focusedIndex >= 0) {
         const project = projects[focusedIndex];
         if (project) {
-          // Open GitHub URL on Enter for projects
-          window.open(project.github_url, '_blank', 'noopener,noreferrer');
+          openProject(project);
         }
       }
     };
@@ -56,24 +64,35 @@ export default function ProjectList({ projects }: ProjectListProps) {
   }, [focusedIndex]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" ref={listRef}>
-      {projects.map((project, index) => {
-        const isFocused = index === focusedIndex;
-        return (
-          <div 
-            key={project.slug} 
-            onMouseEnter={() => setFocusedIndex(index)}
-            style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
-            className={`card-enter transition-all duration-200 rounded-2xl h-full ${
-              isFocused 
-                ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.02]' 
-                : ''
-            }`}
-          >
-            <ProjectCard project={project} />
-          </div>
-        );
-      })}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" ref={listRef}>
+        {projects.map((project, index) => {
+          const isFocused = index === focusedIndex;
+          return (
+            <div 
+              key={project.slug} 
+              onMouseEnter={() => setFocusedIndex(index)}
+              style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
+              className={`card-enter transition-all duration-200 rounded-2xl h-full ${
+                isFocused 
+                  ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.02]' 
+                  : ''
+              }`}
+            >
+              <ProjectCard 
+                project={project} 
+                onClick={() => openProject(project)}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      <ProjectReadmeModal 
+        project={selectedProject}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }

@@ -59,7 +59,7 @@
 			},
 			"digit-recognizer": {
 				"title": "Digit Recognizer",
-				"description": "Una rete neurale per riconoscere cifre scritte a mano costruita da zero in C++."
+				"description": "Rete neurale basata su Micrograd che comunica tramite grpc con il frontend p5.js per l'immissione di cifre scritte a mano"
 			},
 			"sviluppo-web-in-js": {
 				"title": "Sviluppo Web in JS",

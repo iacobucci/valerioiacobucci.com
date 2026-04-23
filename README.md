@@ -20,7 +20,7 @@ The project is built with the following technologies:
 
 ## Deployment
 
-The website is deployed on a low-end VPS. There is currently NO DOCKERization INVOLVED in the production deployment. The repository is cloned on valerio@valerioiacobucci.com:/home/valerio/web/valerioiacobucci.com and the server is started with the following systemd service.
+The website is deployed on a low-end VPS. There is currently no dockerization involved in the production deployment. The repository is cloned on `valerio@valerioiacobucci.com:/home/valerio/web/valerioiacobucci.com` and the server is started with the following systemd service.
 
 ```ini
 [Unit]
@@ -81,23 +81,14 @@ To run the project locally, follow these steps:
     pnpm install
     ```
 
-1.  **Rebuild gyp Dependencies**:
-
-    ```bash
-    pnpm rebuild
-    ```
-
-    The project makes use of `better-sqlite3`, that has glib-specific bindings.
-
 1.  **Run Development Server**:
     ```bash
-    pnpm dev
+    pnpm run dev
     ```
     The application will be available at `http://localhost:8080`.
 
 ## 5. Coding Conventions
 
 - **TypeScript First**: All new code should be written in TypeScript with strict types.
-- **Vue 3 Composition API**: Use `<script setup>` and the Composition API for all new components.
 - **ESLint**: Adhere to the ESLint rules configured in the project. Run the linter to check your changes.
 - **Follow Existing Patterns**: When adding new features, please observe and replicate the coding style and architectural patterns found in the existing codebase.

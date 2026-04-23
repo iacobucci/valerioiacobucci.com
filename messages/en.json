@@ -72,7 +72,7 @@
 			},
 			"digit-recognizer": {
 				"title": "Digit Recognizer",
-				"description": "A neural network to recognize handwritten digits built from scratch in C++."
+				"description": "Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits"
 			},
 			"sviluppo-web-in-js": {
 				"title": "Sviluppo Web in JS",
@@ -90,12 +90,11 @@
 	},
 	"terminal": {
 		"welcome": "Try \"help\" to start.",
-		"help": "Available commands: ",
+		"help": "Available commands: about, blog, projects, clear, whoami",
 		"whoami": "Valerio - Software engineer",
 		"about": "I am a full-stack developer passionate about building modern web applications.",
 		"redirecting_blog": "Redirecting to blog...",
 		"redirecting_projects": "Redirecting to projects...",
-		"redirecting_microblog": "Redirecting to microblog...",
 		"redirecting": "Redirecting...",
 		"not_found": "Command not found: {cmd}. Type \"help\" for a list of commands."
 	},

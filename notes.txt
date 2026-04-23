@@ -47,8 +47,8 @@ terminal
 
 content
 	[x] microblog
-	[ ] blog
+	[x] blog
 		[x] 3d visualizations
-	[ ] projects
+	[x] projects
 		[ ] README.md
 		[ ] apps

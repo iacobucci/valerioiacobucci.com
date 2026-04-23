@@ -59,7 +59,7 @@
 			},
 			"digit-recognizer": {
 				"title": "Digit Recognizer",
-				"description": "Een neuraal netwerk om handgeschreven cijfers te herkennen, vanaf nul opgebouwd in C++."
+				"description": "Op Micrograd gebaseerd neuraal netwerk dat via grpc communiceert met p5.js frontend voor het invoeren van handgeschreven cijfers."
 			},
 			"sviluppo-web-in-js": {
 				"title": "Sviluppo Web in JS",

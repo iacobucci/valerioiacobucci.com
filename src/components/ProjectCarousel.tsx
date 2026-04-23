@@ -3,12 +3,21 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { ProjectGitHubData } from '@/lib/projects';
 import ProjectCard from './ProjectCard';
+import ProjectReadmeModal from './ProjectReadmeModal';
 
 interface ProjectCarouselProps {
   projects: ProjectGitHubData[];
 }
 
 export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
+  const [selectedProject, setSelectedProject] = useState<ProjectGitHubData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openProject = (project: ProjectGitHubData) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
+  };
+
   // Use 3 sets to ensure we have plenty of buffer for smooth infinite scrolling
   const duplicatedProjects = useMemo(() => [...projects, ...projects, ...projects], [projects]);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -67,12 +76,21 @@ export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
                 key={`${project.slug}-${idx}`} 
                 className="w-[300px] sm:w-[450px] flex-shrink-0"
               >
-                <ProjectCard project={project} />
+                <ProjectCard 
+                  project={project} 
+                  onClick={() => openProject(project)}
+                />
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      <ProjectReadmeModal 
+        project={selectedProject}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
