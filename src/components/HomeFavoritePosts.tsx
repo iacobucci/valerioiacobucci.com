@@ -9,7 +9,6 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 	setRequestLocale(locale);
 	const tBlog = await getTranslations('blog');
 
-	// Include drafts if they are selected
 	const blogPosts = await getPosts('blog', locale, true);
 	const selectedPosts = blogPosts
 		.filter(post => post.selected)
@@ -19,27 +18,28 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 			return dateB - dateA;
 		});
 
-    if (selectedPosts.length === 0) return null;
+	if (selectedPosts.length === 0) return null;
 
-    /**
-     * A structured 2-column bento grid pattern.
-     * Designed to be compact, non-repetitive and balanced.
-     */
-    const getBentoClass = (idx: number, isDraftWithImage: boolean) => {
-        if (isDraftWithImage) return "md:col-span-2 md:row-span-2";
-        
-        const patterns = [
-            "md:col-span-1 md:row-span-2", // 0: Tall
-            "md:col-span-1 md:row-span-1", // 1: Small
-            "md:col-span-1 md:row-span-1", // 2: Small
-            "md:col-span-1 md:row-span-1", // 3: Small
-            "md:col-span-1 md:row-span-2", // 4: Tall
-            "md:col-span-1 md:row-span-1", // 5: Small
-            "md:col-span-2 md:row-span-2", // 6: Big Featured
-            "md:col-span-2 md:row-span-1", // 7: Wide
-        ];
-        return patterns[idx % patterns.length];
-    };
+	const getBentoClass = (idx: number, hasImage: boolean) => {
+		const patterns = hasImage
+			? [
+				"md:col-span-1 md:row-span-10",
+				"md:col-span-1 md:row-span-7",
+				"md:col-span-1 md:row-span-8",
+				"md:col-span-1 md:row-span-11",
+				"md:col-span-1 md:row-span-9",
+				"md:col-span-1 md:row-span-6",
+			]
+			: [
+				"md:col-span-1 md:row-span-6",
+				"md:col-span-1 md:row-span-9",
+				"md:col-span-1 md:row-span-7",
+				"md:col-span-1 md:row-span-5",
+				"md:col-span-1 md:row-span-8",
+				"md:col-span-1 md:row-span-6",
+			];
+		return patterns[idx % patterns.length];
+	};
 
 	return (
 		<section className="max-w-7xl mx-auto px-6 sm:px-12 space-y-12 snap-section">
@@ -53,31 +53,34 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 						{tBlog('favorites_description')}
 					</p>
 				</div>
-				<Link 
-					href="/blog" 
+				<Link
+					href="/blog"
 					className="hidden sm:flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:gap-3 transition-all"
 				>
 					{tBlog('view_all')} <MdArrowForward />
 				</Link>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-[300px] grid-flow-dense">
+			<div className=
+				"grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 md:auto-rows-[40px] md:grid-flow-dense"
+			>
 				{selectedPosts.map((post, idx) => {
 					let finalCover = post.coverImage;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 					}
-					
-					const bentoClass = getBentoClass(idx, !!(post.draft && finalCover));
-                    const isLarge = bentoClass.includes('col-span-2');
-                    const isTall = bentoClass.includes('row-span-2');
+
+					const hasImage = !!finalCover;
+					const bentoClass = getBentoClass(idx, hasImage);
+					const rowSpan = parseInt(bentoClass.match(/row-span-(\d+)/)?.[1] ?? '6');
+					const isTall = rowSpan >= 8;
 
 					const CardContent = (
 						<div className="relative h-full w-full p-6 sm:p-8 flex flex-col justify-end overflow-hidden">
 							{finalCover && (
 								<>
 									<div className="absolute inset-0">
-										<Image 
+										<Image
 											src={finalCover as string}
 											alt={post.title}
 											fill
@@ -111,13 +114,13 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 										</>
 									)}
 								</div>
-								
-								<h3 className={`${isLarge ? 'text-2xl sm:text-3xl' : 'text-xl'} font-bold text-white leading-tight`}>
+
+								<h3 className={`${isTall ? 'text-xl sm:text-2xl' : 'text-lg'} font-bold text-white leading-tight`}>
 									{post.title}
 								</h3>
-								
-								{!post.draft && (isLarge || isTall) && (
-									<p className={`text-gray-200 line-clamp-2 ${isLarge ? 'text-base' : 'text-sm'} font-medium`}>
+
+								{!post.draft && isTall && (
+									<p className="text-gray-200 line-clamp-2 text-sm font-medium">
 										{post.description}
 									</p>
 								)}
@@ -134,9 +137,9 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 
 					if (post.draft) {
 						return (
-							<div 
+							<div
 								key={post.slug}
-								className={`${bentoClass} relative bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-800 overflow-hidden cursor-default`}
+								className={`${bentoClass} aspect-[5/3] md:aspect-auto relative bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-800 overflow-hidden cursor-default`}
 							>
 								{CardContent}
 							</div>
@@ -144,10 +147,10 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 					}
 
 					return (
-						<Link 
+						<Link
 							key={post.slug}
 							href={`/blog/${post.slug}`}
-							className={`${bentoClass} group relative bg-white dark:bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-2xl transition-all`}
+							className={`${bentoClass} aspect-[5/3] md:aspect-auto group relative bg-white dark:bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-2xl transition-all`}
 						>
 							{!finalCover && <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-900" />}
 							{CardContent}
