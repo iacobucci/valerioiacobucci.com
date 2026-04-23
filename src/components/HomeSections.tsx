@@ -1,8 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getPosts } from '@/lib/content';
 import { getMicroblogPosts } from '@/lib/microblog';
-import { projects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
-import ProjectCard from '@/components/ProjectCard';
+import { getAllProjectsWithData } from '@/lib/projects';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import MicroblogPostCard from '@/components/MicroblogPostCard';
 import { FormattedDate } from '@/components/FormattedDate';
@@ -30,21 +29,7 @@ export default async function HomeSections({ locale }: { locale: string }) {
 		.slice(0, 3);
 
 	const microblogPosts = await getMicroblogPosts(3, 0);
-
-	const allProjectsData = await Promise.all(
-		projects.map(async (project) => {
-			const githubData = await getGitHubData(project.github_repo);
-			return {
-				...project,
-				stars: githubData.stars || 0,
-				forks: githubData.forks || 0,
-				github_url: githubData.github_url || `https://github.com/${project.github_repo}`,
-				language: githubData.language,
-				last_commit: githubData.last_commit || '',
-				commits: 0,
-			} as ProjectGitHubData;
-		})
-	);
+	const allProjectsData = await getAllProjectsWithData();
 
 	return (
 		<div id="main-content" className="w-full py-24 space-y-32">
@@ -88,6 +73,7 @@ export default async function HomeSections({ locale }: { locale: string }) {
 												src={finalCover as string}
 												alt={post.title}
 												fill
+												priority={true}
 												className="object-cover group-hover:scale-110 transition-transform duration-500"
 											/>
 										</div>
@@ -178,7 +164,27 @@ export default async function HomeSections({ locale }: { locale: string }) {
 			{/* Final CTA / CV Section */}
 			<section className="max-w-7xl mx-auto px-6 sm:px-12 pb-24 snap-section">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-					<div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-10 sm:p-16 border-2 border-fg-light dark:border-gray-800 shadow-[12px_12px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.05)] flex flex-col justify-between items-start gap-12 group overflow-hidden relative">
+					<div className="bg-white dark:bg-gray-900 border-2 border-fg-light dark:border-gray-800 rounded-[2.5rem] p-10 sm:p-16 flex flex-col justify-between items-start gap-12">
+						<div className="space-y-6">
+							<div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400">
+								<FaRss className="text-3xl" />
+							</div>
+							<div className="space-y-4">
+								<h3 className="text-3xl font-black text-fg-light dark:text-fg-dark tracking-tight">Stay Updated</h3>
+								<p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-sm">
+									Follow my RSS feed to stay up to date with my latest posts and projects.
+								</p>
+							</div>
+						</div>
+						<a 
+							href={`/${locale}/feed.xml`}
+							className="inline-flex items-center justify-center w-full sm:w-auto gap-3 px-10 py-5 border-2 border-fg-light dark:border-gray-800 text-fg-light dark:text-fg-dark rounded-2xl font-black text-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95 shadow-xl"
+						>
+							RSS Feed <MdArrowForward className="text-2xl" />
+						</a>
+					</div>
+
+					<div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-10 sm:p-16 border-2 border-fg-light dark:border-gray-800 flex flex-col justify-between items-start gap-12 group overflow-hidden relative">
 						<div className="relative z-10 space-y-6">
 							<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
 								<MdStar className="text-3xl" />
@@ -199,26 +205,6 @@ export default async function HomeSections({ locale }: { locale: string }) {
 							{t('cv.view_now')} <MdArrowForward className="text-2xl" />
 						</Link>
 						<div className="absolute -right-12 -bottom-12 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
-					</div>
-
-					<div className="bg-white dark:bg-gray-900 border-2 border-fg-light dark:border-gray-800 shadow-[12px_12px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.05)] rounded-[2.5rem] p-10 sm:p-16 flex flex-col justify-between items-start gap-12">
-						<div className="space-y-6">
-							<div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400">
-								<FaRss className="text-3xl" />
-							</div>
-							<div className="space-y-4">
-								<h3 className="text-3xl font-black text-fg-light dark:text-fg-dark tracking-tight">Stay Updated</h3>
-								<p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-sm">
-									Follow my RSS feed to stay up to date with my latest posts and projects.
-								</p>
-							</div>
-						</div>
-						<a 
-							href={`/${locale}/feed.xml`}
-							className="inline-flex items-center justify-center w-full sm:w-auto gap-3 px-10 py-5 border-2 border-fg-light dark:border-gray-800 text-fg-light dark:text-fg-dark rounded-2xl font-black text-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95 shadow-xl"
-						>
-							RSS Feed <MdArrowForward className="text-2xl" />
-						</a>
 					</div>
 				</div>
 			</section>

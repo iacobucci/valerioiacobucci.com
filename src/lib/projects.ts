@@ -55,10 +55,20 @@ export const projects: Project[] = [
 	}
 ];
 
-export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
+// In-memory cache for GitHub data
+let projectsCache: Record<string, Partial<ProjectGitHubData>> = {};
+let lastFetchTime = 0;
+const CACHE_TTL = 3600 * 1000; // 1 hour in milliseconds
+
+async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
 	try {
 		const res = await fetch(`https://api.github.com/repos/${repo}`, {
-			next: { revalidate: 3600 } // Cache for 1 hour
+			headers: {
+				'Accept': 'application/vnd.github.v3+json',
+				// In production we should use a GITHUB_TOKEN to avoid rate limits
+				...(process.env.GITHUB_TOKEN ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` } : {})
+			},
+			next: { revalidate: 3600 }
 		});
 		
 		if (!res.ok) {
@@ -79,4 +89,63 @@ export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHub
 		console.error(`Error fetching GitHub data for ${repo}:`, error);
 		return {};
 	}
+}
+
+/**
+ * Gets GitHub data for a specific repo, serving from cache if available.
+ */
+export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
+	const now = Date.now();
+	
+	// If cache is expired or empty, we could trigger a refresh
+	// But to avoid blocking this request, we serve what we have 
+	// and check if we need to refresh the whole set elsewhere
+	if (projectsCache[repo]) {
+		return projectsCache[repo];
+	}
+
+	// Fallback to fresh fetch if not in cache (should only happen once)
+	const data = await fetchGitHubData(repo);
+	projectsCache[repo] = data;
+	return data;
+}
+
+/**
+ * Returns all projects with their cached GitHub data.
+ * Triggers a background refresh if the cache is stale.
+ */
+export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
+	const now = Date.now();
+	
+	// Check if cache needs background refresh
+	if (now - lastFetchTime > CACHE_TTL) {
+		// Non-blocking refresh
+		refreshProjectsCache().catch(console.error);
+	}
+
+	return Promise.all(projects.map(async (project) => {
+		const githubData = await getGitHubData(project.github_repo);
+		return {
+			...project,
+			stars: githubData.stars || 0,
+			forks: githubData.forks || 0,
+			github_url: githubData.github_url || `https://github.com/${project.github_repo}`,
+			language: githubData.language,
+			last_commit: githubData.last_commit || '',
+			commits: 0,
+		} as ProjectGitHubData;
+	}));
+}
+
+async function refreshProjectsCache() {
+	console.log("Refreshing projects GitHub cache...");
+	const newData: Record<string, Partial<ProjectGitHubData>> = {};
+	
+	for (const project of projects) {
+		newData[project.github_repo] = await fetchGitHubData(project.github_repo);
+	}
+	
+	projectsCache = newData;
+	lastFetchTime = Date.now();
+	console.log("Projects GitHub cache refreshed.");
 }
