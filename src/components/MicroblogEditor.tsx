@@ -5,28 +5,36 @@ import { createPostAction } from '@/lib/actions/microblog';
 import { MdImage, MdSend, MdClose } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
+import { compressImage } from '@/lib/image-utils';
 
 export default function MicroblogEditor() {
   const t = useTranslations('microblog');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_CHARS = 140;
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 20 * 1024 * 1024) {
         toast.error(t('image_too_large'));
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      
+      setIsCompressing(true);
+      try {
+        const compressedDataUrl = await compressImage(file);
+        setImagePreview(compressedDataUrl);
+      } catch (error) {
+        console.error('Failed to compress image:', error);
+        toast.error('Failed to process image');
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -93,7 +101,7 @@ export default function MicroblogEditor() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-colors"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCompressing}
               title={t('add_image')}
             >
               <MdImage className="w-6 h-6" />
@@ -109,10 +117,10 @@ export default function MicroblogEditor() {
 
           <button
             type="submit"
-            disabled={isSubmitting || (!content.trim() && !imagePreview) || charsLeft < 0}
+            disabled={isSubmitting || isCompressing || (!content.trim() && !imagePreview) || charsLeft < 0}
             className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white font-bold rounded-full transition-all"
           >
-            {isSubmitting ? (
+            {isSubmitting || isCompressing ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <MdSend className="w-5 h-5" />
