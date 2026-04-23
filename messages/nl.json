@@ -90,11 +90,12 @@
 	},
 	"terminal": {
 		"welcome": "Probeer \"help\" om te beginnen.",
-		"help": "Beschikbare commando's: about, blog, projects, clear, whoami",
+		"help": "Beschikbare commando's: ",
 		"whoami": "Valerio - Software Engineer & Nuxt Liefhebber",
 		"about": "Ik ben een full-stack ontwikkelaar met een passie voor het bouwen von moderne webapplicaties met Nuxt en Vue.",
 		"redirecting_blog": "Doorsturen naar blog...",
 		"redirecting_projects": "Doorsturen naar projecten...",
+		"redirecting_microblog": "Doorsturen naar microblog...",
 		"redirecting": "Doorsturen...",
 		"not_found": "Commando niet gevonden: {cmd}. Typ \"help\" voor een lijst met commando's."
 	},

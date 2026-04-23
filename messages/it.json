@@ -90,11 +90,12 @@
 	},
 	"terminal": {
 		"welcome": "Prova \"help\" per iniziare.",
-		"help": "Comandi disponibili: about, blog, projects, clear, whoami",
+		"help": "Comandi disponibili: ",
 		"whoami": "Valerio - Software Engineer & Appassionato di Nuxt",
 		"about": "Sono uno sviluppatore full-stack appassionato nella creazione di applicazioni web moderne con Nuxt e Vue.",
 		"redirecting_blog": "Reindirizzamento al blog...",
 		"redirecting_projects": "Reindirizzamento ai progetti...",
+		"redirecting_microblog": "Reindirizzamento al microblog...",
 		"redirecting": "Reindirizzamento...",
 		"not_found": "Comando non trovato: {cmd}. Digita \"help\" per la lista dei comandi."
 	},

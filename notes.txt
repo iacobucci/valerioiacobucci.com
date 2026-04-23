@@ -42,8 +42,7 @@ components
 		[x] github login button in toast
 
 terminal
-	[ ] lispv interpreter
-	[ ] figlets
+	[x] lispv interpreter
 	[ ] minigames
 
 content

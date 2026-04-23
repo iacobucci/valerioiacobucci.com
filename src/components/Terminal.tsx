@@ -19,7 +19,7 @@ export function Terminal() {
   const terminalBodyRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const commandList = ['help', 'about', 'blog', 'projects', 'whoami', 'clear', 'lispv'];
+  const commandList = ['help', 'about', 'blog', 'projects', 'microblog', 'whoami', 'clear', 'lispv'];
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -95,40 +95,51 @@ export function Terminal() {
 
     const newHistory = [...history, `> ${input}`];
 
-    if (cmd === 'clear') {
-      setHistory([]);
-      setInput('');
-      return;
-    } else if (cmd === 'blog') {
-      newHistory.push(t('redirecting_blog'));
-    } else if (cmd === 'projects') {
-      newHistory.push(t('redirecting_projects'));
-    } else if (cmd === 'help') {
-      newHistory.push(t('help'));
-    } else if (cmd === 'whoami') {
-      newHistory.push(t('whoami'));
-    } else if (cmd === 'about') {
-      newHistory.push(t('about'));
-    } else if (cmd === 'lispv') {
-      if (!args) {
-        setRunningProgram('lispv');
-        newHistory.push('Lispv REPL started. Press Ctrl+C to exit.');
-      } else {
-        try {
-          const interpreter = new Interpreter(args, false);
-          const result = interpreter.run();
-          newHistory.push(result.toString());
-        } catch (err: any) {
-          newHistory.push(`Error: ${err.message}`);
+    switch (cmd) {
+      case 'clear':
+        setHistory([]);
+        setInput('');
+        return;
+      case 'blog':
+        newHistory.push(t('redirecting_blog'));
+        setTimeout(() => router.push('/blog'), 500);
+        break;
+      case 'projects':
+        newHistory.push(t('redirecting_projects'));
+        setTimeout(() => router.push('/projects'), 500);
+        break;
+      case 'microblog':
+        newHistory.push(t('redirecting_microblog'));
+        setTimeout(() => router.push('/microblog'), 500);
+        break;
+      case 'help':
+        newHistory.push(`${t('help')}${commandList.join(', ')}`);
+        break;
+      case 'whoami':
+        newHistory.push(t('whoami'));
+        break;
+      case 'about':
+        newHistory.push(t('about'));
+        break;
+      case 'lispv':
+        if (!args) {
+          setRunningProgram('lispv');
+          newHistory.push('Lispv REPL started. Press Ctrl+C to exit.');
+        } else {
+          try {
+            const interpreter = new Interpreter(args, false);
+            const result = interpreter.run();
+            newHistory.push(result.toString());
+          } catch (err: any) {
+            newHistory.push(`Error: ${err.message}`);
+          }
         }
-      }
-    } else {
-      newHistory.push(t('not_found', {cmd}));
+        break;
+      default:
+        newHistory.push(t('not_found', { cmd }));
     }
 
     setHistory(newHistory);
-    if (cmd === 'blog') setTimeout(() => router.push('/blog'), 500);
-    if (cmd === 'projects') setTimeout(() => router.push('/projects'), 500);
     setInput('');
   };
 

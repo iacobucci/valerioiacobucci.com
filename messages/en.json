@@ -90,11 +90,12 @@
 	},
 	"terminal": {
 		"welcome": "Try \"help\" to start.",
-		"help": "Available commands: about, blog, projects, clear, whoami",
+		"help": "Available commands: ",
 		"whoami": "Valerio - Software engineer",
 		"about": "I am a full-stack developer passionate about building modern web applications.",
 		"redirecting_blog": "Redirecting to blog...",
 		"redirecting_projects": "Redirecting to projects...",
+		"redirecting_microblog": "Redirecting to microblog...",
 		"redirecting": "Redirecting...",
 		"not_found": "Command not found: {cmd}. Type \"help\" for a list of commands."
 	},
