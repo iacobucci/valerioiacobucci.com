@@ -42,9 +42,9 @@ components
 		[x] github login button in toast
 
 terminal
+	[ ] lispv interpreter
 	[ ] figlets
 	[ ] minigames
-	[ ] lispv interpreter
 
 content
 	[x] microblog
