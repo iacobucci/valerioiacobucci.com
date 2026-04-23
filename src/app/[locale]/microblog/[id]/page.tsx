@@ -4,8 +4,28 @@ import MicroblogPostCard from '@/components/MicroblogPostCard';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { MdArrowBack } from 'react-icons/md';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const dbId = parseInt(id) + 1;
+  
+  if (isNaN(dbId)) return {};
+
+  const post = await getMicroblogPost(dbId);
+  if (!post) return {};
+
+  return {
+    title: `Microblog Post #${id}`,
+    description: post.content.slice(0, 160),
+  };
+}
 
 export default async function MicroblogPostPage({
   params,

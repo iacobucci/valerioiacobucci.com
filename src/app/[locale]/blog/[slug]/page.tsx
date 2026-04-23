@@ -5,6 +5,7 @@ import {Link} from '@/i18n/routing';
 import {ArrowLeft} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
 import {MdLanguage} from 'react-icons/md';
+import { Metadata } from 'next';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
@@ -13,6 +14,24 @@ import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 
 const CONTENT_TYPE = 'blog';
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{locale: string; slug: string}>;
+}): Promise<Metadata> {
+  const {locale, slug} = await params;
+  const post = await getPost(CONTENT_TYPE, locale, slug);
+
+  if (!post) {
+    return {};
+  }
+
+  return {
+    title: post.title,
+    description: post.description,
+  };
+}
 
 export async function generateStaticParams() {
   const locales = routing.locales;

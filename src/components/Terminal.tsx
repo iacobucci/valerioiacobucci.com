@@ -23,7 +23,7 @@ export function Terminal() {
 
   React.useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < window.innerHeight);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);

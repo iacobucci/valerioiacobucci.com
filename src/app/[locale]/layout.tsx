@@ -10,6 +10,26 @@ import Footer from '@/components/Footer';
 import { cookies } from 'next/headers';
 import { COMMIT_HASH } from '@/lib/env';
 import { Providers } from '@/components/Providers';
+import { Metadata } from 'next';
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{locale: string}>;
+}): Promise<Metadata> {
+  const {locale} = await params;
+  
+  return {
+    title: {
+      template: '%s | Valerio Iacobucci',
+      default: 'Valerio Iacobucci',
+    },
+    description: 'Valerio Iacobucci - Software Engineer',
+    icons: {
+      icon: '/favicon.ico',
+    },
+  };
+}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
