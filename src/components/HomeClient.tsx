@@ -72,12 +72,12 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
           </div>
         </motion.div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter text-fg-light dark:text-fg-dark leading-[0.9]"
+            className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-fg-light dark:text-fg-dark leading-[0.85]"
           >
             Valerio Iacobucci
           </motion.h1>
@@ -85,11 +85,11 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
-            className="text-xl sm:text-2xl lg:text-3xl tracking-tighter text-fg-light dark:text-fg-dark leading-[0.95]"
+            className="text-2xl sm:text-3xl lg:text-4xl tracking-tighter text-fg-light dark:text-fg-dark leading-[0.95] max-w-xl"
           >
             {t.intro}
           </motion.h2>
-          <div className="space-y-4 w-full flex flex-col items-center lg:items-start">
+          <div className="pt-4 space-y-6 w-full flex flex-col items-center lg:items-start">
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -104,7 +104,7 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="flex gap-6 justify-center"
+              className="flex gap-8 justify-center"
             >
               {socialLinks.map((social) => (
                 <a
@@ -112,7 +112,7 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-3xl text-gray-400 transition-all duration-300 hover:scale-110 active:scale-95 ${social.color}`}
+                  className={`text-4xl text-gray-400 transition-all duration-300 hover:scale-110 active:scale-95 ${social.color}`}
                   aria-label={social.label}
                   title={social.label}
                 >
@@ -122,27 +122,6 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
             </motion.div>
           </div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex flex-wrap gap-5 justify-center lg:justify-start"
-        >
-          <Link
-            href="/blog"
-            className="group relative px-10 py-4 bg-fg-light text-bg-light dark:bg-fg-dark dark:text-bg-dark font-black rounded-2xl hover:scale-105 active:scale-95 transition-all overflow-hidden"
-          >
-            <span className="relative z-10">{t.read_blog}</span>
-            <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-          </Link>
-          <Link
-            href="/projects"
-            className="px-10 py-4 border-2 border-gray-200 dark:border-gray-800 text-fg-light dark:text-fg-dark font-black rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-95"
-          >
-            {projectsTitle}
-          </Link>
-        </motion.div>
       </div>
 
       {/* Terminal section */}

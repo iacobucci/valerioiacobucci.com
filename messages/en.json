@@ -10,12 +10,7 @@
 		"intro": "Computer Engineering student at the University of Bologna.",
 		"read_blog": "Read Blog",
 		"view_projects": "View Projects",
-		"connect": "Connect with me",
-		"cv": {
-			"title": "Looking for my resume?",
-			"cta_description": "Check out my professional background and technical expertise in detail.",
-			"view_now": "View CV"
-		}
+		"connect": "Connect with me"
 	},
 	"blog": {
 		"title": "Blog",
@@ -99,6 +94,9 @@
 	},
 	"cv": {
 		"title": "Curriculum Vitae",
+		"cta_title": "Looking for my resume?",
+		"cta_description": "Check out my professional background and technical expertise in detail.",
+		"view_now": "View CV",
 		"updated_to": "Updated to",
 		"download_pdf": "Download PDF",
 		"personal_info": {

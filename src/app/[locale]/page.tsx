@@ -21,7 +21,7 @@ export default async function HomePage({
 }) {
 	const { locale } = await params;
 	setRequestLocale(locale);
-	
+
 	const t = await getTranslations();
 	const tMicro = await getTranslations('microblog');
 	const tProjects = await getTranslations('projects');
@@ -65,15 +65,15 @@ export default async function HomePage({
 	return (
 		<div className="flex flex-col flex-1 bg-bg-light font-sans dark:bg-bg-dark overflow-x-hidden snap-y snap-proximity">
 			<section className="snap-section">
-				<HomeClient 
-					t={homeTranslations} 
-					projectsTitle={tProjects('title')} 
-					locale={locale} 
+				<HomeClient
+					t={homeTranslations}
+					projectsTitle={tProjects('title')}
+					locale={locale}
 				/>
 			</section>
 
 			<div id="main-content" className="w-full py-24 space-y-32">
-				
+
 				{/* Favorite Blog Posts */}
 				{favoritePosts.length > 0 && (
 					<section className="max-w-7xl mx-auto px-6 sm:px-12 space-y-12 snap-section">
@@ -87,8 +87,8 @@ export default async function HomePage({
 									{tBlog('favorites_description' as any) || 'A selection of my best articles and experiments.'}
 								</p>
 							</div>
-							<Link 
-								href="/blog" 
+							<Link
+								href="/blog"
 								className="hidden sm:flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:gap-3 transition-all"
 							>
 								{tBlog('view_all' as any) || 'View All Posts'} <MdArrowForward />
@@ -101,16 +101,16 @@ export default async function HomePage({
 								if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
 									finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 								}
-								
+
 								return (
-									<Link 
+									<Link
 										key={post.slug}
 										href={`/blog/${post.slug}`}
 										className="group flex flex-col bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2"
 									>
 										{finalCover && (
 											<div className="relative h-48 w-full overflow-hidden">
-												<Image 
+												<Image
 													src={finalCover as string}
 													alt={post.title}
 													fill
@@ -155,8 +155,8 @@ export default async function HomePage({
 								{tProjects('featured_description' as any) || 'Some of my favorite tools and experiments.'}
 							</p>
 						</div>
-						<Link 
-							href="/projects" 
+						<Link
+							href="/projects"
 							className="hidden sm:flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:gap-3 transition-all"
 						>
 							{tProjects('view_all' as any) || 'View All Projects'} <MdArrowForward />
@@ -184,7 +184,7 @@ export default async function HomePage({
 						<div className="space-y-8 relative">
 							{/* Vertical line connector */}
 							<div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gray-200 dark:via-gray-800 to-transparent hidden sm:block" />
-							
+
 							{microblogPosts.map((post) => (
 								<div key={post.id} className="relative z-10">
 									<MicroblogPostCard post={post} locale={locale} />
@@ -193,8 +193,8 @@ export default async function HomePage({
 						</div>
 
 						<div className="text-center">
-							<Link 
-								href="/microblog" 
+							<Link
+								href="/microblog"
 								className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-fg-light dark:text-fg-dark font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg"
 							>
 								{tMicro('view_all' as any) || 'View Full Stream'} <MdArrowForward />
@@ -206,46 +206,48 @@ export default async function HomePage({
 				{/* Final CTA / CV Section */}
 				<section className="max-w-7xl mx-auto px-6 sm:px-12 pb-24 snap-section">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-						<div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-10 sm:p-16 border-2 border-fg-light dark:border-gray-800 shadow-[12px_12px_0px_0px_rgba(0,0,0,0.1)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.05)] flex flex-col justify-between items-start gap-12 group overflow-hidden relative">
+						<div className="bg-white dark:bg-gray-900 rounded-[2.5rem] p-10 sm:p-16 border-2 border-fg-light dark:border-gray-800 flex flex-col justify-between items-start gap-12 group overflow-hidden relative">
 							<div className="relative z-10 space-y-6">
 								<div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
 									<MdStar className="text-3xl" />
 								</div>
 								<div className="space-y-4">
 									<h2 className="text-4xl sm:text-5xl font-black leading-none text-fg-light dark:text-fg-dark tracking-tighter">
-										{t('cv.title' as any) || 'Looking for my resume?'}
+										{t('cv.cta_title' as any)}
 									</h2>
 									<p className="text-gray-600 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-md">
-										{t('cv.cta_description' as any) || 'Check out my professional background and technical expertise in detail.'}
+										{t('cv.cta_description' as any)}
 									</p>
 								</div>
 							</div>
-							<Link 
-								href="/cv" 
-								className="relative z-10 inline-flex items-center justify-center w-full sm:w-auto gap-3 px-10 py-5 bg-fg-light text-bg-light dark:bg-fg-dark dark:text-bg-dark rounded-2xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-2xl"
+							<Link
+								href="/cv"
+								className="relative z-10 inline-flex items-center justify-center w-full sm:w-auto gap-3 px-10 py-5 bg-fg-light text-bg-light dark:bg-fg-dark dark:text-bg-dark rounded-2xl font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl"
 							>
-								{t('cv.view_now' as any) || 'View CV'} <MdArrowForward className="text-2xl" />
+								{t('cv.view_now' as any)} <MdArrowForward className="text-2xl" />
 							</Link>
-							
+
 							{/* Decorative circle */}
 							<div className="absolute -right-12 -bottom-12 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
 						</div>
 
-						<div className="bg-gray-50 dark:bg-gray-900/30 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-[2.5rem] p-10 sm:p-16 flex flex-col justify-center items-center text-center gap-8">
-							<div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400">
-								<FaRss className="text-3xl" />
+						<div className="bg-white dark:bg-gray-900 border-2 border-fg-light dark:border-gray-800 rounded-[2.5rem] p-10 sm:p-16 flex flex-col justify-between items-start gap-12">
+							<div className="space-y-6">
+								<div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-400">
+									<FaRss className="text-3xl" />
+								</div>
+								<div className="space-y-4">
+									<h3 className="text-3xl font-black text-fg-light dark:text-fg-dark tracking-tight">Stay Updated</h3>
+									<p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-sm">
+										Follow my RSS feed to stay up to date with my latest posts and projects.
+									</p>
+								</div>
 							</div>
-							<div className="space-y-4">
-								<h3 className="text-3xl font-black text-fg-light dark:text-fg-dark tracking-tight">Stay Updated</h3>
-								<p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-sm">
-									Follow my RSS feed to stay up to date with my latest posts and projects.
-								</p>
-							</div>
-							<a 
+							<a
 								href={`/${locale}/feed.xml`}
-								className="inline-flex items-center gap-2 text-xl font-black text-blue-600 dark:text-blue-400 hover:gap-4 transition-all"
+								className="inline-flex items-center justify-center w-full sm:w-auto gap-3 px-10 py-5 border-2 border-fg-light dark:border-gray-800 text-fg-light dark:text-fg-dark rounded-2xl font-black text-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all active:scale-95 shadow-xl"
 							>
-								RSS Feed <MdArrowForward />
+								RSS Feed <MdArrowForward className="text-2xl" />
 							</a>
 						</div>
 					</div>

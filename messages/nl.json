@@ -10,12 +10,7 @@
 		"intro": "Student Computer Engineering aan de Universiteit van Bologna.",
 		"read_blog": "Blog Lezen",
 		"view_projects": "Projecten Bekijken",
-		"connect": "Contact met mij opnemen",
-		"cv": {
-			"title": "Op zoek naar mijn cv?",
-			"cta_description": "Bekijk mijn professionele achtergrond en technische expertise in detail.",
-			"view_now": "Bekijk CV"
-		}
+		"connect": "Contact met mij opnemen"
 	},
 	"blog": {
 		"title": "Blog",
@@ -99,6 +94,9 @@
 	},
 	"cv": {
 		"title": "Curriculum Vitae",
+		"cta_title": "Op zoek naar mijn cv?",
+		"cta_description": "Bekijk mijn professionele achtergrond en technische expertise in detail.",
+		"view_now": "Bekijk CV",
 		"updated_to": "Bijgewerkt vanaf",
 		"download_pdf": "Download in PDF-formaat",
 		"personal_info": {

@@ -10,12 +10,7 @@
 		"intro": "Studente di Ingegneria Informatica all'Università di Bologna.",
 		"read_blog": "Leggi il Blog",
 		"view_projects": "Vedi i Progetti",
-		"connect": "Contattami",
-		"cv": {
-			"title": "Cerchi il mio curriculum?",
-			"cta_description": "Scopri nel dettaglio il mio percorso professionale e le mie competenze tecniche.",
-			"view_now": "Vedi CV"
-		}
+		"connect": "Contattami"
 	},
 	"blog": {
 		"title": "Blog",
@@ -99,6 +94,9 @@
 	},
 	"cv": {
 		"title": "Curriculum",
+		"cta_title": "Cerchi il mio curriculum?",
+		"cta_description": "Scopri nel dettaglio il mio percorso professionale e le mie competenze tecniche.",
+		"view_now": "Vedi CV",
 		"updated_to": "Aggiornato al",
 		"download_pdf": "Scarica in formato PDF",
 		"personal_info": {
