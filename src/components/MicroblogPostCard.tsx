@@ -53,7 +53,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	
 	const handleReaction = () => {
 		if (!session) {
-			toast.info('You must be logged in with GitHub to vote!');
+			toast.info('You must be logged in with GitHub to vote!', true);
 			return;
 		}
 		

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdCheckCircle, MdError, MdInfo, MdClose } from 'react-icons/md';
-import { ToastEventDetail, ToastType } from '@/lib/toast';
+import { ToastEventDetail } from '@/lib/toast';
+import GitHubLoginButton from './GitHubLoginButton';
 
 interface ToastItem extends ToastEventDetail {
   id: string;
@@ -42,34 +43,42 @@ export default function ToastContainer() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.9, transition: { duration: 0.2 } }}
             className={`
-              pointer-events-auto relative flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border
+              pointer-events-auto relative flex flex-col gap-3 p-4 rounded-2xl shadow-2xl border
               min-w-[280px] max-w-md bg-white dark:bg-gray-900 overflow-hidden
               ${toast.type === 'success' ? 'border-green-100 dark:border-green-900/30' : 
                 toast.type === 'error' ? 'border-red-100 dark:border-red-900/30' : 
                 'border-blue-100 dark:border-blue-900/30'}
             `}
           >
-            <div className={`
-              flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-              ${toast.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 
-                toast.type === 'error' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 
-                'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}
-            `}>
-              {toast.type === 'success' && <MdCheckCircle className="w-5 h-5" />}
-              {toast.type === 'error' && <MdError className="w-5 h-5" />}
-              {toast.type === 'info' && <MdInfo className="w-5 h-5" />}
+            <div className="flex items-center gap-3">
+              <div className={`
+                flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+                ${toast.type === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 
+                  toast.type === 'error' ? 'bg-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400' : 
+                  'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}
+              `}>
+                {toast.type === 'success' && <MdCheckCircle className="w-5 h-5" />}
+                {toast.type === 'error' && <MdError className="w-5 h-5" />}
+                {toast.type === 'info' && <MdInfo className="w-5 h-5" />}
+              </div>
+
+              <p className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 pr-2">
+                {toast.message}
+              </p>
+
+              <button
+                onClick={() => removeToast(toast.id)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              >
+                <MdClose className="w-4 h-4" />
+              </button>
             </div>
 
-            <p className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 pr-2">
-              {toast.message}
-            </p>
-
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-            >
-              <MdClose className="w-4 h-4" />
-            </button>
+            {toast.showLogin && (
+              <div className="flex justify-end pt-1">
+                <GitHubLoginButton className="w-full justify-center" />
+              </div>
+            )}
 
             <motion.div
               initial={{ width: '100%' }}

@@ -1,10 +1,11 @@
 'use client';
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdLogout, MdLogin, MdPerson } from "react-icons/md";
+import { MdLogout, MdPerson } from "react-icons/md";
+import GitHubLoginButton from "./GitHubLoginButton";
 
 export default function UserMenu() {
   const { data: session, status } = useSession();
@@ -27,13 +28,11 @@ export default function UserMenu() {
 
   if (!session) {
     return (
-      <button
-        onClick={() => signIn("github")}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700"
-      >
-        <MdLogin className="w-4 h-4" />
-        <span className="hidden sm:inline">Login</span>
-      </button>
+      <GitHubLoginButton 
+        label="GitHub" 
+        responsive={true}
+        className="px-3 py-1.5 h-9" 
+      />
     );
   }
 
