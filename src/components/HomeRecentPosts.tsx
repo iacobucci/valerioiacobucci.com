@@ -43,7 +43,7 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 				{recentPosts.map((post) => {
-					let finalCover = post.coverImage;
+					let finalCover = post.cover;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 					}

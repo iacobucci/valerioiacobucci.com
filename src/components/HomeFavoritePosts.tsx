@@ -65,7 +65,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 				"grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 md:auto-rows-[40px] md:grid-flow-dense"
 			>
 				{selectedPosts.map((post, idx) => {
-					let finalCover = post.coverImage;
+					let finalCover = post.cover;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 					}

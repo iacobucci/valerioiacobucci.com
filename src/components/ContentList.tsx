@@ -138,7 +138,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
         <AnimatePresence mode="popLayout" initial={false}>
           {filteredItems.map((item, index) => {
             // Handle relative cover image
-            let finalCover = item.coverImage;
+            let finalCover = item.cover;
             if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
               const normalized = finalCover.startsWith('./') ? finalCover.slice(2) : finalCover;
               finalCover = `/assets/${type}/${item.slug}/${normalized}`;

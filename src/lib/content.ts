@@ -15,7 +15,7 @@ export interface ContentMetadata {
   content: string;
   order?: number;
   description?: string;
-  coverImage?: string;
+  cover?: string;
   isFallback: boolean;
   language: string;
   draft?: boolean;
