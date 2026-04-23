@@ -43,7 +43,11 @@ export default async function BlogPostPage({
   // Trigger HMR by telling the bundler to watch the file
   if (process.env.NODE_ENV === 'development') {
     try {
-      await import(`@/../content/${CONTENT_TYPE}/${slug}/${locale}.mdx`);
+      if (CONTENT_TYPE === 'blog') {
+        await import(`@/../content/${slug}/${locale}.mdx`);
+      } else {
+        await import(`@/../content/${CONTENT_TYPE}/${slug}/${locale}.mdx`);
+      }
     } catch {
       // Ignore errors, we only want the watcher to register the dependency
     }

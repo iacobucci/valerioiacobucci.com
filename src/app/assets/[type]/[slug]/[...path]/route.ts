@@ -14,7 +14,9 @@ export async function GET(
     return new NextResponse('Invalid path', { status: 400 });
   }
 
-  const filePath = path.join(process.cwd(), 'content', type, slug, filename);
+  const filePath = type === 'blog'
+    ? path.join(process.cwd(), 'content', slug, filename)
+    : path.join(process.cwd(), 'content', type, slug, filename);
 
   if (!fs.existsSync(filePath)) {
     return new NextResponse('Not Found', { status: 404 });

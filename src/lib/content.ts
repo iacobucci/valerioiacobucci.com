@@ -30,9 +30,11 @@ function calculateReadingTime(content: string): number {
 }
 
 export async function getPost(type: string, locale: string, slug: string): Promise<ContentMetadata | null> {
-  const contentDir = path.join(process.cwd(), 'content', type, slug);
+  const contentDir = type === 'blog'
+    ? path.join(process.cwd(), 'content', slug)
+    : path.join(process.cwd(), 'content', type, slug);
   
-  if (!fs.existsSync(contentDir)) {
+  if (!fs.existsSync(contentDir) || !fs.statSync(contentDir).isDirectory()) {
     return null;
   }
 
@@ -81,15 +83,25 @@ export async function getPost(type: string, locale: string, slug: string): Promi
 }
 
 export async function getPosts(type: string, locale: string, includeDrafts = false): Promise<ContentMetadata[]> {
-  const contentDir = path.join(process.cwd(), 'content', type);
+  const contentDir = type === 'blog'
+    ? path.join(process.cwd(), 'content')
+    : path.join(process.cwd(), 'content', type);
   
   if (!fs.existsSync(contentDir)) {
     return [];
   }
 
-  const slugs = fs.readdirSync(contentDir).filter(file =>
-    fs.statSync(path.join(contentDir, file)).isDirectory()
-  );
+  const slugs = fs.readdirSync(contentDir).filter(file => {
+    const fullPath = path.join(contentDir, file);
+    if (fs.statSync(fullPath).isDirectory()) {
+      if (type === 'blog') {
+        // Only include directories that have at least one .mdx file
+        return fs.readdirSync(fullPath).some(f => f.endsWith(`.${extension}`));
+      }
+      return true;
+    }
+    return false;
+  });
 
   const allContent = await Promise.all(slugs.map(async (slug) => {
     return await getPost(type, locale, slug);
