@@ -38,6 +38,8 @@ components
 	[x] terminal
 	[x] footer
 	[x] post list
+	[x] toast
+		[ ] github login button in toast
 
 terminal
 	[ ] figlets
