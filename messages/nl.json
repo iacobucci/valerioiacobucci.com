@@ -10,11 +10,19 @@
 		"intro": "Student Computer Engineering aan de Universiteit van Bologna.",
 		"read_blog": "Blog Lezen",
 		"view_projects": "Projecten Bekijken",
-		"connect": "Contact met mij opnemen"
+		"connect": "Contact met mij opnemen",
+		"cv": {
+			"title": "Op zoek naar mijn cv?",
+			"cta_description": "Bekijk mijn professionele achtergrond en technische expertise in detail.",
+			"view_now": "Bekijk CV"
+		}
 	},
 	"blog": {
 		"title": "Blog",
 		"description": "Gedachten over engineering en al het andere.",
+		"favorites_title": "Geselecteerde Berichten",
+		"favorites_description": "Een selectie van mijn beste artikelen en experimenten.",
+		"view_all": "Bekijk alle berichten",
 		"all": "Alle",
 		"loading": "Blogberichten laden...",
 		"error": "Fout bij het laden van blogberichten:",
@@ -27,6 +35,9 @@
 	"projects": {
 		"title": "Projecten",
 		"description": "Een overzicht van mijn open-source projecten en experimenten op GitHub.",
+		"featured_title": "Open Source Projecten",
+		"featured_description": "Enkele van mijn favoriete tools en experimenten.",
+		"view_all": "Bekijk alle projecten",
 		"loading": "Projecten laden...",
 		"error": "Fout bij het laden van projecten. Probeer het later opnieuw.",
 		"no_projects": "Geen projecten gevonden.",
@@ -59,6 +70,7 @@
 	"microblog": {
 		"title": "Microblog",
 		"description": "Korte gedachten en updates.",
+		"view_all": "Bekijk volledige stream",
 		"no_posts": "Nog geen berichten.",
 		"load_more": "Meer laden",
 		"editor_placeholder": "Wat is er gaande?",
@@ -67,9 +79,8 @@
 		"image_too_large": "Afbeelding te groot (max 20MB)",
 		"back_to_microblog": "Terug naar Microblog"
 	},
-
 	"footer": {
-		"version": "versie",
+		"version": "versione",
 		"made_with": "maakt met"
 	},
 	"auth": {
@@ -152,7 +163,7 @@
 		"technical_skills": {
 			"title": "Technische vaardigheden",
 			"programming_principles": "Programmeerprincipes",
-			"programming_principles_desc": "Algoritmen en datastructuren, computationele complexiteit, programmeerparadigma's (concurrent, declaratief, functioneel, imperatief, procedureel, reactief, objectgeoriënteerd), machine learning.",
+			"programming_principles_desc": "Algoritmen en datastructuren, computationele complexiteit, programmeerparadigma's (concurrent, declaratief, functioneel, imperatief, procedureer, reactief, objectgeoriënteerd), machine learning.",
 			"system_programming": "Systeemprogrammering",
 			"system_programming_desc": "Linux API, Bash, Python, C, C++, Java, Javascript, Rust, Go, build-systemen (CMake, Make, Maven, Gradle, Cargo, Poetry, Npm, Pnpm).",
 			"web_frameworks": "Webframeworks",

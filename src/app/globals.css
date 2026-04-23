@@ -28,7 +28,7 @@
 
 @layer base {
 	html {
-		@apply bg-bg-light dark:bg-bg-dark;
+		@apply bg-bg-light dark:bg-bg-dark scroll-smooth;
 	}
 
 	body {
@@ -61,4 +61,9 @@
 
 .card-enter {
 	animation: fadeInUp 0.3s ease-out both;
+}
+
+.snap-section {
+	scroll-snap-align: start;
+	scroll-margin-top: 4rem; /* Match navbar height */
 }

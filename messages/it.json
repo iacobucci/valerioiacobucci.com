@@ -10,11 +10,19 @@
 		"intro": "Studente di Ingegneria Informatica all'Università di Bologna.",
 		"read_blog": "Leggi il Blog",
 		"view_projects": "Vedi i Progetti",
-		"connect": "Contattami"
+		"connect": "Contattami",
+		"cv": {
+			"title": "Cerchi il mio curriculum?",
+			"cta_description": "Scopri nel dettaglio il mio percorso professionale e le mie competenze tecniche.",
+			"view_now": "Vedi CV"
+		}
 	},
 	"blog": {
 		"title": "Blog",
 		"description": "Pensieri sull'ingegneria e tutto il resto.",
+		"favorites_title": "Post Selezionati",
+		"favorites_description": "Una selezione dei miei migliori articoli ed esperimenti.",
+		"view_all": "Vedi tutti i post",
 		"all": "Tutti",
 		"loading": "Caricamento post...",
 		"error": "Errore nel caricamento dei post:",
@@ -23,9 +31,13 @@
 		"reading_time": "{time} min di lettura",
 		"back": "Torna al Blog",
 		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
-		},	"projects": {
+	},
+	"projects": {
 		"title": "Progetti",
 		"description": "Una vetrina dei miei progetti open-source ed esperimenti su GitHub.",
+		"featured_title": "Progetti Open Source",
+		"featured_description": "Alcuni dei miei strumenti ed esperimenti preferiti.",
+		"view_all": "Vedi tutti i progetti",
 		"loading": "Caricamento progetti...",
 		"error": "Errore nel caricamento dei progetti. Riprova più tardi.",
 		"no_projects": "Nessun progetto trovato.",
@@ -58,6 +70,7 @@
 	"microblog": {
 		"title": "Microblog",
 		"description": "Pensieri brevi e aggiornamenti.",
+		"view_all": "Vedi tutto lo stream",
 		"no_posts": "Nessun post trovato.",
 		"load_more": "Carica altri",
 		"editor_placeholder": "Cosa sta succedendo?",
@@ -66,8 +79,6 @@
 		"image_too_large": "Immagine troppo grande (max 20MB)",
 		"back_to_microblog": "Torna al Microblog"
 	},
-
-
 	"footer": {
 		"version": "versione",
 		"made_with": "realizzato con"

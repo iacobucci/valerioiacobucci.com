@@ -39,7 +39,7 @@ components
 	[x] footer
 	[x] post list
 	[x] toast
-		[ ] github login button in toast
+		[x] github login button in toast
 
 terminal
 	[ ] figlets

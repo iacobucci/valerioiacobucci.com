@@ -10,11 +10,19 @@
 		"intro": "Computer Engineering student at the University of Bologna.",
 		"read_blog": "Read Blog",
 		"view_projects": "View Projects",
-		"connect": "Connect with me"
+		"connect": "Connect with me",
+		"cv": {
+			"title": "Looking for my resume?",
+			"cta_description": "Check out my professional background and technical expertise in detail.",
+			"view_now": "View CV"
+		}
 	},
 	"blog": {
 		"title": "Blog",
 		"description": "Thoughts on engineering and whatever else.",
+		"favorites_title": "Selected Posts",
+		"favorites_description": "A selection of my best articles and experiments.",
+		"view_all": "View All Posts",
 		"all": "All",
 		"loading": "Loading blog posts...",
 		"error": "Error loading blog posts:",
@@ -27,6 +35,7 @@
 	"microblog": {
 		"title": "Microblog",
 		"description": "Short thoughts and updates.",
+		"view_all": "View Full Stream",
 		"no_posts": "No posts yet.",
 		"load_more": "Load more",
 		"editor_placeholder": "What's happening?",
@@ -38,6 +47,9 @@
 	"projects": {
 		"title": "Projects",
 		"description": "A showcase of my open-source projects and experiments on GitHub.",
+		"featured_title": "Open Source Projects",
+		"featured_description": "Some of my favorite tools and experiments.",
+		"view_all": "View All Projects",
 		"loading": "Loading projects...",
 		"error": "Error loading projects. Please try again later.",
 		"no_projects": "No projects found.",
