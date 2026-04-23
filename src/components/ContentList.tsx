@@ -3,10 +3,11 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
-import { MdCalendarToday, MdSortByAlpha, MdFormatListNumbered, MdTag } from 'react-icons/md';
+import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
+import { useTranslations } from 'next-intl';
 
 interface ContentListProps {
   items: ContentMetadata[];
@@ -14,22 +15,25 @@ interface ContentListProps {
   locale: string;
 }
 
-type SortBy = 'date' | 'alphabetical' | 'predefined';
-
 export default function ContentList({ items, type, locale }: ContentListProps) {
   const router = useRouter();
-  const [sortBy, setSortBy] = useState<SortBy>('date');
+  const t = useTranslations('blog');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Extract all unique tags
+  // Extract all unique tags, putting favorites first
   const allTags = useMemo(() => {
     const tags = new Set<string>();
     items.forEach(item => {
       item.tags?.forEach(tag => tags.add(tag));
     });
-    return Array.from(tags).sort();
+    const sortedTags = Array.from(tags).sort((a, b) => {
+      if (a === 'favorites') return -1;
+      if (b === 'favorites') return 1;
+      return a.localeCompare(b);
+    });
+    return sortedTags;
   }, [items]);
 
   const filteredItems = useMemo(() => {
@@ -39,28 +43,17 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
       filtered = filtered.filter(item => item.tags?.includes(selectedTag));
     }
 
+    // Always sort by ORIGINAL publication date newest first
     return filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateB - dateA; // Newest first
-      }
-      if (sortBy === 'alphabetical') {
-        return a.title.localeCompare(b.title);
-      }
-      if (sortBy === 'predefined') {
-        const orderA = a.order ?? Infinity;
-        const orderB = b.order ?? Infinity;
-        return orderA - orderB;
-      }
-      return 0;
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
     });
-  }, [items, sortBy, selectedTag]);
+  }, [items, selectedTag]);
 
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
       if (
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA' ||
@@ -90,7 +83,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
   // Reset focus when filters change
   useEffect(() => {
     setFocusedIndex(-1);
-  }, [selectedTag, sortBy]);
+  }, [selectedTag]);
 
   // Scroll focused item into view
   useEffect(() => {
@@ -103,37 +96,10 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
     }
   }, [focusedIndex]);
 
-  const sortOptions = [
-    { id: 'date', label: 'By Date', icon: MdCalendarToday },
-    { id: 'alphabetical', label: 'A-Z', icon: MdSortByAlpha },
-    { id: 'predefined', label: 'Order', icon: MdFormatListNumbered },
-  ];
-
   return (
     <div className="space-y-8">
       {/* Controls */}
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-3 border-b border-gray-100 dark:border-gray-800 pb-4 overflow-x-auto">
-          {sortOptions.map((opt) => {
-            const Icon = opt.icon;
-            const active = sortBy === opt.id;
-            return (
-              <button
-                key={opt.id}
-                onClick={() => setSortBy(opt.id as SortBy)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  active
-                    ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900 shadow-md'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
@@ -141,7 +107,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             </span>
             <button
               onClick={() => setSelectedTag(null)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 selectedTag === null
                   ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
                   : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -149,19 +115,27 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             >
               All
             </button>
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
-                  selectedTag === tag
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
-                    : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-              >
-                #{tag}
-              </button>
-            ))}
+            {allTags.map(tag => {
+              const isFavorites = tag === 'favorites';
+              const active = selectedTag === tag;
+              
+              return (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(active ? null : tag)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                    active
+                      ? isFavorites 
+                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 ring-1 ring-yellow-200 dark:ring-yellow-800 shadow-sm'
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                      : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                >
+                  {isFavorites && <MdStar className={active ? 'text-yellow-500' : 'text-gray-400'} />}
+                  #{tag}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -179,6 +153,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             
             const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
             const isFocused = index === focusedIndex;
+            const hasFavorites = item.tags?.includes('favorites');
 
             return (
               <motion.div
@@ -196,7 +171,11 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                 <Link
                   href={`/${type}/${item.slug}`}
                   onMouseEnter={() => router.prefetch(`/${type}/${item.slug}`)}
-                  className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  className={`group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border transition-all duration-300 overflow-hidden ${
+                    hasFavorites
+                      ? 'bg-yellow-50/30 dark:bg-yellow-900/5 border-yellow-100/50 dark:border-yellow-900/20 hover:border-yellow-200 dark:hover:border-yellow-800'
+                      : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50'
+                  } hover:shadow-xl`}
                 >
                   {coverSrc && (
                     <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">
@@ -210,15 +189,29 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                   )}
                   
                   <div className="flex flex-col flex-1 justify-center py-2">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {item.tags?.map(tag => (
-                        <span 
-                          key={tag}
-                          className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400"
-                        >
-                          #{tag}
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
+                      <div className="flex flex-wrap gap-2">
+                        {item.tags?.map(tag => (
+                          <span 
+                            key={tag}
+                            className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 ${
+                              tag === 'favorites' 
+                                ? 'text-yellow-600 dark:text-yellow-400' 
+                                : 'text-blue-600 dark:text-blue-400'
+                            }`}
+                          >
+                            {tag === 'favorites' && <MdStar />}
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      {item.isFallback && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest">
+                          <MdLanguage className="w-3 h-3" />
+                          {t('fallback_badge')}
                         </span>
-                      ))}
+                      )}
                     </div>
                     
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
@@ -231,11 +224,17 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                       </p>
                     )}
                     
-                    <div className="flex items-center gap-4 mt-auto">
+                    <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mt-auto">
                       {item.date && (
-                        <div className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                        <div className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5" title="Published date">
                           <MdCalendarToday className="w-3.5 h-3.5" />
                           <FormattedDate date={item.date} locale={locale} />
+                        </div>
+                      )}
+                      {item.updated && (
+                        <div className="text-xs font-medium text-blue-500/80 dark:text-blue-400/80 flex items-center gap-1.5" title="Last updated">
+                          <MdEditCalendar className="w-3.5 h-3.5" />
+                          <FormattedDate date={item.updated} locale={locale} />
                         </div>
                       )}
                       {item.readingTime && (

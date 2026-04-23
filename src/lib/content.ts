@@ -9,6 +9,7 @@ export interface ContentMetadata {
   type: string;
   title: string;
   date?: string;
+  updated?: string;
   readingTime?: number;
   tags?: string[];
   content: string;
@@ -16,6 +17,7 @@ export interface ContentMetadata {
   description?: string;
   coverImage?: string;
   isFallback: boolean;
+  draft?: boolean;
   [key: string]: unknown;
 }
 
@@ -48,9 +50,11 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     isFallback,
     title: data.title || slug,
     date: data.date ? (data.date instanceof Date ? data.date.toISOString() : data.date) : undefined,
+    updated: data.updated ? (data.updated instanceof Date ? data.updated.toISOString() : data.updated) : undefined,
     readingTime: calculateReadingTime(content),
     tags: data.tags || [],
     content,
+    draft: data.draft === true,
     ...data
   } as ContentMetadata;
 }
@@ -70,5 +74,7 @@ export async function getPosts(type: string, locale: string): Promise<ContentMet
     return await getPost(type, locale, slug);
   }));
 
-  return allContent.filter((content): content is ContentMetadata => content !== null);
+  return allContent
+    .filter((content): content is ContentMetadata => content !== null)
+    .filter((content) => process.env.NODE_ENV === 'development' || !content.draft);
 }

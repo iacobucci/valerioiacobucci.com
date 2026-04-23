@@ -4,6 +4,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Link} from '@/i18n/routing';
 import {ArrowLeft} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
+import {MdLanguage} from 'react-icons/md';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
@@ -50,7 +51,7 @@ export default async function BlogPostPage({
   
   const post = await getPost(CONTENT_TYPE, locale, slug);
 
-  if (!post) {
+  if (!post || (post.draft && process.env.NODE_ENV !== 'development')) {
     notFound();
   }
 
@@ -89,11 +90,31 @@ export default async function BlogPostPage({
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t('back')}
           </Link>
+          
+          {post.isFallback && (
+            <div className="mb-8 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl flex items-start gap-3 text-orange-800 dark:text-orange-200 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+              <MdLanguage className="w-5 h-5 mt-0.5 shrink-0" />
+              <p className="text-sm font-medium leading-relaxed">
+                {t('fallback_warning')}
+              </p>
+            </div>
+          )}
+
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
             {post.title}
           </h1>
-          <div className="flex items-center space-x-4 text-gray-500 dark:text-gray-400">
-            {post.date && <FormattedDate date={post.date} locale={locale} />}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 dark:text-gray-400">
+            {post.date && (
+              <div className="flex items-center gap-1.5" title="Published date">
+                <FormattedDate date={post.date} locale={locale} />
+              </div>
+            )}
+            {post.updated && (
+              <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-medium" title="Last updated">
+                <span className="text-[10px] uppercase tracking-wider">Updated:</span>
+                <FormattedDate date={post.updated} locale={locale} />
+              </div>
+            )}
             {post.readingTime && (
               <span>• {t('reading_time', {time: post.readingTime})}</span>
             )}

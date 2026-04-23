@@ -25,6 +25,7 @@
 		"no_posts_tag": "Nessun post trovato per il tag \"{tag}\".",
 		"reading_time": "{time} min di lettura",
 		"back": "Torna al Blog",
+		"fallback_badge": "SOLO IN INGLESE",
 		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
 	},
 	"projects": {

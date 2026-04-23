@@ -24,14 +24,17 @@ export async function GET(
       feedType: 'blog' as const,
       url: `${siteUrl}/${locale}/blog/${p.slug}`
     })),
-    ...microblogPosts.map(p => ({
-      title: p.content.slice(0, 50),
-      slug: '', 
-      date: p.created_at,
-      description: p.content,
-      feedType: 'microblog' as const,
-      url: `${siteUrl}/${locale}/microblog`
-    }))
+    ...microblogPosts.map(p => {
+      const publicId = p.id - 1;
+      return {
+        title: `Microblog #${publicId}: ${p.content.slice(0, 50)}${p.content.length > 50 ? '...' : ''}`,
+        slug: publicId.toString(), 
+        date: p.created_at,
+        description: p.content,
+        feedType: 'microblog' as const,
+        url: `${siteUrl}/${locale}/microblog/${publicId}`
+      };
+    })
   ].sort((a, b) => {
     const dateA = a.date ? new Date(a.date).getTime() : 0;
     const dateB = b.date ? new Date(b.date).getTime() : 0;
