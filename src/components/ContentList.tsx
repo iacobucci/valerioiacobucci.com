@@ -146,7 +146,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             
             const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
             const isFocused = index === focusedIndex;
-            const hasFavorites = item.favorite;
+            const hasSelected = item.selected;
 
             return (
               <motion.div
@@ -179,7 +179,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                   
                   <div className="flex flex-col flex-1 justify-center py-2">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
-                      {hasFavorites && (
+                      {hasSelected && (
                         <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-black uppercase tracking-widest ring-1 ring-yellow-200 dark:ring-yellow-800">
                           <MdStar className="text-yellow-500" />
                           {t('favorites_title')}
@@ -200,7 +200,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                       {item.isFallback && (
                         <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest">
                           <MdLanguage className="w-3 h-3" />
-                          {t('fallback_badge')}
+                          {item.language.toUpperCase()} ONLY
                         </span>
                       )}
 

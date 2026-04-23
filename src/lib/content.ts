@@ -17,8 +17,9 @@ export interface ContentMetadata {
   description?: string;
   coverImage?: string;
   isFallback: boolean;
+  language: string;
   draft?: boolean;
-  favorite?: boolean;
+  selected?: boolean;
   [key: string]: unknown;
 }
 
@@ -29,17 +30,34 @@ function calculateReadingTime(content: string): number {
 }
 
 export async function getPost(type: string, locale: string, slug: string): Promise<ContentMetadata | null> {
-  const contentDir = path.join(process.cwd(), 'content', type);
-  let filePath = path.join(contentDir, slug, `${locale}.${extension}`);
-  let isFallback = false;
-
-  if (!fs.existsSync(filePath) && locale !== 'en') {
-    filePath = path.join(contentDir, slug, `en.${extension}`);
-    isFallback = true;
+  const contentDir = path.join(process.cwd(), 'content', type, slug);
+  
+  if (!fs.existsSync(contentDir)) {
+    return null;
   }
 
+  let filePath = path.join(contentDir, `${locale}.${extension}`);
+  let actualLocale = locale;
+  let isFallback = false;
+
   if (!fs.existsSync(filePath)) {
-    return null;
+    // Try English
+    const enPath = path.join(contentDir, `en.${extension}`);
+    if (fs.existsSync(enPath)) {
+      filePath = enPath;
+      actualLocale = 'en';
+      isFallback = true;
+    } else {
+      // Try any mdx file
+      const files = fs.readdirSync(contentDir).filter(f => f.endsWith(`.${extension}`));
+      if (files.length > 0) {
+        filePath = path.join(contentDir, files[0]);
+        actualLocale = files[0].replace(`.${extension}`, "");
+        isFallback = true;
+      } else {
+        return null;
+      }
+    }
   }
 
   const fileContents = fs.readFileSync(filePath, 'utf8');
@@ -49,6 +67,7 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     slug,
     type,
     isFallback,
+    language: actualLocale,
     title: data.title || slug,
     date: data.date ? (data.date instanceof Date ? data.date.toISOString() : data.date) : undefined,
     updated: data.updated ? (data.updated instanceof Date ? data.updated.toISOString() : data.updated) : undefined,
@@ -56,7 +75,7 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     tags: data.tags || [],
     content,
     draft: data.draft === true,
-    favorite: data.favorite === true,
+    selected: data.selected === true,
     ...data
   } as ContentMetadata;
 }

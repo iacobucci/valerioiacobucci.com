@@ -9,17 +9,37 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 	setRequestLocale(locale);
 	const tBlog = await getTranslations('blog');
 
-	// Include drafts if they are favorites
+	// Include drafts if they are selected
 	const blogPosts = await getPosts('blog', locale, true);
-	const favoritePosts = blogPosts
-		.filter(post => post.favorite)
+	const selectedPosts = blogPosts
+		.filter(post => post.selected)
 		.sort((a, b) => {
 			const dateA = a.date ? new Date(a.date).getTime() : 0;
 			const dateB = b.date ? new Date(b.date).getTime() : 0;
 			return dateB - dateA;
 		});
 
-    if (favoritePosts.length === 0) return null;
+    if (selectedPosts.length === 0) return null;
+
+    /**
+     * A structured 2-column bento grid pattern.
+     * Designed to be compact, non-repetitive and balanced.
+     */
+    const getBentoClass = (idx: number, isDraftWithImage: boolean) => {
+        if (isDraftWithImage) return "md:col-span-2 md:row-span-2";
+        
+        const patterns = [
+            "md:col-span-1 md:row-span-2", // 0: Tall
+            "md:col-span-1 md:row-span-1", // 1: Small
+            "md:col-span-1 md:row-span-1", // 2: Small
+            "md:col-span-1 md:row-span-1", // 3: Small
+            "md:col-span-1 md:row-span-2", // 4: Tall
+            "md:col-span-1 md:row-span-1", // 5: Small
+            "md:col-span-2 md:row-span-2", // 6: Big Featured
+            "md:col-span-2 md:row-span-1", // 7: Wide
+        ];
+        return patterns[idx % patterns.length];
+    };
 
 	return (
 		<section className="max-w-7xl mx-auto px-6 sm:px-12 space-y-12 snap-section">
@@ -41,22 +61,19 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 				</Link>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[240px]">
-				{favoritePosts.map((post, idx) => {
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-[300px] grid-flow-dense">
+				{selectedPosts.map((post, idx) => {
 					let finalCover = post.coverImage;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 					}
 					
-					// Bento grid logic: 
-					// First post or drafts with cover image get more space
-					const isLarge = idx === 0 || (post.draft && finalCover);
-					const cardClass = isLarge 
-						? "md:col-span-2 md:row-span-2" 
-						: "md:col-span-1 md:row-span-1";
+					const bentoClass = getBentoClass(idx, !!(post.draft && finalCover));
+                    const isLarge = bentoClass.includes('col-span-2');
+                    const isTall = bentoClass.includes('row-span-2');
 
 					const CardContent = (
-						<div className="relative h-full w-full p-8 flex flex-col justify-end overflow-hidden">
+						<div className="relative h-full w-full p-6 sm:p-8 flex flex-col justify-end overflow-hidden">
 							{finalCover && (
 								<>
 									<div className="absolute inset-0">
@@ -67,7 +84,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 											priority={idx < 2}
 											className="object-cover group-hover:scale-105 transition-transform duration-700"
 										/>
-										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+										<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 									</div>
 								</>
 							)}
@@ -75,24 +92,31 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 							<div className="relative z-10 space-y-3">
 								<div className="flex flex-wrap gap-2">
 									{post.draft ? (
-										<span className="flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest">
-											<MdTimer className="text-lg" />
+										<span className="flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
+											<MdTimer className="text-sm" />
 											{tBlog('coming_soon')}
 										</span>
 									) : (
-										post.tags?.slice(0, 2).map(tag => (
-											<span key={tag} className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
-												#{tag}
-											</span>
-										))
+										<>
+											{post.isFallback && (
+												<span className="px-2 py-0.5 rounded-md bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest border border-orange-400">
+													{post.language.toUpperCase()} ONLY
+												</span>
+											)}
+											{post.tags?.slice(0, 2).map(tag => (
+												<span key={tag} className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
+													#{tag}
+												</span>
+											))}
+										</>
 									)}
 								</div>
 								
-								<h3 className={`${isLarge ? 'text-3xl' : 'text-xl'} font-bold text-white leading-tight`}>
+								<h3 className={`${isLarge ? 'text-2xl sm:text-3xl' : 'text-xl'} font-bold text-white leading-tight`}>
 									{post.title}
 								</h3>
 								
-								{!post.draft && (
+								{!post.draft && (isLarge || isTall) && (
 									<p className={`text-gray-200 line-clamp-2 ${isLarge ? 'text-base' : 'text-sm'} font-medium`}>
 										{post.description}
 									</p>
@@ -112,7 +136,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 						return (
 							<div 
 								key={post.slug}
-								className={`${cardClass} relative bg-gray-900 rounded-[2.5rem] border border-gray-800 overflow-hidden cursor-default`}
+								className={`${bentoClass} relative bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-800 overflow-hidden cursor-default`}
 							>
 								{CardContent}
 							</div>
@@ -123,7 +147,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 						<Link 
 							key={post.slug}
 							href={`/blog/${post.slug}`}
-							className={`${cardClass} group relative bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-2xl transition-all`}
+							className={`${bentoClass} group relative bg-white dark:bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-2xl transition-all`}
 						>
 							{!finalCover && <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-900" />}
 							{CardContent}

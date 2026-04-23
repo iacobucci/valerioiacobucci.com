@@ -95,7 +95,7 @@ export default async function BlogPostPage({
             <div className="mb-8 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl flex items-start gap-3 text-orange-800 dark:text-orange-200 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
               <MdLanguage className="w-5 h-5 mt-0.5 shrink-0" />
               <p className="text-sm font-medium leading-relaxed">
-                {t('fallback_warning')}
+                {t('fallback_warning')} ({post.language.toUpperCase()})
               </p>
             </div>
           )}
