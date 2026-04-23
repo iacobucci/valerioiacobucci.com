@@ -18,6 +18,7 @@ export interface ContentMetadata {
   coverImage?: string;
   isFallback: boolean;
   draft?: boolean;
+  favorite?: boolean;
   [key: string]: unknown;
 }
 
@@ -55,11 +56,12 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     tags: data.tags || [],
     content,
     draft: data.draft === true,
+    favorite: data.favorite === true,
     ...data
   } as ContentMetadata;
 }
 
-export async function getPosts(type: string, locale: string): Promise<ContentMetadata[]> {
+export async function getPosts(type: string, locale: string, includeDrafts = false): Promise<ContentMetadata[]> {
   const contentDir = path.join(process.cwd(), 'content', type);
   
   if (!fs.existsSync(contentDir)) {
@@ -76,5 +78,5 @@ export async function getPosts(type: string, locale: string): Promise<ContentMet
 
   return allContent
     .filter((content): content is ContentMetadata => content !== null)
-    .filter((content) => process.env.NODE_ENV === 'development' || !content.draft);
+    .filter((content) => includeDrafts || process.env.NODE_ENV === 'development' || !content.draft);
 }

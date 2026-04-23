@@ -4,7 +4,7 @@ import { getPosts } from '@/lib/content';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
-  const blogPosts = await getPosts('blog', locale);
+  const blogPosts = await getPosts('blog', locale, true);
 
   // Load translations for static pages
   let messages;
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       href: `/blog/${p.slug}`,
       description: p.description,
       draft: p.draft,
-      isFavorite: p.tags?.includes('favorites')
+      isFavorite: p.favorite
     })),
     // Localized Static pages
     { title: nav.home || 'Home', type: 'page', href: '/' },

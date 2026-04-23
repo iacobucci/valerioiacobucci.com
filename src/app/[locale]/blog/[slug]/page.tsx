@@ -111,6 +111,13 @@ export default async function BlogPostPage({
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
             {post.title}
           </h1>
+
+          {post.description && (
+            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 mt-4 mb-8 leading-relaxed font-medium">
+              {post.description}
+            </p>
+          )}
+
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-500 dark:text-gray-400">
             {post.date && (
               <div className="flex items-center gap-1.5" title="Published date">

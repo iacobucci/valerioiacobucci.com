@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { HomeClient } from '@/components/HomeClient';
 import HomeFavoritePosts from '@/components/HomeFavoritePosts';
+import HomeRecentPosts from '@/components/HomeRecentPosts';
 import HomeProjects from '@/components/HomeProjects';
 import HomeMicroblogWrapper from '@/components/HomeMicroblogWrapper';
 import HomeFinalCTA from '@/components/HomeFinalCTA';
@@ -93,6 +94,10 @@ export default async function HomePage({
 			<div id="main-content" className="w-full py-24 space-y-32">
 				<Suspense fallback={<FavoritePostsSkeleton />}>
 					<HomeFavoritePosts locale={locale} />
+				</Suspense>
+
+				<Suspense fallback={<FavoritePostsSkeleton />}>
+					<HomeRecentPosts locale={locale} />
 				</Suspense>
 
 				<Suspense fallback={<ProjectsSkeleton />}>

@@ -17,6 +17,8 @@
 		"description": "Gedachten over engineering en al het andere.",
 		"favorites_title": "Geselecteerde Berichten",
 		"favorites_description": "Een selectie van mijn beste artikelen en experimenten.",
+		"recent_title": "Laatste Updates",
+		"recent_description": "Vers gepubliceerde artikelen en gedachten.",
 		"view_all": "Bekijk alle berichten",
 		"all": "Alle",
 		"loading": "Blogberichten laden...",
@@ -27,6 +29,7 @@
 		"back": "Terug naar Blog",
 		"fallback_badge": "ALLEEN ENGELS",
 		"draft_badge": "ONTWERP",
+		"coming_soon": "Binnenkort!",
 		"fallback_warning": "Dit bericht is niet beschikbaar in uw taal. De Engelse versie wordt in plaats daarvan weergegeven."
 	},
 	"projects": {
@@ -66,6 +69,7 @@
 	},
 	"microblog": {
 		"title": "Microblog",
+		"recent_title": "Laatsteste Updates",
 		"description": "Korte gedachten en updates.",
 		"view_all": "Bekijk volledige stream",
 		"no_posts": "Nog geen berichten.",

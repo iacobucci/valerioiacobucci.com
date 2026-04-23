@@ -22,18 +22,15 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Extract all unique tags, putting favorites first
+  // Extract all unique tags
   const allTags = useMemo(() => {
     const tags = new Set<string>();
     items.forEach(item => {
-      item.tags?.forEach(tag => tags.add(tag));
+      item.tags?.forEach(tag => {
+        if (tag !== 'favorites') tags.add(tag);
+      });
     });
-    const sortedTags = Array.from(tags).sort((a, b) => {
-      if (a === 'favorites') return -1;
-      if (b === 'favorites') return 1;
-      return a.localeCompare(b);
-    });
-    return sortedTags;
+    return Array.from(tags).sort((a, b) => a.localeCompare(b));
   }, [items]);
 
   const filteredItems = useMemo(() => {
@@ -116,7 +113,6 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
               All
             </button>
             {allTags.map(tag => {
-              const isFavorites = tag === 'favorites';
               const active = selectedTag === tag;
               
               return (
@@ -125,13 +121,10 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                   onClick={() => setSelectedTag(active ? null : tag)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                     active
-                      ? isFavorites 
-                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 ring-1 ring-yellow-200 dark:ring-yellow-800 shadow-sm'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
                       : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                  {isFavorites && <MdStar className={active ? 'text-yellow-500' : 'text-gray-400'} />}
                   #{tag}
                 </button>
               );
@@ -153,7 +146,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             
             const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
             const isFocused = index === focusedIndex;
-            const hasFavorites = item.tags?.includes('favorites');
+            const hasFavorites = item.favorite;
 
             return (
               <motion.div
@@ -194,7 +187,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                       )}
 
                       <div className="flex flex-wrap gap-2">
-                        {item.tags?.filter(tag => tag !== 'favorites').map(tag => (
+                        {item.tags?.map(tag => (
                           <span 
                             key={tag}
                             className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400"

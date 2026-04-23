@@ -17,6 +17,8 @@
 		"description": "Pensieri sull'ingegneria e tutto il resto.",
 		"favorites_title": "Post Selezionati",
 		"favorites_description": "Una selezione dei miei migliori articoli ed esperimenti.",
+		"recent_title": "Ultimi Articoli",
+		"recent_description": "Pensieri e articoli pubblicati di recente.",
 		"view_all": "Vedi tutti i post",
 		"all": "Tutti",
 		"loading": "Caricamento post...",
@@ -27,6 +29,7 @@
 		"back": "Torna al Blog",
 		"fallback_badge": "SOLO IN INGLESE",
 		"draft_badge": "BOZZA",
+		"coming_soon": "Prossimamente!",
 		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
 	},
 	"projects": {
@@ -66,6 +69,7 @@
 	},
 	"microblog": {
 		"title": "Microblog",
+		"recent_title": "Ultimissimi aggiornamenti",
 		"description": "Pensieri brevi e aggiornamenti.",
 		"view_all": "Vedi tutto lo stream",
 		"no_posts": "Nessun post trovato.",

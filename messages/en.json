@@ -17,6 +17,8 @@
 		"description": "Thoughts on engineering and whatever else.",
 		"favorites_title": "Selected Posts",
 		"favorites_description": "A selection of my best articles and experiments.",
+		"recent_title": "Latest Updates",
+		"recent_description": "Freshly published articles and thoughts.",
 		"view_all": "View All Posts",
 		"all": "All",
 		"loading": "Loading blog posts...",
@@ -27,11 +29,13 @@
 		"back": "Back to Blog",
 		"fallback_badge": "EN ONLY",
 		"draft_badge": "DRAFT",
+		"coming_soon": "Coming soon!",
 		"fallback_warning": "This post is not available in your language. Showing the English version instead."
 	},
 	"microblog": {
 		"title": "Microblog",
 		"description": "Short thoughts and updates.",
+		"recent_title": "Latestst Updates",
 		"view_all": "View Full Stream",
 		"no_posts": "No posts yet.",
 		"load_more": "Load more",

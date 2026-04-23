@@ -17,7 +17,7 @@ export default async function HomeMicroblogWrapper({ locale }: { locale: string 
 						<MdHistoryEdu /> {tMicro('title')}
 					</div>
 					<h2 className="text-4xl sm:text-5xl font-black text-fg-light dark:text-fg-dark tracking-tight">
-						Latest Updates
+						{tMicro("recent_title")}
 					</h2>
 					<p className="text-gray-500 dark:text-gray-400 font-medium text-lg max-w-xl mx-auto">
 						{tMicro('description')}
