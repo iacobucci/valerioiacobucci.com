@@ -85,7 +85,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 											alt={post.title}
 											fill
 											priority={idx < 2}
-											className="object-cover group-hover:scale-105 transition-transform duration-700"
+											className="object-cover group-hover:scale-110 transition-transform duration-500"
 										/>
 										<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 									</div>
@@ -139,7 +139,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 						return (
 							<div
 								key={post.slug}
-								className={`${bentoClass} aspect-[5/3] md:aspect-auto relative bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-800 overflow-hidden cursor-default`}
+								className={`${bentoClass} aspect-[5/3] md:aspect-auto group relative bg-gray-900 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-800 overflow-hidden cursor-default`}
 							>
 								{CardContent}
 							</div>
