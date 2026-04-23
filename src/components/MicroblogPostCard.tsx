@@ -284,7 +284,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 								? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 ring-1 ring-purple-200 dark:ring-purple-800' 
 								: 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
 						} ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
-						title="Invadivote!"
+						title="Invote!"
 					>
 						<span className={hasReacted ? 'animate-pulse' : ''}>👾</span>
 						{reactionsCount > 0 && <span>{reactionsCount}</span>}
