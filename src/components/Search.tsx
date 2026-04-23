@@ -13,6 +13,7 @@ interface SearchResult {
 	href: string;
 	description?: string;
 	draft?: boolean;
+	isFavorite?: boolean;
 }
 
 export default function Search() {
@@ -176,6 +177,7 @@ export default function Search() {
 												</div>
 												<div className="flex-1 min-w-0">
 													<div className="flex items-center gap-2">
+														{result.isFavorite && <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500 shrink-0" />}
 														<h4 className="font-bold text-gray-900 dark:text-white truncate">
 															{result.title}
 														</h4>

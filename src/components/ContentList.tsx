@@ -171,11 +171,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                 <Link
                   href={`/${type}/${item.slug}`}
                   onMouseEnter={() => router.prefetch(`/${type}/${item.slug}`)}
-                  className={`group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border transition-all duration-300 overflow-hidden ${
-                    hasFavorites
-                      ? 'bg-yellow-50/30 dark:bg-yellow-900/5 border-yellow-100/50 dark:border-yellow-900/20 hover:border-yellow-200 dark:hover:border-yellow-800'
-                      : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50'
-                  } hover:shadow-xl`}
+                  className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 transition-all duration-300 overflow-hidden hover:shadow-xl"
                 >
                   {coverSrc && (
                     <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">
@@ -190,17 +186,19 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                   
                   <div className="flex flex-col flex-1 justify-center py-2">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
+                      {hasFavorites && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-black uppercase tracking-widest ring-1 ring-yellow-200 dark:ring-yellow-800">
+                          <MdStar className="text-yellow-500" />
+                          {t('favorites_title')}
+                        </span>
+                      )}
+
                       <div className="flex flex-wrap gap-2">
-                        {item.tags?.map(tag => (
+                        {item.tags?.filter(tag => tag !== 'favorites').map(tag => (
                           <span 
                             key={tag}
-                            className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 ${
-                              tag === 'favorites' 
-                                ? 'text-yellow-600 dark:text-yellow-400' 
-                                : 'text-blue-600 dark:text-blue-400'
-                            }`}
+                            className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400"
                           >
-                            {tag === 'favorites' && <MdStar />}
                             #{tag}
                           </span>
                         ))}

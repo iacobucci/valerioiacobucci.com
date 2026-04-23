@@ -10,7 +10,7 @@ export default async function HomeMicroblogWrapper({ locale }: { locale: string 
 	const microblogPosts = await getMicroblogPosts(3, 0);
 
 	return (
-		<section className="bg-gray-50 dark:bg-gray-900/50 py-24 snap-section">
+		<section className="bg-gray-50 dark:bg-gray-800/50 py-24 snap-section">
 			<div className="max-w-4xl mx-auto px-6 sm:px-12 space-y-16">
 				<div className="text-center space-y-4">
 					<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-black uppercase tracking-widest">

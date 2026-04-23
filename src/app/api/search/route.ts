@@ -22,7 +22,8 @@ export async function GET(request: Request) {
       type: 'blog',
       href: `/blog/${p.slug}`,
       description: p.description,
-      draft: p.draft
+      draft: p.draft,
+      isFavorite: p.tags?.includes('favorites')
     })),
     // Localized Static pages
     { title: nav.home || 'Home', type: 'page', href: '/' },
