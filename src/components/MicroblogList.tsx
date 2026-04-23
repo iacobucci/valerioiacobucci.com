@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { MicroblogPostSerializable } from '@/lib/db';
 import MicroblogPostCard from './MicroblogPostCard';
 import { motion, useAnimation } from 'framer-motion';
+import { cachedMicroblogPosts, setCachedMicroblogPosts } from '@/lib/microblog-cache';
 
 interface MicroblogListProps {
 	posts: MicroblogPostSerializable[];
@@ -12,7 +13,28 @@ interface MicroblogListProps {
 }
 
 export default function MicroblogList({ posts: initialPosts, locale, noPostsMessage }: MicroblogListProps) {
-	const [posts, setPosts] = useState<MicroblogPostSerializable[]>(initialPosts);
+	const [posts, setPosts] = useState<MicroblogPostSerializable[]>(() => {
+		if (cachedMicroblogPosts) {
+			// Merge cache with initialPosts to avoid jumpy loading
+			// initialPosts has the latest 20, cache might have only 3
+			const existingIds = new Set(initialPosts.map(p => p.id));
+			const combined = [...initialPosts];
+			
+			// If cache has posts not in initialPosts (unlikely for first 20 but possible if we scrolled), 
+			// we could append them, but for the first load initialPosts is authoritative.
+			// However, if cache has more than 20, we want to keep them.
+			if (cachedMicroblogPosts.length > initialPosts.length) {
+				cachedMicroblogPosts.slice(initialPosts.length).forEach(p => {
+					if (!existingIds.has(p.id)) {
+						combined.push(p);
+					}
+				});
+			}
+			return combined;
+		}
+		return initialPosts;
+	});
+
 	const [offset, setOffset] = useState(initialPosts.length);
 	const [hasMore, setHasMore] = useState(initialPosts.length >= 20);
 	const [isLoading, setIsLoading] = useState(false);
@@ -26,9 +48,21 @@ export default function MicroblogList({ posts: initialPosts, locale, noPostsMess
 		setIsMounted(true);
 	}, []);
 
-	// Sync with initialPosts when they change (e.g., after a new post is added via Server Action)
+	// Sync with initialPosts when they change
 	useEffect(() => {
-		setPosts(initialPosts);
+		setCachedMicroblogPosts(initialPosts);
+		setPosts(prev => {
+			const existingIds = new Set(initialPosts.map(p => p.id));
+			const combined = [...initialPosts];
+			if (prev.length > initialPosts.length) {
+				prev.slice(initialPosts.length).forEach(p => {
+					if (!existingIds.has(p.id)) {
+						combined.push(p);
+					}
+				});
+			}
+			return combined;
+		});
 		setOffset(initialPosts.length);
 		setHasMore(initialPosts.length >= 20);
 	}, [initialPosts]);
