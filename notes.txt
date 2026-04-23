@@ -43,7 +43,7 @@ components
 
 terminal
 	[ ] figlets
-	[ ] pacman
+	[ ] minigames
 	[ ] lispv interpreter
 
 content
