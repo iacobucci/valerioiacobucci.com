@@ -11,7 +11,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 
 	const blogPosts = await getPosts('blog', locale);
 	const favoritePosts = blogPosts
-		.filter(post => post.tags?.includes('favorites'))
+		.filter(post => post.tags?.includes('favorites') && !post.draft)
 		.sort((a, b) => {
 			const dateA = a.date ? new Date(a.date).getTime() : 0;
 			const dateB = b.date ? new Date(b.date).getTime() : 0;

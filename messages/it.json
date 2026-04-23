@@ -26,6 +26,7 @@
 		"reading_time": "{time} min di lettura",
 		"back": "Torna al Blog",
 		"fallback_badge": "SOLO IN INGLESE",
+		"draft_badge": "BOZZA",
 		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
 	},
 	"projects": {

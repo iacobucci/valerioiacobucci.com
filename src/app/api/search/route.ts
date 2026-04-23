@@ -21,7 +21,8 @@ export async function GET(request: Request) {
       title: p.title,
       type: 'blog',
       href: `/blog/${p.slug}`,
-      description: p.description
+      description: p.description,
+      draft: p.draft
     })),
     // Localized Static pages
     { title: nav.home || 'Home', type: 'page', href: '/' },

@@ -5,16 +5,18 @@ import { MdSearch, MdClose } from 'react-icons/md';
 import { Search as SearchIcon, FileText, Star, Layout, Command } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from '@/i18n/routing';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface SearchResult {
 	title: string;
 	type: 'blog' | 'page';
 	href: string;
 	description?: string;
+	draft?: boolean;
 }
 
 export default function Search() {
+	const tBlog = useTranslations('blog');
 	const [isOpen, setIsOpen] = useState(false);
 	const [query, setQuery] = useState('');
 	const [allData, setAllData] = useState<SearchResult[]>([]);
@@ -173,9 +175,16 @@ export default function Search() {
 													{getIcon(result.type)}
 												</div>
 												<div className="flex-1 min-w-0">
-													<h4 className="font-bold text-gray-900 dark:text-white truncate">
-														{result.title}
-													</h4>
+													<div className="flex items-center gap-2">
+														<h4 className="font-bold text-gray-900 dark:text-white truncate">
+															{result.title}
+														</h4>
+														{result.draft && (
+															<span className="px-1.5 py-0.5 rounded text-[8px] font-black bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 uppercase tracking-tighter shrink-0">
+																{tBlog('draft_badge')}
+															</span>
+														)}
+													</div>
 													{result.description && (
 														<p className="text-xs text-gray-500 dark:text-gray-400 truncate">
 															{result.description}

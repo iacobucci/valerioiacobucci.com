@@ -212,6 +212,12 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                           {t('fallback_badge')}
                         </span>
                       )}
+
+                      {item.draft && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest">
+                          {t('draft_badge')}
+                        </span>
+                      )}
                     </div>
                     
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">

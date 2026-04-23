@@ -100,6 +100,14 @@ export default async function BlogPostPage({
             </div>
           )}
 
+          {post.draft && (
+            <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-start gap-3 text-red-800 dark:text-red-200 shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-widest">
+                {t('draft_badge')}
+              </p>
+            </div>
+          )}
+
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
             {post.title}
           </h1>

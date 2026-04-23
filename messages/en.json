@@ -26,6 +26,7 @@
 		"reading_time": "{time} min read",
 		"back": "Back to Blog",
 		"fallback_badge": "EN ONLY",
+		"draft_badge": "DRAFT",
 		"fallback_warning": "This post is not available in your language. Showing the English version instead."
 	},
 	"microblog": {
