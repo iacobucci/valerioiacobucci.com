@@ -55,9 +55,10 @@ export default function ProjectList({ projects }: ProjectListProps) {
     setIsModalOpen(true);
   };
 
-  // Total projects in view for keyboard navigation
+  // Total projects in view for keyboard navigation and hash selection
   const totalInView = useMemo(() => {
     if (selectedTechs.length === 0) {
+      // Order matters for index: featured first, then others
       return [...selectedProjects, ...filteredProjects];
     }
     return filteredProjects;
@@ -71,22 +72,21 @@ export default function ProjectList({ projects }: ProjectListProps) {
   // Handle hash in URL for selection
   useEffect(() => {
     const handleHash = () => {
-      const hash = window.location.hash.replace('#', '');
+      const hash = decodeURIComponent(window.location.hash.replace('#', ''));
       if (hash) {
+        // Try to find in currently visible projects
         const index = totalInView.findIndex(p => p.github_repo === hash);
         if (index !== -1) {
           setFocusedIndex(index);
         } else {
-          // If not in filtered list, check if it exists in all projects
-          const fullIndex = projects.findIndex(p => p.github_repo === hash);
+          // If not in current view, maybe it's filtered out
+          const allProjectsOrdered = [...selectedProjects, ...projects.filter(p => !p.selected)];
+          const fullIndex = allProjectsOrdered.findIndex(p => p.github_repo === hash);
+          
           if (fullIndex !== -1) {
+            // Clear filters to show the project
             setSelectedTechs([]);
-            // Timeout to allow re-render of full list
-            setTimeout(() => {
-               const newTotal = [...projects.filter(p => p.selected), ...projects.filter(p => !p.selected)];
-               const reIndex = newTotal.findIndex(p => p.github_repo === hash);
-               setFocusedIndex(reIndex);
-            }, 0);
+            // The next effect cycle with [totalInView] will handle focusing
           }
         }
       }
@@ -95,7 +95,18 @@ export default function ProjectList({ projects }: ProjectListProps) {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, [projects, totalInView]);
+  }, [projects, totalInView, selectedProjects]); // Re-run when view changes
+
+  // Auto-focus if hash matches but wasn't focused yet (e.g. after filter clear)
+  useEffect(() => {
+    const hash = decodeURIComponent(window.location.hash.replace('#', ''));
+    if (hash && focusedIndex === -1) {
+      const index = totalInView.findIndex(p => p.github_repo === hash);
+      if (index !== -1) {
+        setFocusedIndex(index);
+      }
+    }
+  }, [totalInView, focusedIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

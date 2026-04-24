@@ -61,7 +61,7 @@ export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-6 sm:px-12">
-      <div className="relative group rounded-[2.5rem] overflow-hidden py-10">
+      <div className="relative rounded-[2.5rem] overflow-hidden py-10">
         {/* Gradient overlays */}
         <div className="absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-bg-light dark:from-bg-dark to-transparent pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-bg-light dark:from-bg-dark to-transparent pointer-events-none" />
