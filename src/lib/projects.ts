@@ -1,15 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
+import { projects as projectsData, Project } from '../../content/projects';
 
-export interface Project {
-	title: string;
-	description: string;
-	github_repo: string; // e.g., 'iacobucci/spl'
-	website_url?: string;
-	tech: string[];
-	selected?: boolean;
-}
+export type { Project };
 
 export interface ProjectGitHubData extends Project {
 	stars: number;
@@ -25,9 +16,7 @@ export interface ProjectGitHubData extends Project {
  * Loads projects from YAML file.
  */
 export function getProjects(): Project[] {
-	const projectsPath = path.join(process.cwd(), 'content/projects.yaml');
-	const fileContents = fs.readFileSync(projectsPath, 'utf8');
-	return yaml.load(fileContents) as Project[];
+	return projectsData;
 }
 
 // In-memory cache for GitHub data
@@ -76,50 +65,63 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
  */
 export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
 	if (projectsCache[repo]) {
-		return projectsCache[repo];
+		const isExpired = Date.now() - lastFetchTime > CACHE_TTL;
+		if (!isExpired) {
+			return projectsCache[repo];
+		}
 	}
 
 	const data = await fetchGitHubData(repo);
 	projectsCache[repo] = data;
+	lastFetchTime = Date.now();
 	return data;
 }
 
 /**
- * Returns all projects with their cached GitHub data.
+ * Gets all projects with their GitHub data.
  */
-export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
-	const now = Date.now();
+export async function getProjectsWithGitHubData(): Promise<ProjectGitHubData[]> {
 	const projects = getProjects();
+	const projectsWithData = await Promise.all(
+		projects.map(async (project) => {
+			const githubData = await getGitHubData(project.github_repo);
+			return {
+				...project,
+				...githubData,
+				// Ensure required fields from ProjectGitHubData are present
+				stars: githubData.stars ?? 0,
+				forks: githubData.forks ?? 0,
+				commits: githubData.commits ?? 0,
+				last_commit: githubData.last_commit ?? '',
+				github_url: githubData.github_url ?? `https://github.com/${project.github_repo}`
+			} as ProjectGitHubData;
+		})
+	);
 
-	if (now - lastFetchTime > CACHE_TTL) {
-		refreshProjectsCache().catch(console.error);
-	}
-
-	return Promise.all(projects.map(async (project) => {
-		const githubData = await getGitHubData(project.github_repo);
-		return {
-			...project,
-			stars: githubData.stars || 0,
-			forks: githubData.forks || 0,
-			github_url: githubData.github_url || `https://github.com/${project.github_repo}`,
-			language: githubData.language,
-			last_commit: githubData.last_commit || '',
-			commits: 0,
-			error: githubData.error
-		} as ProjectGitHubData;
-	}));
+	return projectsWithData;
 }
 
-async function refreshProjectsCache() {
-	console.log("Refreshing projects GitHub cache...");
-	const newData: Record<string, Partial<ProjectGitHubData>> = {};
+/**
+ * Gets selected projects with their GitHub data.
+ */
+export async function getSelectedProjects(): Promise<ProjectGitHubData[]> {
 	const projects = getProjects();
+	const selectedProjects = projects.filter(p => p.selected);
+	
+	const projectsWithData = await Promise.all(
+		selectedProjects.map(async (project) => {
+			const githubData = await getGitHubData(project.github_repo);
+			return {
+				...project,
+				...githubData,
+				stars: githubData.stars ?? 0,
+				forks: githubData.forks ?? 0,
+				commits: githubData.commits ?? 0,
+				last_commit: githubData.last_commit ?? '',
+				github_url: githubData.github_url ?? `https://github.com/${project.github_repo}`
+			} as ProjectGitHubData;
+		})
+	);
 
-	for (const project of projects) {
-		newData[project.github_repo] = await fetchGitHubData(project.github_repo);
-	}
-
-	projectsCache = newData;
-	lastFetchTime = Date.now();
-	console.log("Projects GitHub cache refreshed.");
+	return projectsWithData;
 }
