@@ -73,7 +73,7 @@ export default function ProjectCarousel({ projects }: ProjectCarouselProps) {
           <div ref={contentRef} className="flex gap-8 px-4">
             {duplicatedProjects.map((project, idx) => (
               <div 
-                key={`${project.slug}-${idx}`} 
+                key={`${project.github_repo}-${idx}`} 
                 className="w-[300px] sm:w-[450px] flex-shrink-0"
               >
                 <ProjectCard 

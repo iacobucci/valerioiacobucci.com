@@ -73,7 +73,7 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
             <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {project?.title || project?.slug}
+                  {project?.title || project?.github_repo}
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {project?.github_repo}

@@ -5,7 +5,7 @@ import { projects } from '@/lib/projects';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
-  const blogPosts = await getPosts('blog', locale, true);
+  const blogPosts = await getPosts('blog', locale, false);
 
   // Load translations for static pages and projects
   let messages;
@@ -27,13 +27,16 @@ export async function GET(request: Request) {
       draft: p.draft,
       isFavorite: p.selected
     })),
-    ...projects.map(p => ({
-      title: projectList[p.slug]?.title || p.slug,
-      type: 'project',
-      href: `/projects#${p.slug}`,
-      description: projectList[p.slug]?.description || '',
-      isFavorite: false
-    })),
+    ...projects.map(p => {
+      const translationKey = p.github_repo.split('/').pop() || p.github_repo;
+      return {
+        title: projectList[translationKey]?.title || p.title,
+        type: 'project',
+        href: `/projects#${p.github_repo}`,
+        description: projectList[translationKey]?.description || p.description,
+        isFavorite: p.selected
+      };
+    }),
     // Localized Static pages
     { title: nav.home || 'Home', type: 'page', href: '/' },
     { title: nav.blog || 'Blog', type: 'page', href: '/blog' },

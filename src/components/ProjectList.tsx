@@ -22,6 +22,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
   
   const listRef = useRef<HTMLDivElement>(null);
   const featuredRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
 
   const allTechs = useMemo(() => {
@@ -72,18 +73,18 @@ export default function ProjectList({ projects }: ProjectListProps) {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '');
       if (hash) {
-        const index = totalInView.findIndex(p => p.slug === hash);
+        const index = totalInView.findIndex(p => p.github_repo === hash);
         if (index !== -1) {
           setFocusedIndex(index);
         } else {
           // If not in filtered list, check if it exists in all projects
-          const fullIndex = projects.findIndex(p => p.slug === hash);
+          const fullIndex = projects.findIndex(p => p.github_repo === hash);
           if (fullIndex !== -1) {
             setSelectedTechs([]);
             // Timeout to allow re-render of full list
             setTimeout(() => {
                const newTotal = [...projects.filter(p => p.selected), ...projects.filter(p => !p.selected)];
-               const reIndex = newTotal.findIndex(p => p.slug === hash);
+               const reIndex = newTotal.findIndex(p => p.github_repo === hash);
                setFocusedIndex(reIndex);
             }, 0);
           }
@@ -176,7 +177,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
               const isFocused = index === focusedIndex;
               return (
                 <div 
-                  key={project.slug} 
+                  key={project.github_repo} 
                   onMouseEnter={() => setFocusedIndex(index)}
                   className={`transition-all duration-300 rounded-2xl ${
                     isFocused 
@@ -210,7 +211,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
           const isFocused = actualIndex === focusedIndex;
           return (
             <div 
-              key={project.slug} 
+              key={project.github_repo} 
               onMouseEnter={() => setFocusedIndex(actualIndex)}
               style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
               className={`card-enter transition-all duration-200 rounded-2xl h-full ${

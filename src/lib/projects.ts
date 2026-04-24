@@ -1,5 +1,4 @@
 export interface Project {
-	slug: string;
 	title: string;
 	description: string;
 	github_repo: string; // e.g., 'iacobucci/spl'
@@ -20,7 +19,6 @@ export interface ProjectGitHubData extends Project {
 
 export const projects: Project[] = [
 	{
-		slug: 'valerioiacobucci-com',
 		title: 'valerioiacobucci.com',
 		description: 'My personal portfolio and blog built with Next.js.',
 		github_repo: 'iacobucci/valerioiacobucci.com',
@@ -28,7 +26,6 @@ export const projects: Project[] = [
 		selected: true
 	},
 	{
-		slug: 'spl',
 		title: 'Spl',
 		description: 'A simple parser library in C.',
 		github_repo: 'iacobucci/spl',
@@ -36,7 +33,6 @@ export const projects: Project[] = [
 		selected: true
 	},
 	{
-		slug: 'lispv',
 		title: 'Lispv',
 		description: 'A didactic lisp-like language that compiles to rv32i assembly.',
 		website_url: 'https://valerioiacobucci.com/apps/lispv',
@@ -45,7 +41,6 @@ export const projects: Project[] = [
 		selected: true
 	},
 	{
-		slug: "cfn-nuxt-typeorm-lambda-aurora",
 		title: "Cloudformation Nuxt on Lambda",
 		description: "Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora instance behind a Proxy for connection pooling.",
 		github_repo: "iacobucci/cfn-nuxt-typeorm-lambda-aurora",
@@ -53,7 +48,6 @@ export const projects: Project[] = [
 		selected: true
 	},
 	{
-		slug: 'call-of-duty-flappy-bird-2k25',
 		title: 'Call of duty - flappy bird 2k25',
 		description: 'Unethical flappy bird with realistic graphics...',
 		website_url: 'https://valerioiacobucci.com/apps/flappy/index.html',
@@ -61,42 +55,36 @@ export const projects: Project[] = [
 		tech: ['Typescript', 'Videogames'],
 	},
 	{
-		slug: "cfn-nuxt-typeorm-ecs-rds",
 		title: "Cloudformation Nuxt on Ecs",
 		description: "Boilerplate for a Github Actions workflow that builds the apps image, pushes it on an ECR, creates a Cloudformation stack comprising of AWS ECS tasks for server side rendering a Nuxt app that connects via TypeORM to an RDS instance.",
 		github_repo: "iacobucci/cfn-nuxt-typeorm-ecs-rds",
 		tech: ["Vue", "AWS", "CI/CD", "Load balancing"],
 	},
 	{
-		slug: 'digit-recognizer',
 		title: 'Digit Recognizer',
 		description: 'Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits',
 		github_repo: 'iacobucci/digit-recognizer',
 		tech: ['Machine Learning']
 	},
 	{
-		slug: 'bstow',
 		title: 'Bstow',
 		description: 'A better (for some usecases) GNU Stow',
 		github_repo: 'iacobucci/bstow',
 		tech: ['GNU']
 	},
 	{
-		slug: 'rstow',
 		title: 'Rstow',
 		description: 'A quicker rewrite of bstow',
 		github_repo: 'iacobucci/rstow',
 		tech: ['GNU']
 	},
 	{
-		slug: "split-our-bills-bot",
 		title: 'Split our bills bot',
 		description: 'A Telegram bot to split the bills!',
 		github_repo: "iacobucci/split-our-bills-bot",
 		tech: ['Python', 'Telegram']
 	},
 	{
-		slug: "run-or-raise",
 		title: 'Run or raise',
 		description: 'A Firefox extension. When opening an url, if it is already opened, raise the old tab. Else open a new one. You can set a list of websites that will follow this behaviour. This all works best when launching shortcuts.',
 		github_repo: "iacobucci/run-or-raise",
@@ -104,56 +92,48 @@ export const projects: Project[] = [
 		tech: ['Firefox', "Extension"]
 	},
 	{
-		slug: 'iot-server',
 		title: 'Iot Server',
 		description: 'A simple iot server for my nas, built with FastAPI.',
 		github_repo: 'iacobucci/iot-server',
 		tech: ['IoT']
 	},
 	{
-		slug: 'launchpad-daemon',
 		title: 'Launchpad Daemon',
 		description: 'A low impact linux daemon for using a Novation Launchpad to launch scripts',
 		github_repo: 'iacobucci/launchpad-daemon',
 		tech: ['Midi', 'IoT']
 	},
 	{
-		slug: 'vscode-adwaita',
 		title: 'Vscode adwaita theme',
 		description: 'VS Code theme for the GNOME desktop updated for GNOME-48+\'s new #222226 based theme',
 		github_repo: 'iacobucci/vscode-adwaita',
 		tech: ['Css', 'Themes']
 	},
 	{
-		slug: 'sviluppo-web-in-js',
 		title: 'Sviluppo Web in JS',
 		description: 'Educational resources for web development in JavaScript.',
 		github_repo: 'iacobucci/sviluppo-web-in-js',
 		tech: ['JavaScript', 'Education']
 	},
 	{
-		slug: "mermarpidsome",
 		title: 'Mermarpidsome',
 		description: 'Mermaid integration with Marp, with Fontawesome icons!',
 		github_repo: "iacobucci/mermarpidsome",
 		tech: ['JavaScript', 'Markdown']
 	},
 	{
-		slug: "blender-open-containing-directory-addon",
 		title: 'Blender addon to open project directory',
 		description: 'Opens the directory of your current .blend file.',
 		github_repo: "iacobucci/blender-open-containing-directory-addon",
 		tech: ['Blender', "Extension"]
 	},
 	{
-		slug: "pwdshort",
 		title: "Pwdshort",
 		description: "Shortens your pwd, tries to do it faster than a shell script with sed, cut and pipes :)",
 		github_repo: "iacobucci/pwdshort",
 		tech: ["Zsh"]
 	},
 	{
-		slug: "automaton",
 		title: "Automaton",
 		description: 'Elementary cellular automaton generator in python',
 		github_repo: "iacobucci/automaton",

@@ -21,12 +21,14 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
 
   const hasStats = !project.error && (project.stars > 0 || project.forks > 0 || project.language);
   
-  const title = t.has(`list.${project.slug}.title`) 
-    ? t(`list.${project.slug}.title`) 
+  const translationKey = project.github_repo.split('/').pop() || '';
+
+  const title = t.has(`list.${translationKey}.title`) 
+    ? t(`list.${translationKey}.title`) 
     : project.title;
     
-  const description = t.has(`list.${project.slug}.description`) 
-    ? t(`list.${project.slug}.description`) 
+  const description = t.has(`list.${translationKey}.description`) 
+    ? t(`list.${translationKey}.description`) 
     : project.description;
 
   return (
