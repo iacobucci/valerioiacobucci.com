@@ -22,7 +22,7 @@ export const config = {
     // Match all pathnames except for
     // - API routes
     // - Static files
-    '/((?!api|_next/static|_next/image|favicon.ico|apple-touch-icon.png|robots.txt|sitemap.xml|.*\\..*).*)',
+    '/((?!api|apps|_next/static|_next/image|favicon.ico|apple-touch-icon.png|robots.txt|sitemap.xml|.*\\..*).*)',
     '/', 
     '/feed.xml',
     '/(it|en|nl)/:path*'

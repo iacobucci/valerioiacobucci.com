@@ -21,6 +21,18 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
+	async rewrites() {
+		return [
+			{
+				source: '/apps/:app',
+				destination: '/apps/:app/index.html',
+			},
+			{
+				source: '/apps/:app/',
+				destination: '/apps/:app/index.html',
+			},
+		];
+	},
 };
 
 export default withNextIntl(withMDX(nextConfig));

@@ -26,18 +26,27 @@ export const projects: Project[] = [
 		tech: ['Nuxt', 'Vue', 'TypeScript', 'Tailwind CSS']
 	},
 	{
+		slug: 'lispv',
+		title: '',
+		description: '',
+		website_url: 'https://valerioiacobucci.com/apps/lispv',
+		github_repo: 'iacobucci/lispv',
+		tech: ['Lisp', 'Compiler', "RISC-V"]
+	},
+	{
+		slug: 'call-of-duty-flappy-bird-2k25',
+		title: '',
+		description: '',
+		website_url: 'https://valerioiacobucci.com/apps/flappy/index.html',
+		github_repo: 'iacobucci/call-of-duty-flappy-bird-2k25',
+		tech: ['Typescript', 'Videogames']
+	},
+	{
 		slug: 'spl',
 		title: '',
 		description: '',
 		github_repo: 'iacobucci/spl',
 		tech: ['C', 'Parsing']
-	},
-	{
-		slug: 'lispv',
-		title: '',
-		description: '',
-		github_repo: 'iacobucci/lispv',
-		tech: ['Lisp', 'Compiler', "RISC-V"]
 	},
 	{
 		slug: 'digit-recognizer',
@@ -52,7 +61,7 @@ export const projects: Project[] = [
 		description: '',
 		github_repo: 'iacobucci/sviluppo-web-in-js',
 		tech: ['JavaScript', 'Education', 'Web Development']
-	}
+	},
 ];
 
 // In-memory cache for GitHub data
@@ -70,14 +79,14 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 			},
 			next: { revalidate: 3600 }
 		});
-		
+
 		if (!res.ok) {
 			console.error(`Failed to fetch data for ${repo}: ${res.statusText}`);
 			return {};
 		}
-		
+
 		const data = await res.json();
-		
+
 		return {
 			stars: data.stargazers_count,
 			forks: data.forks_count,
@@ -96,7 +105,7 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
  */
 export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
 	const now = Date.now();
-	
+
 	// If cache is expired or empty, we could trigger a refresh
 	// But to avoid blocking this request, we serve what we have 
 	// and check if we need to refresh the whole set elsewhere
@@ -116,7 +125,7 @@ export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHub
  */
 export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
 	const now = Date.now();
-	
+
 	// Check if cache needs background refresh
 	if (now - lastFetchTime > CACHE_TTL) {
 		// Non-blocking refresh
@@ -140,11 +149,11 @@ export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
 async function refreshProjectsCache() {
 	console.log("Refreshing projects GitHub cache...");
 	const newData: Record<string, Partial<ProjectGitHubData>> = {};
-	
+
 	for (const project of projects) {
 		newData[project.github_repo] = await fetchGitHubData(project.github_repo);
 	}
-	
+
 	projectsCache = newData;
 	lastFetchTime = Date.now();
 	console.log("Projects GitHub cache refreshed.");
