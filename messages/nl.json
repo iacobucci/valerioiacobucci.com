@@ -47,33 +47,7 @@
 		"updated": "Bijgewerkt op {date}",
 		"github": "GitHub",
 		"website": "Website",
-		"visit_website": "Pagina Bezoeken",
-		"list": {
-			"valerioiacobucci-com": {
-				"title": "valerioiacobucci.com",
-				"description": "Mijn persoonlijke portfolio en blog gebouwd met Next.js."
-			},
-			"spl": {
-				"title": "Spl",
-				"description": "Een eenvoudige parser-bibliotheek in C."
-			},
-			"lispv": {
-				"title": "Lispv",
-				"description": "Een didactische lisp-achtige taal die compileert naar rv32i-assembly."
-			},
-			"digit-recognizer": {
-				"title": "Digit Recognizer",
-				"description": "Op Micrograd gebaseerd neuraal netwerk dat via grpc communiceert met p5.js frontend voor het invoeren van handgeschreven cijfers."
-			},
-			"sviluppo-web-in-js": {
-				"title": "Sviluppo Web in JS",
-				"description": "Educatieve bronnen voor webontwikkeling in JavaScript."
-			},
-			"call-of-duty-flappy-bird-2k25": {
-				"title": "Call of duty - flappy bird 2k25",
-				"description": "Onethische flappy bird met realistische graphics..."
-			}
-		}
+		"visit_website": "Pagina Bezoeken"
 	},
 	"microblog": {
 		"title": "Microblog",
