@@ -95,8 +95,8 @@
 	"terminal": {
 		"welcome": "Prova \"help\" per iniziare.",
 		"help": "Comandi disponibili: ",
-		"whoami": "Valerio - Software Engineer & Appassionato di Nuxt",
-		"about": "Sono uno sviluppatore full-stack appassionato nella creazione di applicazioni web moderne con Nuxt e Vue.",
+		"whoami": "Valerio",
+		"about": "Sono uno sviluppatore full-stack appassionato nella creazione di applicazioni web moderne.",
 		"redirecting_blog": "Reindirizzamento al blog...",
 		"redirecting_projects": "Reindirizzamento ai progetti...",
 		"redirecting_microblog": "Reindirizzamento al microblog...",

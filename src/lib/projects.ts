@@ -14,6 +14,7 @@ export interface ProjectGitHubData extends Project {
 	last_commit: string;
 	github_url: string;
 	language?: string;
+	error?: string;
 }
 
 export const projects: Project[] = [
@@ -74,7 +75,6 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 		const res = await fetch(`https://api.github.com/repos/${repo}`, {
 			headers: {
 				'Accept': 'application/vnd.github.v3+json',
-				// In production we should use a GITHUB_TOKEN to avoid rate limits
 				...(process.env.GITHUB_TOKEN ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` } : {})
 			},
 			next: { revalidate: 3600 }
@@ -82,7 +82,10 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 
 		if (!res.ok) {
 			console.error(`Failed to fetch data for ${repo}: ${res.statusText}`);
-			return {};
+			return {
+				github_url: `https://github.com/${repo}`,
+				error: res.status === 403 ? 'Rate limit exceeded' : res.statusText
+			};
 		}
 
 		const data = await res.json();
@@ -96,7 +99,10 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 		};
 	} catch (error) {
 		console.error(`Error fetching GitHub data for ${repo}:`, error);
-		return {};
+		return {
+			github_url: `https://github.com/${repo}`,
+			error: 'Network error'
+		};
 	}
 }
 
@@ -104,16 +110,10 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
  * Gets GitHub data for a specific repo, serving from cache if available.
  */
 export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
-	const now = Date.now();
-
-	// If cache is expired or empty, we could trigger a refresh
-	// But to avoid blocking this request, we serve what we have 
-	// and check if we need to refresh the whole set elsewhere
 	if (projectsCache[repo]) {
 		return projectsCache[repo];
 	}
 
-	// Fallback to fresh fetch if not in cache (should only happen once)
 	const data = await fetchGitHubData(repo);
 	projectsCache[repo] = data;
 	return data;
@@ -121,14 +121,11 @@ export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHub
 
 /**
  * Returns all projects with their cached GitHub data.
- * Triggers a background refresh if the cache is stale.
  */
 export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
 	const now = Date.now();
 
-	// Check if cache needs background refresh
 	if (now - lastFetchTime > CACHE_TTL) {
-		// Non-blocking refresh
 		refreshProjectsCache().catch(console.error);
 	}
 
@@ -142,6 +139,7 @@ export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
 			language: githubData.language,
 			last_commit: githubData.last_commit || '',
 			commits: 0,
+			error: githubData.error
 		} as ProjectGitHubData;
 	}));
 }

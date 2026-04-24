@@ -19,6 +19,8 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
     }
   };
 
+  const hasStats = !project.error && (project.stars > 0 || project.forks > 0 || project.language);
+
   return (
     <div 
       role="button"
@@ -75,26 +77,41 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       </div>
 
       <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-auto pt-4 border-t border-gray-50 dark:border-gray-800">
-        {project.language && (
-          <span className="flex items-center gap-1.5">
-            <span 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: getLanguageColor(project.language) }}
-            ></span>
-            {project.language}
-          </span>
-        )}
-        {project.stars > 0 && (
-          <span className="flex items-center gap-1">
-            <FaStar size={14} className="text-yellow-500" />
-            {project.stars}
-          </span>
-        )}
-        {project.forks > 0 && (
-          <span className="flex items-center gap-1">
-            <FaCodeBranch size={14} className="text-gray-400" />
-            {project.forks}
-          </span>
+        {hasStats ? (
+          <>
+            {project.language && (
+              <span className="flex items-center gap-1.5">
+                <span 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: getLanguageColor(project.language) }}
+                ></span>
+                {project.language}
+              </span>
+            )}
+            {project.stars > 0 && (
+              <span className="flex items-center gap-1">
+                <FaStar size={14} className="text-yellow-500" />
+                {project.stars}
+              </span>
+            )}
+            {project.forks > 0 && (
+              <span className="flex items-center gap-1">
+                <FaCodeBranch size={14} className="text-gray-400" />
+                {project.forks}
+              </span>
+            )}
+          </>
+        ) : (
+          <a
+            href={project.github_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FaGithub size={16} />
+            {t('github')}
+          </a>
         )}
       </div>
     </div>
