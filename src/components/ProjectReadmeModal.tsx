@@ -106,7 +106,10 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
                 </div>
               ) : mdxSource ? (
                 <article className="prose prose-neutral prose-lg dark:prose-invert max-w-none">
-                  <MDXRemote {...mdxSource} components={mdxComponents} />
+                  <MDXRemote 
+                    {...mdxSource} 
+                    components={mdxComponents} 
+                  />
                 </article>
               ) : null}
             </div>

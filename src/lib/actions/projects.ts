@@ -29,8 +29,50 @@ export async function getProjectReadmeAction(repo: string) {
 
     const rawMarkdown = await contentRes.text();
 
-    // 3. Serialize to MDX
-    const mdxSource = await serialize(rawMarkdown, {
+    // 3. Pre-process to resolve relative paths in both Markdown and HTML syntax
+    // We assume 'master' branch as requested
+    let processedMarkdown = rawMarkdown;
+
+    // Fix Markdown images: ![alt](path)
+    processedMarkdown = processedMarkdown.replace(
+      /!\[([^\]]*)\]\((?!https?:\/\/|\/)([^)]+)\)/g,
+      (match, alt, path) => {
+        const cleanPath = path.startsWith('./') ? path.slice(2) : path;
+        return `![${alt}](https://raw.githubusercontent.com/${repo}/master/${cleanPath})`;
+      }
+    );
+
+    // Fix Markdown links: [text](path)
+    processedMarkdown = processedMarkdown.replace(
+      /\[([^\]]*)\]\((?!https?:\/\/|\/|#)([^)]+)\)/g,
+      (match, text, path) => {
+        const cleanPath = path.startsWith('./') ? path.slice(2) : path;
+        return `[${text}](https://github.com/${repo}/blob/master/${cleanPath})`;
+      }
+    );
+
+    // Fix HTML images: <img ... src="./path" ... >
+    processedMarkdown = processedMarkdown.replace(
+      /<img([^>]+)src=["'](?!https?:\/\/|\/)([^"']+)["']([^>]*)>/gi,
+      (match, before, src, after) => {
+        const cleanPath = src.startsWith('./') ? src.slice(2) : src;
+        const absoluteSrc = `https://raw.githubusercontent.com/${repo}/master/${cleanPath}`;
+        return `<img${before}src="${absoluteSrc}"${after}>`;
+      }
+    );
+
+    // Fix HTML links: <a ... href="./path" ... >
+    processedMarkdown = processedMarkdown.replace(
+      /<a([^>]+)href=["'](?!https?:\/\/|\/|#)([^"']+)["']([^>]*)>/gi,
+      (match, before, href, after) => {
+        const cleanPath = href.startsWith('./') ? href.slice(2) : href;
+        const absoluteHref = `https://github.com/${repo}/blob/master/${cleanPath}`;
+        return `<a${before}href="${absoluteHref}"${after}>`;
+      }
+    );
+
+    // 4. Serialize to MDX
+    const mdxSource = await serialize(processedMarkdown, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
         format: 'mdx',
