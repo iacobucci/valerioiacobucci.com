@@ -20,49 +20,56 @@ export interface ProjectGitHubData extends Project {
 export const projects: Project[] = [
 	{
 		slug: 'valerioiacobucci-com',
-		title: '',
-		description: '',
+		title: 'valerioiacobucci.com',
+		description: 'My personal portfolio and blog built with Next.js.',
 		github_repo: 'iacobucci/valerioiacobucci.com',
 		website_url: 'https://valerioiacobucci.com',
 		tech: ['Nuxt', 'Vue', 'TypeScript', 'Tailwind CSS']
 	},
 	{
 		slug: 'lispv',
-		title: '',
-		description: '',
+		title: 'Lispv',
+		description: 'A didactic lisp-like language that compiles to rv32i assembly.',
 		website_url: 'https://valerioiacobucci.com/apps/lispv',
 		github_repo: 'iacobucci/lispv',
 		tech: ['Lisp', 'Compiler', "RISC-V"]
 	},
 	{
 		slug: 'call-of-duty-flappy-bird-2k25',
-		title: '',
-		description: '',
+		title: 'Call of duty - flappy bird 2k25',
+		description: 'Unethical flappy bird with realistic graphics...',
 		website_url: 'https://valerioiacobucci.com/apps/flappy/index.html',
 		github_repo: 'iacobucci/call-of-duty-flappy-bird-2k25',
 		tech: ['Typescript', 'Videogames']
 	},
 	{
 		slug: 'spl',
-		title: '',
-		description: '',
+		title: 'Spl',
+		description: 'A simple parser library in C.',
 		github_repo: 'iacobucci/spl',
 		tech: ['C', 'Parsing']
 	},
 	{
 		slug: 'digit-recognizer',
-		title: '',
-		description: '',
+		title: 'Digit Recognizer',
+		description: 'Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits',
 		github_repo: 'iacobucci/digit-recognizer',
 		tech: ['C++', 'Machine Learning', 'Neural Networks']
 	},
 	{
 		slug: 'sviluppo-web-in-js',
-		title: '',
-		description: '',
+		title: 'Sviluppo Web in JS',
+		description: 'Educational resources for web development in JavaScript.',
 		github_repo: 'iacobucci/sviluppo-web-in-js',
 		tech: ['JavaScript', 'Education', 'Web Development']
 	},
+	{
+		slug: "mermarpidsome",
+		title: 'Mermarpidsome',
+		description: 'Mermaid integration with Marp, with Fontawesome icons!',
+		github_repo: "iacobucci/mermarpidsome",
+		tech: ['JavaScript', 'Markdown']
+	}
 ];
 
 // In-memory cache for GitHub data

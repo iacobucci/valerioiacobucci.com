@@ -20,6 +20,14 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   };
 
   const hasStats = !project.error && (project.stars > 0 || project.forks > 0 || project.language);
+  
+  const title = t.has(`list.${project.slug}.title`) 
+    ? t(`list.${project.slug}.title`) 
+    : project.title;
+    
+  const description = t.has(`list.${project.slug}.description`) 
+    ? t(`list.${project.slug}.description`) 
+    : project.description;
 
   return (
     <div 
@@ -31,7 +39,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
     >
       <div className="flex justify-between items-start mb-4 w-full">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-          {t(`list.${project.slug}.title`)}
+          {title}
         </h3>
         <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
           <a
@@ -62,7 +70,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       </div>
 
       <p className="text-gray-600 dark:text-gray-400 mb-6 flex-grow leading-relaxed">
-        {t(`list.${project.slug}.description`)}
+        {description}
       </p>
 
       <div className="flex flex-wrap gap-2 mb-6">
