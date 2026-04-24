@@ -3,11 +3,13 @@
 UPDATE_SERVICE=update-valerioiacobucci.com.service
 
 function --publish {
-	if [[ -n $(command -v push) ]];
-	then
-		push
-	fi
+	echo "Step 1/3: Pushing 'content' submodule..."
+	git -C content push
 
+	echo "Step 2/3: Pushing main repository..."
+	git push
+
+	echo "Step 3/3: Triggering remote update on VPS..."
 	ssh valerio@valerioiacobucci.com "bash /home/valerio/source/web/valerioiacobucci.com/scripts/update.sh --setup --full"
 
 	--watch
@@ -22,14 +24,23 @@ function --job {
 	export NODE_OPTIONS=--max-old-space-size=1536
 
 	cd /home/valerio/source/web/valerioiacobucci.com
+	
+	echo "Pulling latest changes from main repository..."
 	git pull
 
+	echo "Updating submodules (content)..."
 	git submodule update --init --recursive --remote
 
+	echo "Installing dependencies..."
 	pnpm install
+
+	echo "Building application..."
 	pnpm run build
 
+	echo "Restarting service..."
 	systemctl --user restart valerioiacobucci.com
+	
+	echo "Update complete!"
 }
 
 function --watch {
