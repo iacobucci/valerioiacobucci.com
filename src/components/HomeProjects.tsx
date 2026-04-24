@@ -16,10 +16,10 @@ export default async function HomeProjects({ locale }: { locale: string }) {
 				<div className="space-y-2">
 					<h2 className="text-3xl font-black text-fg-light dark:text-fg-dark flex items-center gap-3">
 						<MdRocketLaunch className="text-orange-500" />
-						{tProjects('featured_title')}
+						{tProjects('title')}
 					</h2>
 					<p className="text-gray-500 dark:text-gray-400 font-medium">
-						{tProjects('featured_description')}
+						{tProjects('description')}
 					</p>
 				</div>
 				<Link 

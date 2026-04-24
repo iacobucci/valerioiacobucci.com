@@ -24,7 +24,6 @@ export const projects: Project[] = [
 		title: 'valerioiacobucci.com',
 		description: 'My personal portfolio and blog built with Next.js.',
 		github_repo: 'iacobucci/valerioiacobucci.com',
-		website_url: 'https://valerioiacobucci.com',
 		tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Postgresql'],
 		selected: true
 	},
@@ -48,7 +47,7 @@ export const projects: Project[] = [
 	{
 		slug: "cfn-nuxt-typeorm-lambda-aurora",
 		title: "Cloudformation Nuxt on Lambda",
-		description: "Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora behind a Proxy for connection pooling.",
+		description: "Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora instance behind a Proxy for connection pooling.",
 		github_repo: "iacobucci/cfn-nuxt-typeorm-lambda-aurora",
 		tech: ["Vue", "AWS", "CI/CD", "Serverless"],
 		selected: true
@@ -73,7 +72,7 @@ export const projects: Project[] = [
 		title: 'Digit Recognizer',
 		description: 'Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits',
 		github_repo: 'iacobucci/digit-recognizer',
-		tech: ['Machine Learning', 'Neural Networks']
+		tech: ['Machine Learning']
 	},
 	{
 		slug: 'bstow',
@@ -90,18 +89,33 @@ export const projects: Project[] = [
 		tech: ['GNU']
 	},
 	{
+		slug: "split-our-bills-bot",
+		title: 'Split our bills bot',
+		description: 'A Telegram bot to split the bills!',
+		github_repo: "iacobucci/split-our-bills-bot",
+		tech: ['Python', 'Telegram']
+	},
+	{
+		slug: "run-or-raise",
+		title: 'Run or raise',
+		description: 'A Firefox extension. When opening an url, if it is already opened, raise the old tab. Else open a new one. You can set a list of websites that will follow this behaviour. This all works best when launching shortcuts.',
+		github_repo: "iacobucci/run-or-raise",
+		website_url: "https://addons.mozilla.org/en-US/firefox/addon/run-or-raise/",
+		tech: ['Firefox', "Extension"]
+	},
+	{
 		slug: 'iot-server',
 		title: 'Iot Server',
 		description: 'A simple iot server for my nas, built with FastAPI.',
 		github_repo: 'iacobucci/iot-server',
-		tech: ['Iot']
+		tech: ['IoT']
 	},
 	{
 		slug: 'launchpad-daemon',
 		title: 'Launchpad Daemon',
 		description: 'A low impact linux daemon for using a Novation Launchpad to launch scripts',
 		github_repo: 'iacobucci/launchpad-daemon',
-		tech: ['Midi']
+		tech: ['Midi', 'IoT']
 	},
 	{
 		slug: 'vscode-adwaita',
@@ -115,7 +129,7 @@ export const projects: Project[] = [
 		title: 'Sviluppo Web in JS',
 		description: 'Educational resources for web development in JavaScript.',
 		github_repo: 'iacobucci/sviluppo-web-in-js',
-		tech: ['JavaScript', 'Education', 'Web Development']
+		tech: ['JavaScript', 'Education']
 	},
 	{
 		slug: "mermarpidsome",
@@ -125,12 +139,26 @@ export const projects: Project[] = [
 		tech: ['JavaScript', 'Markdown']
 	},
 	{
-		slug: "split-our-bills-bot",
-		title: 'Split our bills bot',
-		description: 'A Telegram bot to split the bills!',
-		github_repo: "iacobucci/split-our-bills-bot",
-		tech: ['Python', 'Telegram']
+		slug: "blender-open-containing-directory-addon",
+		title: 'Blender addon to open project directory',
+		description: 'Opens the directory of your current .blend file.',
+		github_repo: "iacobucci/blender-open-containing-directory-addon",
+		tech: ['Blender', "Extension"]
 	},
+	{
+		slug: "pwdshort",
+		title: "Pwdshort",
+		description: "Shortens your pwd, tries to do it faster than a shell script with sed, cut and pipes :)",
+		github_repo: "iacobucci/pwdshort",
+		tech: ["Zsh"]
+	},
+	{
+		slug: "automaton",
+		title: "Automaton",
+		description: 'Elementary cellular automaton generator in python',
+		github_repo: "iacobucci/automaton",
+		tech: ['Automata']
+	}
 ];
 
 // In-memory cache for GitHub data
