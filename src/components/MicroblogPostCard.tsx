@@ -32,9 +32,9 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	
-	const user = session?.user as { id?: string; sub?: string; username?: string; email?: string | null } | undefined;
-	const userId = user ? (user.id || user.sub) : null;
-	const hasReacted = post.reactions?.some(r => r.userId === userId);
+	const user = session?.user as { id?: string; username?: string; name?: string | null; email?: string | null } | undefined;
+	const username = user?.username || user?.name || null;
+	const hasReacted = post.reactions?.some(r => r.username === username);
 	const reactionsCount = post.reactions?.length || 0;
 
 	const isAuthor = 

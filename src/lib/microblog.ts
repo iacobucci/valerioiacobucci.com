@@ -83,15 +83,17 @@ export async function toggleMicroblogReaction(postId: number, userId: string, us
   const reactionRepository = AppDataSource.getRepository(MicroblogReaction);
   const postRepository = AppDataSource.getRepository(MicroblogPost);
 
-  const existingReaction = await reactionRepository.findOne({
+  // Find existing reactions by username on this post
+  const existingReactions = await reactionRepository.find({
     where: {
       post: { id: postId },
-      userId: userId
+      username: username
     }
   });
 
-  if (existingReaction) {
-    await reactionRepository.remove(existingReaction);
+  if (existingReactions.length > 0) {
+    // Remove all existing reactions from this username to clean up duplicates if any
+    await reactionRepository.remove(existingReactions);
   } else {
     const post = await postRepository.findOneBy({ id: postId });
     if (!post) throw new Error('Post not found');
