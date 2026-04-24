@@ -23,7 +23,7 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
       href: 'https://github.com/iacobucci',
       icon: FaGithub,
       label: 'GitHub',
-      color: 'hover:text-[#24292e] dark:hover:text-white'
+      color: 'hover:text-[#8E00F7] dark:hover:text-[#8B46A8]'
     },
     {
       href: 'https://youtube.com/@valerioiacobucci',
@@ -35,7 +35,7 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
       href: 'mailto:valerio@valerioiacobucci.com',
       icon: MdEmail,
       label: 'Email',
-      color: 'hover:text-accent-light dark:hover:text-accent-dark'
+      color: 'hover:text-[#FEC006] dark:hover:text-[#FECD38]'
     },
     {
       href: `/${locale}/feed.xml`,
@@ -90,15 +90,6 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
             {t.intro}
           </motion.h2>
           <div className="pt-4 space-y-6 w-full flex flex-col items-center lg:items-start">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-xl sm:text-2xl text-gray-500 dark:text-gray-400 max-w-lg leading-relaxed font-medium"
-            >
-              {t.connect}
-            </motion.p>
-
             {/* Social Links */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}

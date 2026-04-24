@@ -135,7 +135,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 						
 						{!isEditing && (
 							<div 
-								className={`relative transition-opacity duration-200 ${isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} 
+								className={`relative'}`} 
 								ref={menuRef}
 							>
 								<button 

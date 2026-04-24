@@ -90,6 +90,20 @@ export const projects: Project[] = [
 		tech: ['GNU']
 	},
 	{
+		slug: 'iot-server',
+		title: 'Iot Server',
+		description: 'A simple iot server for my nas, built with FastAPI.',
+		github_repo: 'iacobucci/iot-server',
+		tech: ['Iot']
+	},
+	{
+		slug: 'launchpad-daemon',
+		title: 'Launchpad Daemon',
+		description: 'A low impact linux daemon for using a Novation Launchpad to launch scripts',
+		github_repo: 'iacobucci/launchpad-daemon',
+		tech: ['Midi']
+	},
+	{
 		slug: 'vscode-adwaita',
 		title: 'Vscode adwaita theme',
 		description: 'VS Code theme for the GNOME desktop updated for GNOME-48+\'s new #222226 based theme',
