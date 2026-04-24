@@ -286,7 +286,7 @@ export function Terminal() {
         })}
         <div className="flex items-center group relative min-h-[1.5rem]">
           <span className="mr-2 text-white/30 font-bold shrink-0">
-            {runningProgram ? programs[runningProgram].prompt : `${username}@valerioiacobucci:~$`}
+            {runningProgram ? programs[runningProgram].prompt : `${username}@term:~$`}
           </span>
           <div className="relative flex-1 flex items-center overflow-hidden">
             <input
