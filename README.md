@@ -1,5 +1,7 @@
 # valerioiacobucci.com
 
+I'm using the process of building my website as field practice to develop with agentic AI. So far it is going very smoothly.
+
 This document provides guidance for humans and AI agents with the `valerioiacobucci.com` codebase.
 
 The file `notes.txt` is also important for monitoring the state of the project, though it is written in the form of a TODO list with boxes to check on completion, and has a tree structure for problem decomposition. It should ALWAYS be checked first for open issues.

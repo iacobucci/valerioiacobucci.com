@@ -46,6 +46,14 @@ export const projects: Project[] = [
 		selected: true
 	},
 	{
+		slug: "cfn-nuxt-typeorm-lambda-aurora",
+		title: "Cloudformation Nuxt on Lambda",
+		description: "Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora behind a Proxy for connection pooling.",
+		github_repo: "iacobucci/cfn-nuxt-typeorm-lambda-aurora",
+		tech: ["Vue", "AWS", "CI/CD", "Serverless"],
+		selected: true
+	},
+	{
 		slug: 'call-of-duty-flappy-bird-2k25',
 		title: 'Call of duty - flappy bird 2k25',
 		description: 'Unethical flappy bird with realistic graphics...',
@@ -54,11 +62,32 @@ export const projects: Project[] = [
 		tech: ['Typescript', 'Videogames'],
 	},
 	{
+		slug: "cfn-nuxt-typeorm-ecs-rds",
+		title: "Cloudformation Nuxt on Ecs",
+		description: "Boilerplate for a Github Actions workflow that builds the apps image, pushes it on an ECR, creates a Cloudformation stack comprising of AWS ECS tasks for server side rendering a Nuxt app that connects via TypeORM to an RDS instance.",
+		github_repo: "iacobucci/cfn-nuxt-typeorm-ecs-rds",
+		tech: ["Vue", "AWS", "CI/CD", "Load balancing"],
+	},
+	{
 		slug: 'digit-recognizer',
 		title: 'Digit Recognizer',
 		description: 'Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits',
 		github_repo: 'iacobucci/digit-recognizer',
 		tech: ['Machine Learning', 'Neural Networks']
+	},
+	{
+		slug: 'bstow',
+		title: 'Bstow',
+		description: 'A better (for some usecases) GNU Stow',
+		github_repo: 'iacobucci/bstow',
+		tech: ['GNU']
+	},
+	{
+		slug: 'rstow',
+		title: 'Rstow',
+		description: 'A quicker rewrite of bstow',
+		github_repo: 'iacobucci/rstow',
+		tech: ['GNU']
 	},
 	{
 		slug: 'sviluppo-web-in-js',
@@ -81,13 +110,6 @@ export const projects: Project[] = [
 		github_repo: "iacobucci/split-our-bills-bot",
 		tech: ['Python', 'Telegram']
 	},
-	{
-		slug: "cfn-nuxt-typeorm-lambda-aurora",
-		title: "Cloudformation Nuxt on Lambda",
-		description: " Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora behind a Proxy for connection pooling.",
-		github_repo: "iacobucci/cfn-nuxt-typeorm-lambda-aurora",
-		tech: ["Vue", "AWS", "CI/CD", "Serverless"]
-	}
 ];
 
 // In-memory cache for GitHub data

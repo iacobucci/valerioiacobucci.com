@@ -27,7 +27,6 @@ features
 	[x] postgres
 		[x] typeorm
 		[x] github login for posting and adding reactions
-	[ ] migrate content on other repo
 
 components
 	[x] navbar
@@ -41,14 +40,16 @@ components
 	[x] toast
 		[x] github login button in toast
 
-terminal
+[x] fake terminal
 	[x] lispv interpreter
 	[ ] minigames
 
-content
-	[x] microblog
-	[x] blog
-		[x] 3d visualizations
-	[x] projects
-		[ ] README.md
-		[ ] apps
+[x] blog
+	[x] 3d visualizations
+	[ ] migrate content on other repo
+
+[x] microblog
+
+[x] projects
+	[ ] README.md fetched from github
+	[ ] apps
