@@ -58,13 +58,13 @@ export async function toggleReactionAction(postId: number) {
     throw new Error("You must be logged in to vote");
   }
 
-  const user = session.user as { id?: string; sub?: string; username?: string; name?: string | null; image?: string | null };
-  const userId = user.id || user.sub;
-  const username = user.username || user.name || "Unknown";
+  const user = session.user as { id?: string; username?: string; name?: string | null; image?: string | null };
+  const userId = user.id;
+  const username = user.username || user.name;
   const userImage = user.image || undefined;
 
-  if (!userId) {
-    throw new Error("User ID not found in session");
+  if (!userId || !username) {
+    throw new Error("User information not found in session");
   }
 
   await toggleMicroblogReaction(postId, userId, username, userImage);

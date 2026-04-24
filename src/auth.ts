@@ -28,8 +28,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token?.username) {
         (session.user as any).username = token.username;
       }
+      if (token?.id) {
+        (session.user as any).id = token.id;
+      }
       if (token?.sub) {
-        (session.user as any).id = token.sub;
+        (session.user as any).uuid = token.sub;
       }
       return session;
     },
