@@ -46,10 +46,10 @@ components
 
 [x] blog
 	[x] 3d visualizations
-	[ ] migrate content on other repo
+	[x] migrate content on other repo
 
 [x] microblog
 
 [x] projects
-	[ ] README.md fetched from github
-	[ ] apps
+	[x] README.md fetched from github
+	[x] apps
