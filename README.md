@@ -10,6 +10,24 @@ The file `notes.txt` is also important for monitoring the state of the project, 
 
 This is the source code for the personal website of Valerio Iacobucci, available at valerioiacobucci.com. It showcases projects, articles, and professional information.
 
+## Features
+
+- Multilingual interface.
+- Multilingual blog, with fallback to English.
+- Microblog that gets its feed from a db, supporting images and reactions from users, showing the profile pictures of users that reacted. Only the owner of the site can post on this, and from the dedicated section.
+- User login with GitHub's OAuth.
+- RSS feed.
+- Projects page that regularly gets its updates from GitHub, shows stars and details and lets the user read project' READMEs directly fetching them from their client, and resolves images correctly and renders Mermaid diagrams.
+- Search bar for pages, blog posts and projects.
+- Fake interactive terminal, where REPL programs can be loaded.
+
+## Requirements
+
+- Extreme speed, leveraging server-side rendering, aggressive caching and React Supsense components.
+- Hot module replacement on development mode.
+- Lightweight build for low end hardware.
+- Separate repos for code and content.
+
 ## Tech Stack
 
 The project is built with the following technologies:
