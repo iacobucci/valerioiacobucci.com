@@ -90,6 +90,13 @@ export const projects: Project[] = [
 		tech: ['GNU']
 	},
 	{
+		slug: 'vscode-adwaita',
+		title: 'Vscode adwaita theme',
+		description: 'VS Code theme for the GNOME desktop updated for GNOME-48+\'s new #222226 based theme',
+		github_repo: 'iacobucci/vscode-adwaita',
+		tech: ['Css', 'Themes']
+	},
+	{
 		slug: 'sviluppo-web-in-js',
 		title: 'Sviluppo Web in JS',
 		description: 'Educational resources for web development in JavaScript.',
