@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getPosts } from '@/lib/content';
+import { projects } from '@/lib/projects';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
   const blogPosts = await getPosts('blog', locale, true);
 
-  // Load translations for static pages
+  // Load translations for static pages and projects
   let messages;
   try {
     messages = (await import(`../../../../messages/${locale}.json`)).default;
@@ -15,6 +16,7 @@ export async function GET(request: Request) {
   }
 
   const nav = messages.nav || {};
+  const projectList = messages.projects?.list || {};
 
   const results = [
     ...blogPosts.map(p => ({
@@ -24,6 +26,13 @@ export async function GET(request: Request) {
       description: p.description,
       draft: p.draft,
       isFavorite: p.selected
+    })),
+    ...projects.map(p => ({
+      title: projectList[p.slug]?.title || p.slug,
+      type: 'project',
+      href: `/projects#${p.slug}`,
+      description: projectList[p.slug]?.description || '',
+      isFavorite: false
     })),
     // Localized Static pages
     { title: nav.home || 'Home', type: 'page', href: '/' },

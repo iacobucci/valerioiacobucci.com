@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { MdSearch, MdClose } from 'react-icons/md';
-import { Search as SearchIcon, FileText, Star, Layout, Command } from 'lucide-react';
+import { Search as SearchIcon, FileText, Star, Layout, Command, Code } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
 
 interface SearchResult {
 	title: string;
-	type: 'blog' | 'page';
+	type: 'blog' | 'page' | 'project';
 	href: string;
 	description?: string;
 	draft?: boolean;
@@ -67,9 +67,6 @@ export default function Search() {
 		if (isOpen) {
 			const timer = setTimeout(() => inputRef.current?.focus(), 100);
 			return () => clearTimeout(timer);
-		} else {
-			// Clear query when closing, but do it in a way that doesn't trigger cascade during render
-			// Actually, it's better to just use a local state or clear it when opening
 		}
 	}, [isOpen]);
 
@@ -100,8 +97,16 @@ export default function Search() {
 	const getIcon = (type: string) => {
 		switch (type) {
 			case 'blog': return <FileText className="w-4 h-4" />;
-			case 'favorites': return <Star className="w-4 h-4" />;
+			case 'project': return <Code className="w-4 h-4" />;
 			default: return <Layout className="w-4 h-4" />;
+		}
+	};
+
+	const getTypeStyles = (type: string) => {
+		switch (type) {
+			case 'blog': return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+			case 'project': return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+			default: return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400';
 		}
 	};
 
@@ -166,13 +171,11 @@ export default function Search() {
 												onClick={() => handleSelect(result)}
 												onMouseEnter={() => setSelectedIndex(index)}
 												className={`w-full text-left p-3 rounded-2xl flex items-center gap-4 transition-all ${index === selectedIndex
-														? 'bg-gray-100 dark:bg-gray-800'
-														: 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+													? 'bg-gray-100 dark:bg-gray-800'
+													: 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
 													}`}
 											>
-												<div className={`w-10 h-10 rounded-xl flex items-center justify-center ${result.type === 'blog' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-														'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
-													}`}>
+												<div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getTypeStyles(result.type)}`}>
 													{getIcon(result.type)}
 												</div>
 												<div className="flex-1 min-w-0">
@@ -205,7 +208,7 @@ export default function Search() {
 									</div>
 								) : (
 									<div className="p-8 text-center text-gray-400 space-y-2">
-										<p className="text-sm font-medium">Type to search blog posts, favorites, and pages.</p>
+										<p className="text-sm font-medium">Type to search blog posts, projects, and pages.</p>
 										<div className="flex justify-center gap-4 text-[10px] font-bold uppercase tracking-tighter">
 											<span className="flex items-center gap-1"><Command size={10} /> K to search</span>
 											<span className="flex items-center gap-1">↑↓ to navigate</span>

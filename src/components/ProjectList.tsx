@@ -25,6 +25,23 @@ export default function ProjectList({ projects }: ProjectListProps) {
     setIsModalOpen(true);
   };
 
+  // Handle hash in URL for selection
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash) {
+        const index = projects.findIndex(p => p.slug === hash);
+        if (index !== -1) {
+          setFocusedIndex(index);
+        }
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [projects]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
