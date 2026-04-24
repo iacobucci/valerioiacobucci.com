@@ -94,18 +94,18 @@ export function Terminal() {
   }, [runningProgram]);
 
   React.useEffect(() => {
-    const input = inputRef.current;
-    if (!input) return;
+    const inputEl = inputRef.current;
+    if (!inputEl) return;
 
     const onFocus = () => setIsFocused(true);
     const onBlur = () => setIsFocused(false);
 
-    input.addEventListener('focus', onFocus);
-    input.addEventListener('blur', onBlur);
+    inputEl.addEventListener('focus', onFocus);
+    inputEl.addEventListener('blur', onBlur);
 
     return () => {
-      input.removeEventListener('focus', onFocus);
-      input.removeEventListener('blur', onBlur);
+      inputEl.removeEventListener('focus', onFocus);
+      inputEl.removeEventListener('blur', onBlur);
     };
   }, []);
 
@@ -221,8 +221,8 @@ export function Terminal() {
 
   const handleHistoryNavigation = (e: React.KeyboardEvent) => {
     const context = runningProgram || 'shell';
-    const history = histories[context] || [];
-    const index = historyIndices[context] ?? -1;
+    const history = currentHistory;
+    const index = currentHistoryIndex;
 
     if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -302,23 +302,25 @@ export function Terminal() {
                 handleHistoryNavigation(e);
                 handleAutocomplete(e);
               }}
-              className="absolute inset-0 bg-transparent border-none outline-none text-emerald-400 focus:ring-0 p-0 selection:bg-emerald-500/30 caret-transparent w-full z-10"
+              className={`bg-transparent border-none outline-none text-emerald-400 focus:ring-0 p-0 selection:bg-emerald-500/30 w-full z-10 ${!isFocused ? 'text-transparent' : ''}`}
               spellCheck="false"
               autoComplete="off"
             />
-            <div className="flex items-center whitespace-pre pointer-events-none">
-              <span className="text-emerald-400">{input}</span>
-              <motion.div
-                animate={{ opacity: [1, 1, 0, 0] }}
-                transition={{ 
-                  duration: 0.8, 
-                  repeat: Infinity, 
-                  times: [0, 0.5, 0.5, 1],
-                  ease: "linear"
-                }}
-                className="w-2 h-4 bg-emerald-400 ml-0.5"
-              />
-            </div>
+            {!isFocused && (
+              <div className="absolute inset-0 flex items-center whitespace-pre pointer-events-none">
+                <span className="text-emerald-400">{input}</span>
+                <motion.div
+                  animate={{ opacity: [1, 1, 0, 0] }}
+                  transition={{ 
+                    duration: 0.8, 
+                    repeat: Infinity, 
+                    times: [0, 0.5, 0.5, 1],
+                    ease: "linear"
+                  }}
+                  className="w-2 h-4 bg-emerald-400 shrink-0 ml-0.5"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
