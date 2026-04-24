@@ -37,7 +37,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       onKeyDown={handleKeyDown}
       className={`group bg-white dark:bg-gray-900 rounded-2xl border ${
         project.selected 
-          ? 'border-blue-100 dark:border-blue-900/30 bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10' 
+          ? 'border-gray-300 dark:border-gray-700 bg-blue-50/20 dark:bg-blue-900/5' 
           : 'border-gray-100 dark:border-gray-800'
       } p-6 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 flex flex-col h-full text-left w-full cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
     >
