@@ -5,9 +5,13 @@ UPDATE_SERVICE=update-valerioiacobucci.com.service
 function --publish {
 	echo "Step 1/3: Pushing 'content' submodule..."
 	git -C content push
+	git -C content add -A
+	git -C content commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
+
 
 	echo "Step 2/3: Pushing main repository..."
-	git add -A && git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
+	git add -A
+	git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
 	git push
 
 	echo "Step 3/3: Triggering remote update on VPS..."
