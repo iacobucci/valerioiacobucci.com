@@ -7,6 +7,7 @@ function --publish {
 	git -C content push
 
 	echo "Step 2/3: Pushing main repository..."
+	git add -A && git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
 	git push
 
 	echo "Step 3/3: Triggering remote update on VPS..."
