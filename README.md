@@ -87,9 +87,9 @@ The node process exposes a server at TCP port 8080, but the access to valerioiac
    }
 ```
 
-### Secrets
+## Content
 
-The `secrets` git submodule has two branches: production and development, used respectively. It contains a `.env` file that is symlinked to the main repository.
+The content git submodule is used to store blog posts and additional details modifiable by the website editors.
 
 ## Getting Started
 
@@ -106,9 +106,3 @@ To run the project locally, follow these steps:
     pnpm run dev
     ```
     The application will be available at `http://localhost:8080`.
-
-## 5. Coding Conventions
-
-- **TypeScript First**: All new code should be written in TypeScript with strict types.
-- **ESLint**: Adhere to the ESLint rules configured in the project. Run the linter to check your changes.
-- **Follow Existing Patterns**: When adding new features, please observe and replicate the coding style and architectural patterns found in the existing codebase.
