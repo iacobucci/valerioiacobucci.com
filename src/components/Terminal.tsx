@@ -309,8 +309,13 @@ export function Terminal() {
             <div className="flex items-center whitespace-pre pointer-events-none">
               <span className="text-emerald-400">{input}</span>
               <motion.div
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: "steps(2)" }}
+                animate={{ opacity: [1, 1, 0, 0] }}
+                transition={{ 
+                  duration: 0.8, 
+                  repeat: Infinity, 
+                  times: [0, 0.5, 0.5, 1],
+                  ease: "linear"
+                }}
                 className="w-2 h-4 bg-emerald-400 ml-0.5"
               />
             </div>
