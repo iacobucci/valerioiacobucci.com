@@ -60,33 +60,7 @@
 		"updated": "Updated {date}",
 		"github": "GitHub",
 		"website": "Website",
-		"visit_website": "Visit Page",
-		"list": {
-			"valerioiacobucci-com": {
-				"title": "valerioiacobucci.com",
-				"description": "My personal portfolio and blog built with Next.js."
-			},
-			"spl": {
-				"title": "Spl",
-				"description": "A simple parser library in C."
-			},
-			"lispv": {
-				"title": "Lispv",
-				"description": "A didactic lisp-like language that compiles to rv32i assembly."
-			},
-			"digit-recognizer": {
-				"title": "Digit Recognizer",
-				"description": "Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits"
-			},
-			"sviluppo-web-in-js": {
-				"title": "Sviluppo Web in JS",
-				"description": "Educational resources for web development in JavaScript."
-			},
-			"call-of-duty-flappy-bird-2k25": {
-				"title": "Call of duty - flappy bird 2k25",
-				"description": "Unethical flappy bird with realistic graphics..."
-			}
-		}
+		"visit_website": "Visit Page"
 	},
 	"footer": {
 		"version": "version",

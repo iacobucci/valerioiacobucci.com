@@ -1,12 +1,6 @@
-export interface Project {
-	slug: string;
-	title: string;
-	description: string;
-	github_repo: string; // e.g., 'iacobucci/spl'
-	website_url?: string;
-	tech: string[];
-	selected?: boolean;
-}
+import { projects as projectsData, Project } from '../../content/projects';
+
+export type { Project };
 
 export interface ProjectGitHubData extends Project {
 	stars: number;
@@ -18,148 +12,12 @@ export interface ProjectGitHubData extends Project {
 	error?: string;
 }
 
-export const projects: Project[] = [
-	{
-		slug: 'valerioiacobucci-com',
-		title: 'valerioiacobucci.com',
-		description: 'My personal portfolio and blog built with Next.js.',
-		github_repo: 'iacobucci/valerioiacobucci.com',
-		tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Postgresql'],
-		selected: true
-	},
-	{
-		slug: 'spl',
-		title: 'Spl',
-		description: 'A simple parser library in C.',
-		github_repo: 'iacobucci/spl',
-		tech: ['C', 'Parsing'],
-		selected: true
-	},
-	{
-		slug: 'lispv',
-		title: 'Lispv',
-		description: 'A didactic lisp-like language that compiles to rv32i assembly.',
-		website_url: 'https://valerioiacobucci.com/apps/lispv',
-		github_repo: 'iacobucci/lispv',
-		tech: ['Lisp', 'Compiler', "RISC-V"],
-		selected: true
-	},
-	{
-		slug: "cfn-nuxt-typeorm-lambda-aurora",
-		title: "Cloudformation Nuxt on Lambda",
-		description: "Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora instance behind a Proxy for connection pooling.",
-		github_repo: "iacobucci/cfn-nuxt-typeorm-lambda-aurora",
-		tech: ["Vue", "AWS", "CI/CD", "Serverless"],
-		selected: true
-	},
-	{
-		slug: 'call-of-duty-flappy-bird-2k25',
-		title: 'Call of duty - flappy bird 2k25',
-		description: 'Unethical flappy bird with realistic graphics...',
-		website_url: 'https://valerioiacobucci.com/apps/flappy/index.html',
-		github_repo: 'iacobucci/call-of-duty-flappy-bird-2k25',
-		tech: ['Typescript', 'Videogames'],
-	},
-	{
-		slug: "cfn-nuxt-typeorm-ecs-rds",
-		title: "Cloudformation Nuxt on Ecs",
-		description: "Boilerplate for a Github Actions workflow that builds the apps image, pushes it on an ECR, creates a Cloudformation stack comprising of AWS ECS tasks for server side rendering a Nuxt app that connects via TypeORM to an RDS instance.",
-		github_repo: "iacobucci/cfn-nuxt-typeorm-ecs-rds",
-		tech: ["Vue", "AWS", "CI/CD", "Load balancing"],
-	},
-	{
-		slug: 'digit-recognizer',
-		title: 'Digit Recognizer',
-		description: 'Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits',
-		github_repo: 'iacobucci/digit-recognizer',
-		tech: ['Machine Learning']
-	},
-	{
-		slug: 'bstow',
-		title: 'Bstow',
-		description: 'A better (for some usecases) GNU Stow',
-		github_repo: 'iacobucci/bstow',
-		tech: ['GNU']
-	},
-	{
-		slug: 'rstow',
-		title: 'Rstow',
-		description: 'A quicker rewrite of bstow',
-		github_repo: 'iacobucci/rstow',
-		tech: ['GNU']
-	},
-	{
-		slug: "split-our-bills-bot",
-		title: 'Split our bills bot',
-		description: 'A Telegram bot to split the bills!',
-		github_repo: "iacobucci/split-our-bills-bot",
-		tech: ['Python', 'Telegram']
-	},
-	{
-		slug: "run-or-raise",
-		title: 'Run or raise',
-		description: 'A Firefox extension. When opening an url, if it is already opened, raise the old tab. Else open a new one. You can set a list of websites that will follow this behaviour. This all works best when launching shortcuts.',
-		github_repo: "iacobucci/run-or-raise",
-		website_url: "https://addons.mozilla.org/en-US/firefox/addon/run-or-raise/",
-		tech: ['Firefox', "Extension"]
-	},
-	{
-		slug: 'iot-server',
-		title: 'Iot Server',
-		description: 'A simple iot server for my nas, built with FastAPI.',
-		github_repo: 'iacobucci/iot-server',
-		tech: ['IoT']
-	},
-	{
-		slug: 'launchpad-daemon',
-		title: 'Launchpad Daemon',
-		description: 'A low impact linux daemon for using a Novation Launchpad to launch scripts',
-		github_repo: 'iacobucci/launchpad-daemon',
-		tech: ['Midi', 'IoT']
-	},
-	{
-		slug: 'vscode-adwaita',
-		title: 'Vscode adwaita theme',
-		description: 'VS Code theme for the GNOME desktop updated for GNOME-48+\'s new #222226 based theme',
-		github_repo: 'iacobucci/vscode-adwaita',
-		tech: ['Css', 'Themes']
-	},
-	{
-		slug: 'sviluppo-web-in-js',
-		title: 'Sviluppo Web in JS',
-		description: 'Educational resources for web development in JavaScript.',
-		github_repo: 'iacobucci/sviluppo-web-in-js',
-		tech: ['JavaScript', 'Education']
-	},
-	{
-		slug: "mermarpidsome",
-		title: 'Mermarpidsome',
-		description: 'Mermaid integration with Marp, with Fontawesome icons!',
-		github_repo: "iacobucci/mermarpidsome",
-		tech: ['JavaScript', 'Markdown']
-	},
-	{
-		slug: "blender-open-containing-directory-addon",
-		title: 'Blender addon to open project directory',
-		description: 'Opens the directory of your current .blend file.',
-		github_repo: "iacobucci/blender-open-containing-directory-addon",
-		tech: ['Blender', "Extension"]
-	},
-	{
-		slug: "pwdshort",
-		title: "Pwdshort",
-		description: "Shortens your pwd, tries to do it faster than a shell script with sed, cut and pipes :)",
-		github_repo: "iacobucci/pwdshort",
-		tech: ["Zsh"]
-	},
-	{
-		slug: "automaton",
-		title: "Automaton",
-		description: 'Elementary cellular automaton generator in python',
-		github_repo: "iacobucci/automaton",
-		tech: ['Automata']
-	}
-];
+/**
+ * Loads projects from YAML file.
+ */
+export function getProjects(): Project[] {
+	return projectsData;
+}
 
 // In-memory cache for GitHub data
 let projectsCache: Record<string, Partial<ProjectGitHubData>> = {};
@@ -207,48 +65,63 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
  */
 export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHubData>> {
 	if (projectsCache[repo]) {
-		return projectsCache[repo];
+		const isExpired = Date.now() - lastFetchTime > CACHE_TTL;
+		if (!isExpired) {
+			return projectsCache[repo];
+		}
 	}
 
 	const data = await fetchGitHubData(repo);
 	projectsCache[repo] = data;
+	lastFetchTime = Date.now();
 	return data;
 }
 
 /**
- * Returns all projects with their cached GitHub data.
+ * Gets all projects with their GitHub data.
  */
-export async function getAllProjectsWithData(): Promise<ProjectGitHubData[]> {
-	const now = Date.now();
+export async function getProjectsWithGitHubData(): Promise<ProjectGitHubData[]> {
+	const projects = getProjects();
+	const projectsWithData = await Promise.all(
+		projects.map(async (project) => {
+			const githubData = await getGitHubData(project.github_repo);
+			return {
+				...project,
+				...githubData,
+				// Ensure required fields from ProjectGitHubData are present
+				stars: githubData.stars ?? 0,
+				forks: githubData.forks ?? 0,
+				commits: githubData.commits ?? 0,
+				last_commit: githubData.last_commit ?? '',
+				github_url: githubData.github_url ?? `https://github.com/${project.github_repo}`
+			} as ProjectGitHubData;
+		})
+	);
 
-	if (now - lastFetchTime > CACHE_TTL) {
-		refreshProjectsCache().catch(console.error);
-	}
-
-	return Promise.all(projects.map(async (project) => {
-		const githubData = await getGitHubData(project.github_repo);
-		return {
-			...project,
-			stars: githubData.stars || 0,
-			forks: githubData.forks || 0,
-			github_url: githubData.github_url || `https://github.com/${project.github_repo}`,
-			language: githubData.language,
-			last_commit: githubData.last_commit || '',
-			commits: 0,
-			error: githubData.error
-		} as ProjectGitHubData;
-	}));
+	return projectsWithData;
 }
 
-async function refreshProjectsCache() {
-	console.log("Refreshing projects GitHub cache...");
-	const newData: Record<string, Partial<ProjectGitHubData>> = {};
+/**
+ * Gets selected projects with their GitHub data.
+ */
+export async function getSelectedProjects(): Promise<ProjectGitHubData[]> {
+	const projects = getProjects();
+	const selectedProjects = projects.filter(p => p.selected);
+	
+	const projectsWithData = await Promise.all(
+		selectedProjects.map(async (project) => {
+			const githubData = await getGitHubData(project.github_repo);
+			return {
+				...project,
+				...githubData,
+				stars: githubData.stars ?? 0,
+				forks: githubData.forks ?? 0,
+				commits: githubData.commits ?? 0,
+				last_commit: githubData.last_commit ?? '',
+				github_url: githubData.github_url ?? `https://github.com/${project.github_repo}`
+			} as ProjectGitHubData;
+		})
+	);
 
-	for (const project of projects) {
-		newData[project.github_repo] = await fetchGitHubData(project.github_repo);
-	}
-
-	projectsCache = newData;
-	lastFetchTime = Date.now();
-	console.log("Projects GitHub cache refreshed.");
+	return projectsWithData;
 }
