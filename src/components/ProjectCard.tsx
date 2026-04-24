@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch } from 'react-icons/fa';
+import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch, FaRegGem } from 'react-icons/fa';
 import { ProjectGitHubData } from '@/lib/projects';
 import { getLanguageColor } from '@/lib/colors';
 import { useTranslations } from 'next-intl';
@@ -35,12 +35,24 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 hover:shadow-xl hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 flex flex-col h-full text-left w-full cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className={`group bg-white dark:bg-gray-900 rounded-2xl border ${
+        project.selected 
+          ? 'border-blue-100 dark:border-blue-900/30 bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10' 
+          : 'border-gray-100 dark:border-gray-800'
+      } p-6 hover:shadow-xl hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 flex flex-col h-full text-left w-full cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-blue-500`}
     >
       <div className="flex justify-between items-start mb-4 w-full">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-          {title}
-        </h3>
+        <div className="flex flex-col gap-1">
+          {project.selected && (
+            <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">
+              <FaRegGem size={10} />
+              {t('featured_badge') || 'Featured'}
+            </span>
+          )}
+          <h3 className={`text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors ${project.selected ? 'text-blue-950 dark:text-blue-50' : ''}`}>
+            {title}
+          </h3>
+        </div>
         <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
           <a
             href={project.github_url}

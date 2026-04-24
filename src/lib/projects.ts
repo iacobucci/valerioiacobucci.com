@@ -5,6 +5,7 @@ export interface Project {
 	github_repo: string; // e.g., 'iacobucci/spl'
 	website_url?: string;
 	tech: string[];
+	selected?: boolean;
 }
 
 export interface ProjectGitHubData extends Project {
@@ -24,7 +25,16 @@ export const projects: Project[] = [
 		description: 'My personal portfolio and blog built with Next.js.',
 		github_repo: 'iacobucci/valerioiacobucci.com',
 		website_url: 'https://valerioiacobucci.com',
-		tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Postgresql']
+		tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Postgresql'],
+		selected: true
+	},
+	{
+		slug: 'spl',
+		title: 'Spl',
+		description: 'A simple parser library in C.',
+		github_repo: 'iacobucci/spl',
+		tech: ['C', 'Parsing'],
+		selected: true
 	},
 	{
 		slug: 'lispv',
@@ -32,7 +42,8 @@ export const projects: Project[] = [
 		description: 'A didactic lisp-like language that compiles to rv32i assembly.',
 		website_url: 'https://valerioiacobucci.com/apps/lispv',
 		github_repo: 'iacobucci/lispv',
-		tech: ['Lisp', 'Compiler', "RISC-V"]
+		tech: ['Lisp', 'Compiler', "RISC-V"],
+		selected: true
 	},
 	{
 		slug: 'call-of-duty-flappy-bird-2k25',
@@ -40,14 +51,7 @@ export const projects: Project[] = [
 		description: 'Unethical flappy bird with realistic graphics...',
 		website_url: 'https://valerioiacobucci.com/apps/flappy/index.html',
 		github_repo: 'iacobucci/call-of-duty-flappy-bird-2k25',
-		tech: ['Typescript', 'Videogames']
-	},
-	{
-		slug: 'spl',
-		title: 'Spl',
-		description: 'A simple parser library in C.',
-		github_repo: 'iacobucci/spl',
-		tech: ['C', 'Parsing']
+		tech: ['Typescript', 'Videogames'],
 	},
 	{
 		slug: 'digit-recognizer',
