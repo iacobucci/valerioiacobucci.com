@@ -24,7 +24,7 @@ function --job {
 	cd /home/valerio/source/web/valerioiacobucci.com
 	git pull
 
-	git submodule update --remote --recursive
+	git submodule update --init --recursive --remote
 
 	pnpm install
 	pnpm run build
