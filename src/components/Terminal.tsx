@@ -14,7 +14,7 @@ export function Terminal() {
   const [input, setInput] = React.useState('');
   const [username, setUsername] = React.useState('guest');
   const [runningProgram, setRunningProgram] = React.useState<string | null>(null);
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [isFocused, setIsFocused] = React.useState(false);
   
   const terminalBodyRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -22,27 +22,51 @@ export function Terminal() {
   const commandList = ['help', 'about', 'blog', 'projects', 'microblog', 'whoami', 'clear', 'lispv'];
 
   React.useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < window.innerHeight);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Handle Ctrl+C
       if (e.ctrlKey && e.key === 'c') {
         if (runningProgram) {
           setHistory(prev => [...prev, '^C', `Terminated ${runningProgram}`]);
           setRunningProgram(null);
           setInput('');
         }
+        return;
+      }
+
+      // Focus terminal on alphanumeric/symbol key press if no other input is focused
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key.length === 1 && e.key !== ' ' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        inputRef.current?.focus({ preventScroll: true });
+        setInput(prev => prev + e.key);
+        e.preventDefault();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [runningProgram]);
+
+  React.useEffect(() => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    const onFocus = () => setIsFocused(true);
+    const onBlur = () => setIsFocused(false);
+
+    input.addEventListener('focus', onFocus);
+    input.addEventListener('blur', onBlur);
+
+    return () => {
+      input.removeEventListener('focus', onFocus);
+      input.removeEventListener('blur', onBlur);
+    };
+  }, []);
 
   React.useEffect(() => {
     const fetchWhoami = async () => {
@@ -161,7 +185,7 @@ export function Terminal() {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="bg-gray-950 rounded-2xl shadow-2xl overflow-hidden font-mono text-sm text-emerald-400 border border-white/10 ring-1 ring-white/5"
-      onClick={() => !isMobile && inputRef.current?.focus()}
+      onClick={() => inputRef.current?.focus({ preventScroll: true })}
     >
       <div className="bg-white/5 backdrop-blur-md px-4 py-3 flex items-center justify-between border-b border-white/10">
         <div className="flex space-x-2">
@@ -183,23 +207,36 @@ export function Terminal() {
             </div>
           );
         })}
-        <div className="flex items-center group">
-          <span className="mr-2 text-white/30 font-bold">
-            {runningProgram ? `${runningProgram}>` : `${username}@valerioiacobucci:~$`}
+        <div className="flex items-center group relative min-h-[1.5rem]">
+          <span className="mr-2 text-white/30 font-bold shrink-0">
+            {runningProgram ? `${runningProgram}>` : `${username}@term:~$`}
           </span>
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCommand();
-              handleAutocomplete(e);
-            }}
-            className="bg-transparent border-none outline-none flex-1 text-emerald-400 focus:ring-0 p-0 selection:bg-emerald-500/30"
-            spellCheck="false"
-            autoComplete="off"
-            autoFocus={!isMobile}
-          />
+          <div className="relative flex-1 flex items-center overflow-hidden">
+            <input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCommand();
+                if (e.ctrlKey && e.key === 'l') {
+                  e.preventDefault();
+                  setHistory([]);
+                }
+                handleAutocomplete(e);
+              }}
+              className="absolute inset-0 bg-transparent border-none outline-none text-emerald-400 focus:ring-0 p-0 selection:bg-emerald-500/30 caret-transparent w-full z-10"
+              spellCheck="false"
+              autoComplete="off"
+            />
+            <div className="flex items-center whitespace-pre pointer-events-none">
+              <span className="text-emerald-400">{input}</span>
+              <motion.div
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: "steps(2)" }}
+                className="w-2 h-4 bg-emerald-400 ml-0.5"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </motion.div>
