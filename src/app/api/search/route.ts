@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getPosts } from '@/lib/content';
-import { projects } from '@/lib/projects';
+import { getProjects } from '@/lib/projects';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
-  const blogPosts = await getPosts('blog', locale, false);
+  const blogPosts = (await getPosts('blog', locale, false)).filter(p => !p.draft);
+  const projects = getProjects();
 
   // Load translations for static pages and projects
   let messages;
@@ -28,7 +29,7 @@ export async function GET(request: Request) {
       isFavorite: p.selected
     })),
     ...projects.map(p => {
-      const translationKey = p.github_repo.split('/').pop() || p.github_repo;
+      const translationKey = (p.github_repo.split('/').pop() || p.github_repo).replaceAll('.', '-');
       return {
         title: projectList[translationKey]?.title || p.title,
         type: 'project',

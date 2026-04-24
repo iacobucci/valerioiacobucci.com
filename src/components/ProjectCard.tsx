@@ -21,7 +21,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
 
   const hasStats = !project.error && (project.stars > 0 || project.forks > 0 || project.language);
   
-  const translationKey = project.github_repo.split('/').pop() || '';
+  const translationKey = (project.github_repo.split('/').pop() || '').replaceAll('.', '-');
 
   const title = t.has(`list.${translationKey}.title`) 
     ? t(`list.${translationKey}.title`) 

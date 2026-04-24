@@ -1,5 +1,5 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { projects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
+import { getProjects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
 import ProjectList from '@/components/ProjectList';
 import { Metadata } from 'next';
 
@@ -26,6 +26,7 @@ export default async function ProjectsPage({
   setRequestLocale(locale);
   const t = await getTranslations('projects');
 
+  const projects = getProjects();
   const projectsWithData = await Promise.all(
     projects.map(async (project) => {
       const githubData = await getGitHubData(project.github_repo);
