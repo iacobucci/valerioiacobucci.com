@@ -149,6 +149,12 @@ export function Terminal() {
         if (!args) {
           setRunningProgram('lispv');
           newHistory.push('Lispv REPL started. Press Ctrl+C to exit.');
+          newHistory.push('syntax: (<op> <args>)');
+          newHistory.push('        (defun <name> (args <params>) (<op> <args>))');
+          newHistory.push('ops:    +, -, if, greater, less, <user defined fun>');
+          newHistory.push('try:    (+ 1 2)');
+          newHistory.push('        (defun f (args x) (+ x 1))');
+          newHistory.push('        (f (f x))');
         } else {
           try {
             const interpreter = new Interpreter(args, false);
