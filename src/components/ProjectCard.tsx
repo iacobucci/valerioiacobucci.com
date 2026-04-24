@@ -53,31 +53,32 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             {title}
           </h3>
         </div>
-        <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+          {project.website_url && (
+            <a
+              href={project.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+              title={t('website')}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <FaExternalLinkAlt size={12} />
+              <span>{t('visit_website')}</span>
+            </a>
+          )}
           <a
             href={project.github_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors p-1"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
             title="GitHub"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
             <FaGithub size={20} />
           </a>
-          {project.website_url && (
-            <a
-              href={project.website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors p-1"
-              title="Website"
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => e.stopPropagation()}
-            >
-              <FaExternalLinkAlt size={18} />
-            </a>
-          )}
         </div>
       </div>
 
