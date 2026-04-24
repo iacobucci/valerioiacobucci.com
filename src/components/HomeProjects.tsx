@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { getAllProjectsWithData } from '@/lib/projects';
+import { getProjectsWithGitHubData } from '@/lib/projects';
 import ProjectCarousel from '@/components/ProjectCarousel';
 import { Link } from '@/i18n/routing';
 import { MdArrowForward, MdRocketLaunch } from 'react-icons/md';
@@ -7,7 +7,7 @@ import { MdArrowForward, MdRocketLaunch } from 'react-icons/md';
 export default async function HomeProjects({ locale }: { locale: string }) {
 	setRequestLocale(locale);
 	const tProjects = await getTranslations('projects');
-	const allProjectsData = await getAllProjectsWithData();
+	const allProjectsData = await getProjectsWithGitHubData();
 	const limitedProjects = allProjectsData.slice(0, 10);
 
 	return (
