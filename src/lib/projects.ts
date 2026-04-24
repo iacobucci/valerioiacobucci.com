@@ -24,7 +24,7 @@ export const projects: Project[] = [
 		description: 'My personal portfolio and blog built with Next.js.',
 		github_repo: 'iacobucci/valerioiacobucci.com',
 		website_url: 'https://valerioiacobucci.com',
-		tech: ['Nuxt', 'Vue', 'TypeScript', 'Tailwind CSS']
+		tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Postgresql']
 	},
 	{
 		slug: 'lispv',
@@ -54,7 +54,7 @@ export const projects: Project[] = [
 		title: 'Digit Recognizer',
 		description: 'Micrograd-based neural network that communicates via grpc with p5.js frontend for inputting handwritten digits',
 		github_repo: 'iacobucci/digit-recognizer',
-		tech: ['C++', 'Machine Learning', 'Neural Networks']
+		tech: ['Machine Learning', 'Neural Networks']
 	},
 	{
 		slug: 'sviluppo-web-in-js',
@@ -69,6 +69,20 @@ export const projects: Project[] = [
 		description: 'Mermaid integration with Marp, with Fontawesome icons!',
 		github_repo: "iacobucci/mermarpidsome",
 		tech: ['JavaScript', 'Markdown']
+	},
+	{
+		slug: "split-our-bills-bot",
+		title: 'Split our bills bot',
+		description: 'A Telegram bot to split the bills!',
+		github_repo: "iacobucci/split-our-bills-bot",
+		tech: ['Python', 'Telegram']
+	},
+	{
+		slug: "cfn-nuxt-typeorm-lambda-aurora",
+		title: "Cloudformation Nuxt on Lambda",
+		description: " Boilerplate for a Github Actions workflow that zips the app's build, pushes it to an S3 bucket, creates a Cloudformation stack comprising of an AWS Lambda for serverless side rendering a Nuxt app that connects via TypeORM to an Aurora behind a Proxy for connection pooling.",
+		github_repo: "iacobucci/cfn-nuxt-typeorm-lambda-aurora",
+		tech: ["Vue", "AWS", "CI/CD", "Serverless"]
 	}
 ];
 
