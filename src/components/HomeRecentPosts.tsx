@@ -3,7 +3,7 @@ import { getPosts } from '@/lib/content';
 import { FormattedDate } from '@/components/FormattedDate';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-import { MdArrowForward, MdHistory } from 'react-icons/md';
+import { MdArrowForward, MdHistory, MdLanguage } from 'react-icons/md';
 
 export default async function HomeRecentPosts({ locale }: { locale: string }) {
 	setRequestLocale(locale);
@@ -71,12 +71,20 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 								</div>
 							)}
 							<div className="p-6 flex flex-col flex-1">
-								<div className="flex gap-2 mb-3">
-									{post.tags?.slice(0, 2).map(tag => (
-										<span key={tag} className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-											#{tag}
+								<div className="flex flex-wrap items-center gap-2 mb-3">
+									<div className="flex gap-2">
+										{post.tags?.slice(0, 2).map(tag => (
+											<span key={tag} className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+												#{tag}
+											</span>
+										))}
+									</div>
+									{post.isFallback && (
+										<span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest">
+											<MdLanguage className="w-3 h-3" />
+											{post.language.toUpperCase()} ONLY
 										</span>
-									))}
+									)}
 								</div>
 								<h3 className="text-xl font-bold text-fg-light dark:text-fg-dark mb-2 group-hover:text-blue-600 transition-colors">
 									{post.title}

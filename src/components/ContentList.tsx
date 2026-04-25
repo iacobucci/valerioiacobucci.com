@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage } from 'react-icons/md';
+import { Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
@@ -20,7 +21,9 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
   const t = useTranslations('blog');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+  const [visibleCount, setVisibleCount] = useState(6);
   const listRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   // Extract all unique tags
   const allTags = useMemo(() => {
@@ -48,6 +51,37 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
     });
   }, [items, selectedTag]);
 
+  const visibleItems = useMemo(() => {
+    return filteredItems.slice(0, visibleCount);
+  }, [filteredItems, visibleCount]);
+
+  const hasMore = visibleCount < filteredItems.length;
+
+  // Intersection Observer for infinite scrolling
+  useEffect(() => {
+    if (!hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 6);
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    const currentLoader = loaderRef.current;
+    if (currentLoader) {
+      observer.observe(currentLoader);
+    }
+
+    return () => {
+      if (currentLoader) {
+        observer.unobserve(currentLoader);
+      }
+    };
+  }, [hasMore]);
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,12 +95,12 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
 
       if (e.key === 'j' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setFocusedIndex(prev => (prev < filteredItems.length - 1 ? prev + 1 : prev));
+        setFocusedIndex(prev => (prev < visibleItems.length - 1 ? prev + 1 : prev));
       } else if (e.key === 'k' || e.key === 'ArrowUp') {
         e.preventDefault();
         setFocusedIndex(prev => (prev > 0 ? prev - 1 : 0));
       } else if (e.key === 'Enter' && focusedIndex >= 0) {
-        const item = filteredItems[focusedIndex];
+        const item = visibleItems[focusedIndex];
         if (item) {
           router.push(`/${type}/${item.slug}`);
         }
@@ -75,11 +109,12 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [filteredItems, focusedIndex, router, type]);
+  }, [visibleItems, focusedIndex, router, type]);
 
-  // Reset focus when filters change
+  // Reset focus and count when filters change
   useEffect(() => {
     setFocusedIndex(-1);
+    setVisibleCount(6);
   }, [selectedTag]);
 
   // Scroll focused item into view
@@ -136,7 +171,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
       {/* List */}
       <div className="grid grid-cols-1 gap-6" ref={listRef}>
         <AnimatePresence mode="popLayout" initial={false}>
-          {filteredItems.map((item, index) => {
+          {visibleItems.map((item, index) => {
             // Handle relative cover image
             let finalCover = item.cover;
             if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
@@ -254,6 +289,16 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
           })}
         </AnimatePresence>
       </div>
+
+      {/* Loader for infinite scroll */}
+      {hasMore && (
+        <div ref={loaderRef} className="py-12 flex justify-center">
+          <div className="flex items-center gap-3 text-gray-400 font-medium animate-pulse">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Loading more posts...</span>
+          </div>
+        </div>
+      )}
       
       {filteredItems.length === 0 && (
         <div className="text-center py-20 bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-100 dark:border-gray-800">
