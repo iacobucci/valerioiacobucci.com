@@ -261,7 +261,52 @@ export async function gitPullAction() {
   }
 
   try {
-    execSync('git -C content pull', { stdio: 'inherit' });
+    // Using rebase for a cleaner history in a single-user workflow
+    execSync('git -C content pull --rebase', { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      error: "Pull failed. You might have local conflicts or changes that need stashing.",
+      details: error.message 
+    };
+  }
+}
+
+export async function gitStashAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    execSync('git -C content stash', { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function gitStashPopAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    execSync('git -C content stash pop', { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: "Stash pop failed. You might have conflicts with your current changes." };
+  }
+}
+
+export async function gitResetAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    // Hard reset to the last committed state to recover from messy states
+    execSync('git -C content reset --hard', { stdio: 'inherit' });
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

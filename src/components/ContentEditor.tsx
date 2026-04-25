@@ -19,6 +19,9 @@ import {
   gitCommitAction,
   gitPushAction,
   gitPullAction,
+  gitStashAction,
+  gitStashPopAction,
+  gitResetAction,
   FileNode
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
@@ -33,7 +36,7 @@ import {
   ArrowRight, GitCommit, GitPullRequest, Rocket, 
   RefreshCw, Terminal as TerminalIcon, AlertCircle, CheckCircle2,
   List, Code, ArrowUp, ArrowDown, Tag, ExternalLink, GripVertical,
-  Undo2, Redo2, RotateCw
+  Undo2, Redo2, RotateCw, Archive, ArchiveRestore, RotateCcw
 } from 'lucide-react';
 import { FaGithub } from 'react-icons/fa6';
 import { toast } from '@/lib/toast';
@@ -96,19 +99,19 @@ function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", confir
   if (!isOpen) return null;
 
   const variants = {
-    danger: "bg-red-600 hover:bg-red-700 text-white",
-    primary: "bg-blue-600 hover:bg-blue-700 text-white",
-    purple: "bg-purple-600 hover:bg-purple-700 text-white",
+    danger: "bg-red-600 hover:bg-red-700 text-white border-red-500",
+    primary: "bg-blue-600 hover:bg-blue-700 text-white border-blue-500",
+    purple: "bg-purple-600 hover:bg-purple-700 text-white border-purple-500",
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md overflow-hidden">
         <div className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
         </div>
-        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
           <button 
             onClick={onCancel}
             className="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -117,7 +120,7 @@ function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", confir
           </button>
           <button 
             onClick={onConfirm}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${variants[confirmVariant]}`}
+            className={`px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${variants[confirmVariant]}`}
           >
             {confirmLabel}
           </button>
@@ -515,7 +518,7 @@ function EditorInternal() {
   const [mdxSource, setMdxSource] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'deploy'>('none');
+  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'stash' | 'pop' | 'reset' | 'deploy'>('none');
   const [gitStatus, setGitStatus] = useState<{ status: string; diff: string }>({ status: '', diff: '' });
   const [deployStatus, setDeployStatus] = useState<{ isActive: boolean; status: string; logs: string }>({ isActive: false, status: '', logs: '' });
   const [sidebarTab, setSidebarTab] = useState<'files' | 'git'>('files');
@@ -565,16 +568,20 @@ function EditorInternal() {
     } catch (error) {}
   }, []);
 
+  // Initial load
   useEffect(() => {
     loadTree();
     loadGitStatus();
-    loadDeployStatus();
-    const interval = setInterval(() => {
-      loadGitStatus();
+  }, [loadTree, loadGitStatus]);
+
+  // Selective polling: only for deployment status when tab is active
+  useEffect(() => {
+    if (sidebarTab === 'git') {
       loadDeployStatus();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [loadTree, loadGitStatus, loadDeployStatus]);
+      const interval = setInterval(loadDeployStatus, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [sidebarTab, loadDeployStatus]);
 
   useEffect(() => {
     async function loadFileContent() {
@@ -645,7 +652,7 @@ function EditorInternal() {
       await saveContentAction(selectedNode.path, content);
       setIsDirty(false);
       toast.success("Saved locally");
-      loadGitStatus();
+      loadGitStatus(); // Fetch git status only on save
     } catch (error) {
       toast.error("Failed to save");
     } finally {
@@ -691,7 +698,7 @@ function EditorInternal() {
         toast.success("Pushed to remote");
         loadGitStatus();
       } else {
-        toast.error(`Error: ${result.error}`);
+        toast.error(`Push failed. You might need to pull first.`);
       }
     } catch (error) {
       toast.error("Push failed");
@@ -705,17 +712,70 @@ function EditorInternal() {
     try {
       const result = await gitPullAction();
       if (result.success) {
-        toast.success("Pulled from remote");
+        toast.success("Pulled and rebased");
         loadGitStatus();
         loadTree();
       } else {
-        toast.error(`Error: ${result.error}`);
+        toast.error(result.error || "Pull failed");
       }
     } catch (error) {
       toast.error("Pull failed");
     } finally {
       setGitOperation('none');
     }
+  };
+
+  const handleGitStash = async () => {
+    setGitOperation('stash');
+    try {
+      const result = await gitStashAction();
+      if (result.success) {
+        toast.success("Changes stashed");
+        loadGitStatus();
+      }
+    } finally {
+      setGitOperation('none');
+    }
+  };
+
+  const handleGitPop = async () => {
+    setGitOperation('pop');
+    try {
+      const result = await gitStashPopAction();
+      if (result.success) {
+        toast.success("Stash popped");
+        loadGitStatus();
+      } else {
+        toast.error(result.error);
+      }
+    } finally {
+      setGitOperation('none');
+    }
+  };
+
+  const handleGitReset = async () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Hard Reset",
+      message: "This will DISCARD all local changes and reset to the last commit. Are you sure?",
+      confirmLabel: "Reset Everything",
+      confirmVariant: "danger",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setGitOperation('reset');
+        try {
+          const result = await gitResetAction();
+          if (result.success) {
+            toast.success("Reset complete");
+            loadGitStatus();
+            loadTree();
+          }
+        } finally {
+          setGitOperation('none');
+        }
+      },
+      onCancel: () => setConfirmModal(null)
+    });
   };
 
   const handleDeploy = async () => {
@@ -1157,7 +1217,6 @@ function EditorInternal() {
                     )}
                   </div>
 
-                  {/* History & Refresh Controls - MOVED TO BOTTOM */}
                   <div className="p-3 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-gray-50/50 dark:bg-gray-900/50">
                     <button 
                       onClick={handleUndo}
@@ -1212,15 +1271,31 @@ function EditorInternal() {
                         className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-orange-500 transition-all group disabled:opacity-50"
                       >
                         <GitPullRequest className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] font-bold">Pull</span>
+                        <span className="text-[10px] font-bold">Pull (Rebase)</span>
                       </button>
                       <button 
-                        onClick={handleDeploy}
-                        disabled={gitOperation !== 'none'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:border-purple-500 transition-all group disabled:opacity-50"
+                        onClick={handleGitStash}
+                        disabled={gitOperation !== 'none' || gitStatus.status === 'Clean'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-amber-500 transition-all group disabled:opacity-50"
                       >
-                        <Rocket className="w-5 h-5 text-purple-500 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] font-bold">Deploy Site</span>
+                        <Archive className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Stash</span>
+                      </button>
+                      <button 
+                        onClick={handleGitPop}
+                        disabled={gitOperation !== 'none'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-amber-500 transition-all group disabled:opacity-50"
+                      >
+                        <ArchiveRestore className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Stash Pop</span>
+                      </button>
+                      <button 
+                        onClick={handleGitReset}
+                        disabled={gitOperation !== 'none'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 hover:border-red-500 transition-all group disabled:opacity-50"
+                      >
+                        <RotateCcw className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Hard Reset</span>
                       </button>
                     </div>
                   </div>
@@ -1228,7 +1303,7 @@ function EditorInternal() {
                   {/* Git Status */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Git Status</h4>
-                    <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] border border-gray-200 dark:border-gray-700 leading-relaxed overflow-x-auto whitespace-pre">
+                    <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] border border-gray-200 dark:border-gray-800 leading-relaxed overflow-x-auto whitespace-pre">
                       {gitStatus.status === 'Clean' ? (
                         <div className="flex items-center gap-2 text-green-600">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Working directory clean
@@ -1435,7 +1510,7 @@ function EditorInternal() {
                 <div className="pt-2 flex gap-3">
                   <button 
                     onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                   >
                     Cancel
                   </button>
