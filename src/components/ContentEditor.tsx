@@ -950,12 +950,10 @@ function EditorInternal() {
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onload = () => resolve((reader.result as string).split(',')[1]);
-          reader.readAsDataURL(file);
-        });
-        await uploadFileAction(targetDir, file.name, base64);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('dir', targetDir);
+        await uploadFileAction(formData);
       }
       toast.success(`${files.length} files uploaded`);
       loadTree();
@@ -1252,50 +1250,56 @@ function EditorInternal() {
                       <button 
                         onClick={handleGitCommit}
                         disabled={gitOperation !== 'none' || gitStatus.status === 'Clean'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all group disabled:opacity-50"
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-blue-500 transition-all group disabled:opacity-50"
                       >
                         <GitCommit className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold">Commit</span>
+                        <span className="text-[8px] text-gray-400 text-center leading-tight">Save snapshot</span>
                       </button>
                       <button 
                         onClick={handleGitPush}
                         disabled={gitOperation !== 'none'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-green-500 transition-all group disabled:opacity-50"
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-green-500 transition-all group disabled:opacity-50"
                       >
                         <Send className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold">Push</span>
+                        <span className="text-[8px] text-gray-400 text-center leading-tight">Sync to remote</span>
                       </button>
                       <button 
                         onClick={handleGitPull}
                         disabled={gitOperation !== 'none'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-orange-500 transition-all group disabled:opacity-50"
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-orange-500 transition-all group disabled:opacity-50"
                       >
                         <GitPullRequest className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold">Pull (Rebase)</span>
+                        <span className="text-[8px] text-gray-400 text-center leading-tight">Get remote changes</span>
                       </button>
                       <button 
                         onClick={handleGitStash}
                         disabled={gitOperation !== 'none' || gitStatus.status === 'Clean'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-amber-500 transition-all group disabled:opacity-50"
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-amber-500 transition-all group disabled:opacity-50"
                       >
                         <Archive className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold">Stash</span>
+                        <span className="text-[8px] text-gray-400 text-center leading-tight">Save work for later</span>
                       </button>
                       <button 
                         onClick={handleGitPop}
                         disabled={gitOperation !== 'none'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-amber-500 transition-all group disabled:opacity-50"
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-amber-500 transition-all group disabled:opacity-50"
                       >
                         <ArchiveRestore className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold">Stash Pop</span>
+                        <span className="text-[8px] text-gray-400 text-center leading-tight">Restore stashed work</span>
                       </button>
                       <button 
                         onClick={handleGitReset}
                         disabled={gitOperation !== 'none'}
-                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 hover:border-red-500 transition-all group disabled:opacity-50"
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 hover:border-red-500 transition-all group disabled:opacity-50"
                       >
                         <RotateCcw className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold">Hard Reset</span>
+                        <span className="text-[8px] text-red-400 text-center leading-tight">Discard all changes</span>
                       </button>
                     </div>
                   </div>

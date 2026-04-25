@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
 	pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
 	devIndicators: false,
 	allowedDevOrigins: ['msi', 'valerioiacobucci.com'],
+	experimental: {
+		serverActions: {
+			bodySizeLimit: '10mb',
+		},
+	},
 	images: {
 		remotePatterns: [
 			{

@@ -83,10 +83,15 @@ export async function saveContentAction(relativeFilePath: string, content: strin
   return { success: true };
 }
 
-export async function uploadFileAction(relativeDirPath: string, fileName: string, base64Data: string) {
+export async function uploadFileAction(formData: FormData) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
   }
+
+  const relativeDirPath = formData.get('dir') as string;
+  const file = formData.get('file') as File;
+  
+  if (!file) throw new Error("No file uploaded");
 
   const dirPath = path.join(CONTENT_PATH, relativeDirPath);
   if (!dirPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
@@ -95,8 +100,8 @@ export async function uploadFileAction(relativeDirPath: string, fileName: string
     fs.mkdirSync(dirPath, { recursive: true });
   }
 
-  const fullPath = path.join(dirPath, fileName);
-  const buffer = Buffer.from(base64Data, 'base64');
+  const fullPath = path.join(dirPath, file.name);
+  const buffer = Buffer.from(await file.arrayBuffer());
   
   fs.writeFileSync(fullPath, buffer);
   return { success: true };
