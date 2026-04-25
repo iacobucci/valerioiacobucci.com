@@ -4,13 +4,17 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdLogout, MdPerson } from "react-icons/md";
+import { MdLogout, MdPerson, MdEdit } from "react-icons/md";
 import GitHubLoginButton from "./GitHubLoginButton";
+import { Link } from "@/i18n/routing";
+import { useParams } from "next/navigation";
 
 export default function UserMenu() {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const params = useParams();
+  const locale = params.locale as string;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,6 +39,11 @@ export default function UserMenu() {
       />
     );
   }
+
+  const user = session.user as { email?: string | null; username?: string; image?: string | null; name?: string | null };
+  const isAuthorized = 
+    user?.email?.toLowerCase().trim() === "iacobuccivalerio@gmail.com" || 
+    user?.username === "iacobucci";
 
   return (
     <div className="relative" ref={menuRef}>
@@ -74,9 +83,21 @@ export default function UserMenu() {
                 {session.user?.email}
               </p>
             </div>
+            
+            {isAuthorized && (
+              <Link
+                href="/admin/editor"
+                className="flex items-center w-full gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                <MdEdit className="w-4 h-4" />
+                Content Editor
+              </Link>
+            )}
+
             <button
               onClick={() => signOut()}
-              className="flex items-center w-full gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              className="flex items-center w-full gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-gray-100 dark:border-gray-800 mt-1 pt-2"
             >
               <MdLogout className="w-4 h-4" />
               Sign Out

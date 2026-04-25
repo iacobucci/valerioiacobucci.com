@@ -46,3 +46,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   trustHost: true,
 })
+
+export async function isAuthorized() {
+  const session = await auth();
+  const user = session?.user as { email?: string | null; username?: string } | undefined;
+  return (
+    user?.email?.toLowerCase().trim() === "iacobuccivalerio@gmail.com" || 
+    user?.username === "iacobucci"
+  );
+}

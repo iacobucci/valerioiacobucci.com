@@ -1,17 +1,8 @@
 'use server';
 
-import { auth } from "@/auth";
+import { auth, isAuthorized } from "@/auth";
 import { addMicroblogPost, toggleMicroblogReaction, deleteMicroblogPost, updateMicroblogPost } from "@/lib/microblog";
 import { revalidatePath } from "next/cache";
-
-async function isAuthorized() {
-  const session = await auth();
-  const user = session?.user as { email?: string | null; username?: string } | undefined;
-  return (
-    user?.email?.toLowerCase().trim() === "iacobuccivalerio@gmail.com" || 
-    user?.username === "iacobucci"
-  );
-}
 
 export async function createPostAction(content: string, imageBase64?: string | null) {
   if (!(await isAuthorized())) {
