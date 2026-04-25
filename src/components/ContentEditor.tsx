@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { 
   listContentAction, 
   getContentAction, 
@@ -31,8 +31,10 @@ import {
   Trash2, Upload, Plus, FolderPlus, Download, X,
   PenSquare, Menu, MoreVertical, Minimize, GitBranch,
   ArrowRight, GitCommit, GitPullRequest, Rocket, 
-  RefreshCw, Terminal as TerminalIcon, AlertCircle, CheckCircle2
+  RefreshCw, Terminal as TerminalIcon, AlertCircle, CheckCircle2,
+  List, Code, ArrowUp, ArrowDown, Tag, ExternalLink
 } from 'lucide-react';
+import { FaGithub } from 'react-icons/fa6';
 import { toast } from '@/lib/toast';
 import matter from 'gray-matter';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
@@ -43,11 +45,21 @@ const ItemTypes = {
   FILE: 'file',
 };
 
+interface Project {
+  title: string;
+  description: string;
+  github_repo: string;
+  website_url?: string;
+  tech: string[];
+  selected?: boolean;
+}
+
 // --- Helper Functions ---
 
 function getFileIcon(fileName: string) {
   const ext = fileName.split('.').pop()?.toLowerCase();
   if (ext === 'mdx' || ext === 'md') return FileText;
+  if (ext === 'json') return Code;
   if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(ext || '')) return ImageIcon;
   if (['gltf', 'glb', 'obj'].includes(ext || '')) return Box;
   return File;
@@ -201,6 +213,205 @@ function DraggableFile({
   );
 }
 
+// --- Visual JSON Editor ---
+
+interface JsonVisualEditorProps {
+  data: any[];
+  onChange: (newData: any[]) => void;
+}
+
+function ProjectsVisualEditor({ data, onChange }: JsonVisualEditorProps) {
+  const allTechTags = useMemo(() => {
+    const tags = new Set<string>();
+    data.forEach(p => p.tech?.forEach((t: string) => tags.add(t)));
+    return Array.from(tags).sort();
+  }, [data]);
+
+  const moveItem = (index: number, direction: 'up' | 'down') => {
+    const newData = [...data];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= newData.length) return;
+    [newData[index], newData[newIndex]] = [newData[newIndex], newData[index]];
+    onChange(newData);
+  };
+
+  const updateItem = (index: number, field: string, value: any) => {
+    const newData = [...data];
+    newData[index] = { ...newData[index], [field]: value };
+    onChange(newData);
+  };
+
+  const addItem = () => {
+    const newItem: Project = {
+      title: 'New Project',
+      description: '',
+      github_repo: '',
+      tech: [],
+      selected: false
+    };
+    onChange([newItem, ...data]);
+  };
+
+  const removeItem = (index: number) => {
+    if (confirm('Remove this project?')) {
+      const newData = [...data];
+      newData.splice(index, 1);
+      onChange(newData);
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6 max-w-4xl mx-auto pb-24">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <Box className="w-8 h-8 text-blue-500" /> Projects Manager
+        </h2>
+        <button 
+          onClick={addItem}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all"
+        >
+          <Plus className="w-4 h-4" /> Add Project
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {data.map((project, idx) => (
+          <div key={idx} className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
+            <div className="absolute -left-12 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button 
+                disabled={idx === 0}
+                onClick={() => moveItem(idx, 'up')}
+                className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 disabled:opacity-30"
+              >
+                <ArrowUp className="w-4 h-4" />
+              </button>
+              <button 
+                disabled={idx === data.length - 1}
+                onClick={() => moveItem(idx, 'down')}
+                className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 disabled:opacity-30"
+              >
+                <ArrowDown className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Title</label>
+                  <input 
+                    type="text" 
+                    value={project.title}
+                    onChange={(e) => updateItem(idx, 'title', e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">GitHub Repo</label>
+                  <div className="relative">
+                    <FaGithub className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input 
+                      type="text" 
+                      value={project.github_repo}
+                      onChange={(e) => updateItem(idx, 'github_repo', e.target.value)}
+                      placeholder="user/repo"
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-mono text-sm"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Website URL (Optional)</label>
+                  <div className="relative">
+                    <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input 
+                      type="text" 
+                      value={project.website_url || ''}
+                      onChange={(e) => updateItem(idx, 'website_url', e.target.value)}
+                      placeholder="https://..."
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-mono text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Description</label>
+                  <textarea 
+                    value={project.description}
+                    onChange={(e) => updateItem(idx, 'description', e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white resize-none text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center justify-between">
+                    <span>Technologies</span>
+                    <span className="text-blue-500 normal-case font-medium">{project.tech.length} selected</span>
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {project.tech.map((t: string) => (
+                      <span key={t} className="px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold flex items-center gap-1.5">
+                        {t}
+                        <button onClick={() => updateItem(idx, 'tech', project.tech.filter((x: string) => x !== t))}>
+                          <X className="w-3 h-3 hover:text-red-500" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <select 
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs"
+                      onChange={(e) => {
+                        if (e.target.value && !project.tech.includes(e.target.value)) {
+                          updateItem(idx, 'tech', [...project.tech, e.target.value]);
+                          e.target.value = '';
+                        }
+                      }}
+                      value=""
+                    >
+                      <option value="">Add existing...</option>
+                      {allTechTags.filter(t => !project.tech.includes(t)).map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <button 
+                      onClick={() => {
+                        const t = prompt('New tech tag:');
+                        if (t && !project.tech.includes(t)) updateItem(idx, 'tech', [...project.tech, t]);
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold"
+                    >
+                      New
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={project.selected} 
+                      onChange={(e) => updateItem(idx, 'selected', e.target.checked)}
+                      className="w-4 h-4 rounded-lg border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Selected / Highlight</span>
+                  </label>
+                  <div className="flex-1" />
+                  <button 
+                    onClick={() => removeItem(idx)}
+                    className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // --- Main Editor ---
 
 export default function ContentEditor() {
@@ -214,7 +425,7 @@ export default function ContentEditor() {
   const [gitStatus, setGitStatus] = useState<{ status: string; diff: string }>({ status: '', diff: '' });
   const [deployStatus, setDeployStatus] = useState<{ isActive: boolean; status: string; logs: string }>({ isActive: false, status: '', logs: '' });
   const [sidebarTab, setSidebarTab] = useState<'files' | 'git'>('files');
-  const [previewMode, setPreviewMode] = useState<'split' | 'edit' | 'preview'>('split');
+  const [previewMode, setPreviewMode] = useState<'split' | 'edit' | 'preview' | 'visual'>('split');
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -274,7 +485,9 @@ export default function ContentEditor() {
   useEffect(() => {
     async function loadFileContent() {
       if (!selectedNode || selectedNode.type === 'directory') return;
-      if (!selectedNode.name.endsWith('.mdx')) {
+      
+      const isTextFile = selectedNode.name.endsWith('.mdx') || selectedNode.name.endsWith('.json');
+      if (!isTextFile) {
         setContent('');
         setIsDirty(false);
         return;
@@ -285,6 +498,16 @@ export default function ContentEditor() {
         const fileContent = await getContentAction(selectedNode.path);
         setContent(fileContent);
         setIsDirty(false);
+        
+        // Auto-switch to visual mode for projects.json
+        if (selectedNode.name === 'projects.json') {
+          setPreviewMode('visual');
+        } else if (selectedNode.name.endsWith('.mdx')) {
+          setPreviewMode(window.innerWidth < 1024 ? 'edit' : 'split');
+        } else {
+          setPreviewMode('edit');
+        }
+
         if (window.innerWidth < 1024) setIsSidebarOpen(false);
       } catch (error) {
         toast.error("Failed to load file content");
@@ -296,7 +519,7 @@ export default function ContentEditor() {
   }, [selectedNode]);
 
   const updatePreview = useCallback(async (text: string) => {
-    if (!text) return;
+    if (!text || !selectedNode?.name.endsWith('.mdx')) return;
     try {
       const { content: mdxContent } = matter(text);
       const result = await serializeMdxAction(mdxContent);
@@ -304,7 +527,7 @@ export default function ContentEditor() {
     } catch (error) {
       console.error("MDX error", error);
     }
-  }, []);
+  }, [selectedNode]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -579,7 +802,14 @@ export default function ContentEditor() {
   };
 
   const isMdx = selectedNode?.name.endsWith('.mdx');
+  const isJson = selectedNode?.name.endsWith('.json');
   const isImage = selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
+  const hasVisualEditor = selectedNode?.name === 'projects.json';
+
+  const handleJsonVisualChange = (newData: any[]) => {
+    setContent(JSON.stringify(newData, null, 2));
+    setIsDirty(true);
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -614,10 +844,17 @@ export default function ContentEditor() {
                 <button onClick={() => setPreviewMode('preview')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'preview' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Prev</button>
               </div>
             )}
+
+            {isJson && hasVisualEditor && (
+              <div className="hidden md:flex bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mr-4">
+                <button onClick={() => setPreviewMode('edit')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Source</button>
+                <button onClick={() => setPreviewMode('visual')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'visual' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Visual</button>
+              </div>
+            )}
             
             <button
               onClick={handleSave}
-              disabled={saving || !isMdx}
+              disabled={saving || (!isMdx && !isJson)}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm ${
                 isDirty ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
               }`}
@@ -798,10 +1035,28 @@ export default function ContentEditor() {
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-white dark:bg-gray-950">
             {selectedNode ? (
               <>
-                {isMdx ? (
+                {(isMdx || isJson) ? (
                   <>
                     <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-full">
-                      {(previewMode === 'preview' || previewMode === 'split') && (
+                      {/* Visual Editor View */}
+                      {isJson && hasVisualEditor && previewMode === 'visual' && (
+                        <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/10">
+                          {(() => {
+                            try {
+                              const jsonData = JSON.parse(content);
+                              if (Array.isArray(jsonData)) {
+                                return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} />;
+                              }
+                              return <div className="p-12 text-center text-gray-500">Visual editor only supports array-based JSON for now.</div>;
+                            } catch (e) {
+                              return <div className="p-12 text-center text-red-500 font-mono text-sm">Invalid JSON syntax. Please fix in Source mode.</div>;
+                            }
+                          })()}
+                        </div>
+                      )}
+
+                      {/* MDX Preview View */}
+                      {isMdx && (previewMode === 'preview' || previewMode === 'split') && (
                         <div className={`flex-1 overflow-y-auto p-4 sm:p-8 order-1 lg:order-2 ${previewMode === 'split' ? 'bg-gray-50/30 dark:bg-gray-900/10' : ''}`}>
                           <div className="max-w-none prose prose-neutral dark:prose-invert">
                             {mdxSource && <MDXRemote {...mdxSource} components={components} />}
@@ -809,7 +1064,8 @@ export default function ContentEditor() {
                         </div>
                       )}
                       
-                      {(previewMode === 'edit' || previewMode === 'split') && (
+                      {/* Source Editor View */}
+                      {(previewMode === 'edit' || (isMdx && previewMode === 'split') || (isJson && previewMode !== 'visual')) && (
                         <div className={`flex-1 flex flex-col order-2 lg:order-1 ${previewMode === 'split' ? 'border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800' : ''}`}>
                           <textarea
                             value={content}
@@ -934,7 +1190,7 @@ export default function ContentEditor() {
                 <div className="pt-2 flex gap-3">
                   <button 
                     onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                   >
                     Cancel
                   </button>
