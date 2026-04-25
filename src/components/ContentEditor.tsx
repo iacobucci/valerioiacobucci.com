@@ -746,7 +746,7 @@ function EditorInternal() {
         toast.success("Stash popped");
         loadGitStatus();
       } else {
-        toast.error(result.error);
+        toast.error(result.error || "Failed to pop stash");
       }
     } finally {
       setGitOperation('none');
@@ -1067,6 +1067,10 @@ function EditorInternal() {
     }),
   }), [handleMove]);
 
+  const rootRef = (el: HTMLDivElement | null) => {
+    dropToRoot(el);
+  };
+
   return (
     <div className="flex flex-col h-screen max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-100px)] overflow-hidden bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         {confirmConfig && <ConfirmModal {...confirmConfig} />}
@@ -1185,7 +1189,7 @@ function EditorInternal() {
                   </div>
                   
                   <div 
-                    ref={dropToRoot}
+                    ref={rootRef}
                     className={`flex-1 overflow-y-auto p-2 transition-colors ${isOverRoot ? 'bg-blue-50/50 dark:bg-blue-900/10 ring-2 ring-blue-500 ring-inset' : ''}`}
                   >
                     {loading && tree.length === 0 ? (

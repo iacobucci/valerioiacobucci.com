@@ -13,7 +13,8 @@ This is the source code for the personal website of Valerio Iacobucci, available
 ## Features
 
 - Multilingual interface.
-- Multilingual blog, with fallback to English.
+- Multilingual markdown based blog with fallback to English, that supports Mermaid diagrams and threejs visualizations.
+- Online content editor, with file upload, image compressor, git controls and deploy actions.
 - Microblog that gets its feed from a db, supporting images and reactions from users, showing the profile pictures of users that reacted. Only the owner of the site can post on this, and from the dedicated section.
 - User login with GitHub's OAuth.
 - RSS feed.
