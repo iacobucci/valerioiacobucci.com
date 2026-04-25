@@ -45,7 +45,11 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 				{recentPosts.map((post) => {
 					let finalCover = post.cover;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
+						const version = post.updated || post.date || '';
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
+						if (version) {
+							finalCover += `?v=${encodeURIComponent(version)}`;
+						}
 					}
 					
 					return (

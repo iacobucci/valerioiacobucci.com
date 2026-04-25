@@ -140,8 +140,12 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             // Handle relative cover image
             let finalCover = item.cover;
             if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
+              const version = item.updated || item.date || '';
               const normalized = finalCover.startsWith('./') ? finalCover.slice(2) : finalCover;
               finalCover = `/assets/${type}/${item.slug}/${normalized}`;
+              if (version) {
+                finalCover += `?v=${encodeURIComponent(version)}`;
+              }
             }
             
             const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
