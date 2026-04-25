@@ -3,10 +3,9 @@
   "type": "array",
   "items": {
     "type": "object",
-    "required": ["title", "description", "github_repo", "tech"],
+    "required": ["title", "github_repo", "tech"],
     "properties": {
       "title": { "type": "string" },
-      "description": { "type": "string" },
       "github_repo": { "type": "string" },
       "website_url": { "type": "string" },
       "tech": { 

@@ -2,7 +2,6 @@ import projectsData from '../../content/projects.json';
 
 export interface Project {
 	title: string;
-	description: string;
 	github_repo: string;
 	website_url?: string;
 	tech: string[];
@@ -12,6 +11,7 @@ export interface Project {
 export type { Project as ProjectType };
 
 export interface ProjectGitHubData extends Project {
+	description: string;
 	stars: number;
 	forks: number;
 	commits: number;
@@ -29,7 +29,7 @@ export function getProjects(): Project[] {
 }
 
 // In-memory cache for GitHub data
-let projectsCache: Record<string, Partial<ProjectGitHubData>> = {};
+const projectsCache: Record<string, Partial<ProjectGitHubData>> = {};
 let lastFetchTime = 0;
 const CACHE_TTL = 3600 * 1000; // 1 hour in milliseconds
 
@@ -54,6 +54,7 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 		const data = await res.json();
 
 		return {
+			description: data.description ?? '',
 			stars: data.stargazers_count,
 			forks: data.forks_count,
 			github_url: data.html_url,
@@ -63,6 +64,7 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 	} catch (error) {
 		console.error(`Error fetching GitHub data for ${repo}:`, error);
 		return {
+			description: '',
 			github_url: `https://github.com/${repo}`,
 			error: 'Network error'
 		};
@@ -98,6 +100,7 @@ export async function getProjectsWithGitHubData(): Promise<ProjectGitHubData[]> 
 				...project,
 				...githubData,
 				// Ensure required fields from ProjectGitHubData are present
+				description: githubData.description ?? '',
 				stars: githubData.stars ?? 0,
 				forks: githubData.forks ?? 0,
 				commits: githubData.commits ?? 0,
@@ -123,6 +126,7 @@ export async function getSelectedProjects(): Promise<ProjectGitHubData[]> {
 			return {
 				...project,
 				...githubData,
+				description: githubData.description ?? '',
 				stars: githubData.stars ?? 0,
 				forks: githubData.forks ?? 0,
 				commits: githubData.commits ?? 0,
