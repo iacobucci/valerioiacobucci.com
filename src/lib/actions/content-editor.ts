@@ -36,7 +36,7 @@ export async function listContentAction(): Promise<FileNode[]> {
           return {
             name: entry.name,
             path: relativePath,
-            type: 'directory',
+            type: 'directory' as const,
             children: getTree(fullPath)
           };
         } else {
@@ -44,7 +44,7 @@ export async function listContentAction(): Promise<FileNode[]> {
           return {
             name: entry.name,
             path: relativePath,
-            type: 'file',
+            type: 'file' as const,
             size: stats.size
           };
         }
@@ -242,7 +242,7 @@ export async function publishContentAction() {
     
     try {
       execSync('git -C content push', { stdio: 'inherit' });
-    } catch (e) {
+    } catch (e: any) {
       throw new Error("Push failed: " + e.message);
     }
 

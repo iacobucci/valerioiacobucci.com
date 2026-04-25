@@ -2,6 +2,12 @@
 
 UPDATE_SERVICE=update-valerioiacobucci.com.service
 
+function --content {
+	clone content
+	cd content
+	git pull
+}
+
 function --publish {
 	echo "Step 1/2: Pushing 'content' repository..."
 	if [ -d "content/.git" ]; then

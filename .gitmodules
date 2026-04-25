@@ -1,3 +1,0 @@
-[submodule "content"]
-	path = content
-	url = ssh://valerio@rockbp:/git/content.git
