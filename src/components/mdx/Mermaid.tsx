@@ -24,10 +24,9 @@ export default function Mermaid({ chart }: MermaidProps) {
           fontFamily: 'inherit',
         });
 
+        const id = `mermaid-${Math.random().toString(36).substring(2, 11)}`;
+        
         try {
-          // Generate a unique ID for each chart
-          const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-          
           // Validate first to avoid Mermaid's internal error rendering
           await mermaid.parse(chart);
           
@@ -35,16 +34,15 @@ export default function Mermaid({ chart }: MermaidProps) {
           setSvg(svg);
           setError(null);
         } catch (err) {
-          // Quietly handle the error without letting Mermaid inject SVGs into the body
-          // and cleanup any potential stray element Mermaid might have left
-          const strays = document.querySelectorAll('svg[id^="mermaid-"]');
-          strays.forEach(s => {
-            if (!document.querySelector('.mermaid-container')?.contains(s)) {
-              s.remove();
-            }
-          });
+          // Surgical cleanup: only remove elements that match this specific ID
+          // Mermaid sometimes prefixes IDs or creates hidden containers
+          const stray = document.getElementById(id);
+          if (stray) stray.remove();
           
-          console.error('Mermaid render error:', err);
+          const bindStray = document.getElementById(`d${id}`);
+          if (bindStray) bindStray.remove();
+          
+          console.error('Mermaid render error for ID:', id, err);
           setError('Failed to render diagram');
         }
       }
