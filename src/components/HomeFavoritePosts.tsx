@@ -67,10 +67,11 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 				{selectedPosts.map((post, idx) => {
 					let finalCover = post.cover;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
-						const version = post.updated || post.date || '';
+						const date = post.updated || post.date;
+						const version = date ? new Date(date).getTime() : '';
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 						if (version) {
-							finalCover += `?v=${encodeURIComponent(version)}`;
+							finalCover += `?v=${version}`;
 						}
 					}
 
@@ -89,6 +90,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 											alt={post.title}
 											fill
 											priority={idx < 2}
+											unoptimized
 											className="object-cover group-hover:scale-110 transition-transform duration-500"
 										/>
 										<div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
