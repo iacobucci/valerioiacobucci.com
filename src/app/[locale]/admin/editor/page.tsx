@@ -25,17 +25,8 @@ export default async function AdminEditorPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Content Manager
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Edit your website's MDX content directly from the production environment.
-          </p>
-        </header>
-        
         <ContentEditor />
       </div>
     </div>
