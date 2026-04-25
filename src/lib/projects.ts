@@ -1,6 +1,15 @@
-import { projects as projectsData, Project } from '../../content/projects';
+import projectsData from '../../content/projects.json';
 
-export type { Project };
+export interface Project {
+	title: string;
+	description: string;
+	github_repo: string;
+	website_url?: string;
+	tech: string[];
+	selected?: boolean;
+}
+
+export type { Project as ProjectType };
 
 export interface ProjectGitHubData extends Project {
 	stars: number;

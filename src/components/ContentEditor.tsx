@@ -250,7 +250,13 @@ export default function ContentEditor() {
   const loadDeployStatus = useCallback(async () => {
     try {
       const result = await getDeployStatusAction();
-      if (result.success) setDeployStatus({ isActive: result.isActive, status: result.status, logs: result.logs });
+      if (result.success) {
+        setDeployStatus({ 
+          isActive: result.isActive ?? false, 
+          status: result.status ?? '', 
+          logs: result.logs ?? '' 
+        });
+      }
     } catch (error) {}
   }, []);
 
