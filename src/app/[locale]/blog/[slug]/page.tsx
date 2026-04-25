@@ -80,7 +80,7 @@ export default async function BlogPostPage({
 
   const t = await getTranslations('blog');
 
-  const version = post.updated || post.date || '';
+  const version = (post.updated || post.date) ? new Date(post.updated || post.date || '').getTime() : '';
   
   // Custom components to handle relative paths for this specific post
   const components = {
@@ -91,7 +91,7 @@ export default async function BlogPostPage({
         const normalizedUrl = url.startsWith('./') ? url.slice(2) : url;
         url = `/assets/${CONTENT_TYPE}/${slug}/${normalizedUrl}`;
         if (version) {
-          url += `?v=${encodeURIComponent(version)}`;
+          url += `?v=${version}`;
         }
       }
       return <ModelViewerWrapper {...props} url={url} />;
@@ -102,7 +102,7 @@ export default async function BlogPostPage({
         const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
         finalSrc = `/assets/${CONTENT_TYPE}/${slug}/${normalizedSrc}`;
         if (version) {
-          finalSrc += `?v=${encodeURIComponent(version)}`;
+          finalSrc += `?v=${version}`;
         }
       }
       // eslint-disable-next-line @next/next/no-img-element

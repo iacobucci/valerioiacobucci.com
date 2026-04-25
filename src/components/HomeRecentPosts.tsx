@@ -45,10 +45,11 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 				{recentPosts.map((post) => {
 					let finalCover = post.cover;
 					if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
-						const version = post.updated || post.date || '';
+						const date = post.updated || post.date;
+						const version = date ? new Date(date).getTime() : '';
 						finalCover = `/assets/blog/${post.slug}/${finalCover.startsWith('./') ? finalCover.slice(2) : finalCover}`;
 						if (version) {
-							finalCover += `?v=${encodeURIComponent(version)}`;
+							finalCover += `?v=${version}`;
 						}
 					}
 					
@@ -64,6 +65,7 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 										src={finalCover as string}
 										alt={post.title}
 										fill
+										unoptimized
 										className="object-cover group-hover:scale-110 transition-transform duration-500"
 									/>
 								</div>
