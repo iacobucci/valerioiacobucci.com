@@ -221,39 +221,99 @@ export async function getGitStatusAction() {
 
   try {
     const status = execSync('git -C content status --short', { encoding: 'utf8' });
-    return { success: true, status };
+    const diff = execSync('git -C content diff --stat', { encoding: 'utf8' });
+    return { success: true, status, diff };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
 }
 
-export async function publishContentAction() {
+export async function gitCommitAction(message: string) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
   }
 
   try {
     execSync('git -C content add .', { stdio: 'inherit' });
-    try {
-      execSync('git -C content commit -m "Update from web editor"', { stdio: 'inherit' });
-    } catch (e) {
-      // Ignore if nothing to commit
-    }
-    
-    try {
-      execSync('git -C content push', { stdio: 'inherit' });
-    } catch (e: any) {
-      throw new Error("Push failed: " + e.message);
-    }
-
-    const updateScript = path.join(process.cwd(), 'scripts', 'update.sh');
-    if (fs.existsSync(updateScript)) {
-      execSync(`bash ${updateScript} --setup`, { stdio: 'inherit' });
-    }
-
+    execSync(`git -C content commit -m "${message.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
+}
+
+export async function gitPushAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    execSync('git -C content push', { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function gitPullAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    execSync('git -C content pull', { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getDeployStatusAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const UPDATE_SERVICE = 'update-valerioiacobucci.com.service';
+  try {
+    const isActive = execSync(`systemctl --user is-active ${UPDATE_SERVICE}`, { encoding: 'utf8' }).trim();
+    const status = execSync(`systemctl --user status ${UPDATE_SERVICE} --no-pager`, { encoding: 'utf8' });
+    const logs = execSync(`journalctl --user -u ${UPDATE_SERVICE} -n 20 --no-pager`, { encoding: 'utf8' });
+    
+    return { 
+      success: true, 
+      isActive: isActive === 'active' || isActive === 'activating',
+      status,
+      logs 
+    };
+  } catch (error: any) {
+    return { success: false, error: "Service not running or not found", details: error.message };
+  }
+}
+
+export async function triggerDeployAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const updateScript = path.join(process.cwd(), 'scripts', 'update.sh');
+    if (!fs.existsSync(updateScript)) throw new Error("Update script not found");
+    
+    execSync(`bash ${updateScript} --setup`, { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function publishContentAction() {
+  // Mantengo questa funzione per compatibilità ma la rifattorizzo per usare le nuove
+  const commit = await gitCommitAction("Update from web editor");
+  if (!commit.success && !commit.error.includes("nothing to commit")) return commit;
+  
+  const push = await gitPushAction();
+  if (!push.success) return push;
+  
+  return triggerDeployAction();
 }
 

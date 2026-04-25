@@ -14,6 +14,11 @@ import {
   moveFileAction,
   compressImageAction,
   getGitStatusAction,
+  getDeployStatusAction,
+  triggerDeployAction,
+  gitCommitAction,
+  gitPushAction,
+  gitPullAction,
   FileNode
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
@@ -25,7 +30,8 @@ import {
   Loader2, Folder, File, Image as ImageIcon, Box, 
   Trash2, Upload, Plus, FolderPlus, Download, X,
   PenSquare, Menu, MoreVertical, Minimize, GitBranch,
-  ArrowRight
+  ArrowRight, GitCommit, GitPullRequest, Rocket, 
+  RefreshCw, Terminal as TerminalIcon, AlertCircle, CheckCircle2
 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import matter from 'gray-matter';
@@ -95,7 +101,6 @@ function DraggableFile({
     }),
   }), [node.path, node.type, onMove]);
 
-  // Combine refs
   const ref = (el: HTMLDivElement | null) => {
     drag(drop(el));
   };
@@ -205,8 +210,10 @@ export default function ContentEditor() {
   const [mdxSource, setMdxSource] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [gitStatus, setGitStatus] = useState<string>('');
+  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'deploy'>('none');
+  const [gitStatus, setGitStatus] = useState<{ status: string; diff: string }>({ status: '', diff: '' });
+  const [deployStatus, setDeployStatus] = useState<{ isActive: boolean; status: string; logs: string }>({ isActive: false, status: '', logs: '' });
+  const [sidebarTab, setSidebarTab] = useState<'files' | 'git'>('files');
   const [previewMode, setPreviewMode] = useState<'split' | 'edit' | 'preview'>('split');
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -236,14 +243,27 @@ export default function ContentEditor() {
   const loadGitStatus = useCallback(async () => {
     try {
       const result = await getGitStatusAction();
-      if (result.success) setGitStatus(result.status || 'Clean');
+      if (result.success) setGitStatus({ status: result.status || 'Clean', diff: result.diff || '' });
+    } catch (error) {}
+  }, []);
+
+  const loadDeployStatus = useCallback(async () => {
+    try {
+      const result = await getDeployStatusAction();
+      if (result.success) setDeployStatus({ isActive: result.isActive, status: result.status, logs: result.logs });
     } catch (error) {}
   }, []);
 
   useEffect(() => {
     loadTree();
     loadGitStatus();
-  }, [loadTree, loadGitStatus]);
+    loadDeployStatus();
+    const interval = setInterval(() => {
+      loadGitStatus();
+      loadDeployStatus();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [loadTree, loadGitStatus, loadDeployStatus]);
 
   useEffect(() => {
     async function loadFileContent() {
@@ -323,23 +343,77 @@ export default function ContentEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave]);
 
-  async function handlePublish() {
-    if (!confirm("Commit and push changes?")) return;
-    setPublishing(true);
+  const handleGitCommit = async () => {
+    const message = prompt("Commit message:", "Update from web editor");
+    if (!message) return;
+    setGitOperation('commit');
     try {
-      const result = await publishContentAction();
+      const result = await gitCommitAction(message);
       if (result.success) {
-        toast.success("Published successfully!");
+        toast.success("Committed locally");
         loadGitStatus();
       } else {
         toast.error(`Error: ${result.error}`);
       }
     } catch (error) {
-      toast.error("Failed to publish");
+      toast.error("Commit failed");
     } finally {
-      setPublishing(false);
+      setGitOperation('none');
     }
-  }
+  };
+
+  const handleGitPush = async () => {
+    setGitOperation('push');
+    try {
+      const result = await gitPushAction();
+      if (result.success) {
+        toast.success("Pushed to remote");
+        loadGitStatus();
+      } else {
+        toast.error(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      toast.error("Push failed");
+    } finally {
+      setGitOperation('none');
+    }
+  };
+
+  const handleGitPull = async () => {
+    setGitOperation('pull');
+    try {
+      const result = await gitPullAction();
+      if (result.success) {
+        toast.success("Pulled from remote");
+        loadGitStatus();
+        loadTree();
+      } else {
+        toast.error(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      toast.error("Pull failed");
+    } finally {
+      setGitOperation('none');
+    }
+  };
+
+  const handleDeploy = async () => {
+    if (!confirm("Start full website build and deployment?")) return;
+    setGitOperation('deploy');
+    try {
+      const result = await triggerDeployAction();
+      if (result.success) {
+        toast.success("Deployment started");
+        loadDeployStatus();
+      } else {
+        toast.error(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      toast.error("Deployment trigger failed");
+    } finally {
+      setGitOperation('none');
+    }
+  };
 
   async function handleDelete(path: string) {
     try {
@@ -546,12 +620,12 @@ export default function ContentEditor() {
               <span className="hidden sm:inline">Save</span>
             </button>
             <button
-              onClick={handlePublish}
-              disabled={publishing || gitStatus === 'Clean'}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
+              onClick={handleDeploy}
+              disabled={gitOperation === 'deploy'}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
             >
-              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-              <span className="hidden sm:inline">Publish</span>
+              {gitOperation === 'deploy' || deployStatus.isActive ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+              <span className="hidden sm:inline">Deploy</span>
             </button>
           </div>
         </div>
@@ -559,61 +633,150 @@ export default function ContentEditor() {
         <div className="flex flex-1 overflow-hidden relative">
           {/* Sidebar */}
           <div className={`
-            ${isSidebarOpen ? 'w-72 border-r' : 'w-0 overflow-hidden border-0'} 
+            ${isSidebarOpen ? 'w-80 border-r' : 'w-0 overflow-hidden border-0'} 
             absolute lg:relative z-40 h-full border-gray-200 dark:border-gray-800 
             flex flex-col bg-gray-50 dark:bg-gray-900 transition-all duration-300 ease-in-out
           `}>
-            <div className="min-w-[18rem] flex flex-col h-full">
-              <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex flex-col gap-2">
+            <div className="min-w-[20rem] flex flex-col h-full">
+              {/* Tabs */}
+              <div className="flex p-2 bg-gray-100 dark:bg-gray-800/50">
                 <button 
-                  onClick={() => setShowCreateModal(true)}
-                  className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-colors"
+                  onClick={() => setSidebarTab('files')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${sidebarTab === 'files' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                  <PenSquare className="w-4 h-4" /> New Article
+                  <Folder className="w-3.5 h-3.5" /> Files
                 </button>
-                <div className="flex gap-2">
-                  <button onClick={handleCreateFolder} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    <FolderPlus className="w-3.5 h-3.5" /> Folder
-                  </button>
-                  <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    <Upload className="w-3.5 h-3.5" /> Upload
-                  </button>
-                </div>
-                <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleUpload} />
+                <button 
+                  onClick={() => setSidebarTab('git')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all relative ${sidebarTab === 'git' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <GitBranch className="w-3.5 h-3.5" /> Source & Deploy
+                  {gitStatus.status !== 'Clean' && <div className="absolute top-2 right-4 w-1.5 h-1.5 bg-red-500 rounded-full" />}
+                </button>
               </div>
-              
-              {/* Git Status Bar */}
-              {gitStatus && (
-                <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-800/50 flex items-center gap-2 overflow-hidden">
-                  <GitBranch className="w-3 h-3 text-green-500 shrink-0" />
-                  <span className="text-[10px] font-mono truncate text-gray-500 uppercase tracking-tighter">
-                    {gitStatus === 'Clean' ? 'No pending changes' : gitStatus.replace(/\n/g, ' ')}
-                  </span>
+
+              {sidebarTab === 'files' ? (
+                <>
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex flex-col gap-2">
+                    <button 
+                      onClick={() => setShowCreateModal(true)}
+                      className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-colors"
+                    >
+                      <PenSquare className="w-4 h-4" /> New Article
+                    </button>
+                    <div className="flex gap-2">
+                      <button onClick={handleCreateFolder} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        <FolderPlus className="w-3.5 h-3.5" /> Folder
+                      </button>
+                      <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
+                        <Upload className="w-3.5 h-3.5" /> Upload
+                      </button>
+                    </div>
+                    <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleUpload} />
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-2">
+                    {loading && tree.length === 0 ? (
+                      <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
+                    ) : (
+                      <div className="space-y-0.5">
+                        {tree.map(node => (
+                          <DraggableFile 
+                            key={node.path}
+                            node={node} 
+                            onSelect={setSelectedNode} 
+                            onDelete={handleDelete}
+                            onRename={handleRename}
+                            onMove={handleMove}
+                            onCompress={handleCompress}
+                            selectedPath={selectedNode?.path || null}
+                            expandedPaths={expandedPaths}
+                            toggleExpand={toggleExpand}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  {/* Git Operations */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Repository Control</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button 
+                        onClick={handleGitCommit}
+                        disabled={gitOperation !== 'none' || gitStatus.status === 'Clean'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-all group disabled:opacity-50"
+                      >
+                        <GitCommit className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Commit</span>
+                      </button>
+                      <button 
+                        onClick={handleGitPush}
+                        disabled={gitOperation !== 'none'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-green-500 transition-all group disabled:opacity-50"
+                      >
+                        <Send className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Push</span>
+                      </button>
+                      <button 
+                        onClick={handleGitPull}
+                        disabled={gitOperation !== 'none'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-orange-500 transition-all group disabled:opacity-50"
+                      >
+                        <GitPullRequest className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Pull</span>
+                      </button>
+                      <button 
+                        onClick={handleDeploy}
+                        disabled={gitOperation !== 'none'}
+                        className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:border-purple-500 transition-all group disabled:opacity-50"
+                      >
+                        <Rocket className="w-5 h-5 text-purple-500 group-hover:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold">Deploy Site</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Git Status */}
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Git Status</h4>
+                    <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] leading-relaxed overflow-x-auto whitespace-pre">
+                      {gitStatus.status === 'Clean' ? (
+                        <div className="flex items-center gap-2 text-green-600">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Working directory clean
+                        </div>
+                      ) : (
+                        <span className="text-orange-600 dark:text-orange-400">{gitStatus.status}</span>
+                      )}
+                    </div>
+                    {gitStatus.diff && (
+                      <div className="bg-gray-900 rounded-xl p-3 font-mono text-[9px] leading-tight overflow-x-auto whitespace-pre text-gray-300">
+                        {gitStatus.diff}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Deploy Logs */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between px-1">
+                      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Deployment Monitor</h4>
+                      <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${deployStatus.isActive ? 'bg-green-100 text-green-700 animate-pulse' : 'bg-gray-200 text-gray-600'}`}>
+                        {deployStatus.isActive ? 'In Progress' : 'Idle'}
+                      </div>
+                    </div>
+                    <div className="bg-gray-950 rounded-xl border border-gray-800 overflow-hidden">
+                      <div className="flex items-center gap-2 px-3 py-2 bg-gray-900/50 border-b border-gray-800">
+                        <TerminalIcon className="w-3 h-3 text-gray-500" />
+                        <span className="text-[10px] font-bold text-gray-500 uppercase">Console Output</span>
+                      </div>
+                      <div className="p-3 font-mono text-[9px] leading-normal text-green-500 h-40 overflow-y-auto whitespace-pre-wrap">
+                        {deployStatus.logs || "No recent deployment logs found."}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
-
-              <div className="flex-1 overflow-y-auto p-2">
-                {loading && tree.length === 0 ? (
-                  <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
-                ) : (
-                  <div className="space-y-0.5">
-                    {tree.map(node => (
-                      <DraggableFile 
-                        key={node.path}
-                        node={node} 
-                        onSelect={setSelectedNode} 
-                        onDelete={handleDelete}
-                        onRename={handleRename}
-                        onMove={handleMove}
-                        onCompress={handleCompress}
-                        selectedPath={selectedNode?.path || null}
-                        expandedPaths={expandedPaths}
-                        toggleExpand={toggleExpand}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 
