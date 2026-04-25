@@ -80,6 +80,8 @@ export default async function BlogPostPage({
 
   const t = await getTranslations('blog');
 
+  const version = post.updated || post.date || '';
+  
   // Custom components to handle relative paths for this specific post
   const components = {
     ...mdxComponents,
@@ -88,6 +90,9 @@ export default async function BlogPostPage({
       if (url && typeof url === 'string' && !url.startsWith('http') && !url.startsWith('/') && !url.startsWith('data:')) {
         const normalizedUrl = url.startsWith('./') ? url.slice(2) : url;
         url = `/assets/${CONTENT_TYPE}/${slug}/${normalizedUrl}`;
+        if (version) {
+          url += `?v=${encodeURIComponent(version)}`;
+        }
       }
       return <ModelViewerWrapper {...props} url={url} />;
     },
@@ -96,6 +101,9 @@ export default async function BlogPostPage({
       if (src && typeof src === 'string' && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
         const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
         finalSrc = `/assets/${CONTENT_TYPE}/${slug}/${normalizedSrc}`;
+        if (version) {
+          finalSrc += `?v=${encodeURIComponent(version)}`;
+        }
       }
       // eslint-disable-next-line @next/next/no-img-element
       return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;

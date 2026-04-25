@@ -38,10 +38,15 @@ export async function GET(
 
   const contentType = contentTypes[extension] || 'application/octet-stream';
 
+  const stats = fs.statSync(filePath);
+  const etag = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+
   return new NextResponse(fileBuffer, {
     headers: {
       'Content-Type': contentType,
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cache-Control': 'public, max-age=3600, must-revalidate',
+      'ETag': etag,
+      'Last-Modified': stats.mtime.toUTCString(),
     },
   });
 }
