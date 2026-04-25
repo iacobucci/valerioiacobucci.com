@@ -82,10 +82,55 @@ function formatSize(bytes?: number) {
 
 // --- Components ---
 
+interface ConfirmModalProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  confirmVariant?: 'danger' | 'primary' | 'purple';
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", confirmVariant = "primary", onConfirm, onCancel }: ConfirmModalProps) {
+  if (!isOpen) return null;
+
+  const variants = {
+    danger: "bg-red-600 hover:bg-red-700 text-white",
+    primary: "bg-blue-600 hover:bg-blue-700 text-white",
+    purple: "bg-purple-600 hover:bg-purple-700 text-white",
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md overflow-hidden">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+        </div>
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3">
+          <button 
+            onClick={onCancel}
+            className="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={onConfirm}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${variants[confirmVariant]}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface DraggableFileProps {
   node: FileNode;
   onSelect: (node: FileNode) => void;
-  onDelete: (path: string) => void;
+  onDelete: (path: string, name: string) => void;
   onRename: (path: string) => void;
   onMove: (oldPath: string, newParentPath: string) => void;
   onCompress: (path: string) => void;
@@ -152,12 +197,12 @@ function DraggableFile({
         <span className="truncate flex-1">{node.name}</span>
         
         {node.type === 'file' && (
-          <span className="text-[10px] text-gray-400 dark:text-gray-600 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-[10px] text-gray-400 dark:text-gray-600 mr-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
             {formatSize(node.size)}
           </span>
         )}
 
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
           <button 
             onClick={(e) => {
               e.stopPropagation();
@@ -172,7 +217,7 @@ function DraggableFile({
         {showMenu && (
           <>
             <div className="fixed inset-0 z-50" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
-            <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[60] py-1 overflow-hidden">
+            <div className="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 z-[60] py-1 overflow-hidden">
               <button 
                 onClick={(e) => { e.stopPropagation(); setShowMenu(false); onRename(node.path); }}
                 className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs flex items-center gap-2"
@@ -192,7 +237,7 @@ function DraggableFile({
                 onClick={(e) => { 
                   e.stopPropagation(); 
                   setShowMenu(false); 
-                  if (confirm(`Delete ${node.name}?`)) onDelete(node.path); 
+                  onDelete(node.path, node.name);
                 }}
                 className="w-full text-left px-3 py-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs flex items-center gap-2 text-red-600"
               >
@@ -267,7 +312,7 @@ function DraggableProjectCard({
   return (
     <div 
       ref={ref}
-      className={`group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all ${isDragging ? 'opacity-0' : 'opacity-100'}`}
+      className={`group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 transition-all ${isDragging ? 'opacity-0' : 'opacity-100'}`}
     >
       <div className="absolute -left-8 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-2 text-gray-300 dark:text-gray-700 hover:text-gray-500 transition-colors">
         <GripVertical className="w-5 h-5" />
@@ -392,9 +437,10 @@ function DraggableProjectCard({
 interface JsonVisualEditorProps {
   data: any[];
   onChange: (newData: any[]) => void;
+  onRemoveRequest: (index: number) => void;
 }
 
-function ProjectsVisualEditor({ data, onChange }: JsonVisualEditorProps) {
+function ProjectsVisualEditor({ data, onChange, onRemoveRequest }: JsonVisualEditorProps) {
   const allTechTags = useMemo(() => {
     const tags = new Set<string>();
     data.forEach(p => p.tech?.forEach((t: string) => tags.add(t)));
@@ -426,14 +472,6 @@ function ProjectsVisualEditor({ data, onChange }: JsonVisualEditorProps) {
     onChange([newItem, ...data]);
   };
 
-  const removeItem = (index: number) => {
-    if (confirm('Remove this project?')) {
-      const newData = [...data];
-      newData.splice(index, 1);
-      onChange(newData);
-    }
-  };
-
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto pb-24">
       <div className="flex items-center justify-between mb-8">
@@ -444,7 +482,7 @@ function ProjectsVisualEditor({ data, onChange }: JsonVisualEditorProps) {
           <span className="text-xs text-gray-400 italic">Drag cards to reorder</span>
           <button 
             onClick={addItem}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
           >
             <Plus className="w-4 h-4" /> Add Project
           </button>
@@ -459,7 +497,7 @@ function ProjectsVisualEditor({ data, onChange }: JsonVisualEditorProps) {
             index={idx}
             allTechTags={allTechTags}
             onUpdate={updateItem}
-            onRemove={removeItem}
+            onRemove={onRemoveRequest}
             onMove={moveProject}
           />
         ))}
@@ -488,6 +526,9 @@ function EditorInternal() {
   const [newPostData, setNewPostData] = useState({ title: '', slug: '', description: '' });
   const [isDirty, setIsDirty] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Confirmation Modal State
+  const [confirmConfig, setConfirmModal] = useState<ConfirmModalProps | null>(null);
 
   // History for Undo/Redo
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
@@ -678,33 +719,54 @@ function EditorInternal() {
   };
 
   const handleDeploy = async () => {
-    if (!confirm("Start full website build and deployment?")) return;
-    setGitOperation('deploy');
-    try {
-      const result = await triggerDeployAction();
-      if (result.success) {
-        toast.success("Deployment started");
-        loadDeployStatus();
-      } else {
-        toast.error(`Error: ${result.error}`);
-      }
-    } catch (error) {
-      toast.error("Deployment trigger failed");
-    } finally {
-      setGitOperation('none');
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: "Trigger Deployment",
+      message: "This will start a full website build and restart the service. Are you sure?",
+      confirmLabel: "Deploy Now",
+      confirmVariant: "purple",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setGitOperation('deploy');
+        try {
+          const result = await triggerDeployAction();
+          if (result.success) {
+            toast.success("Deployment started");
+            loadDeployStatus();
+          } else {
+            toast.error(`Error: ${result.error}`);
+          }
+        } catch (error) {
+          toast.error("Deployment trigger failed");
+        } finally {
+          setGitOperation('none');
+        }
+      },
+      onCancel: () => setConfirmModal(null)
+    });
   };
 
-  async function handleDelete(path: string) {
-    try {
-      await deleteFileAction(path);
-      if (selectedNode?.path === path) setSelectedNode(null);
-      loadTree();
-      loadGitStatus();
-      toast.success("Deleted");
-    } catch (error) {
-      toast.error("Failed to delete");
-    }
+  async function handleDelete(path: string, name: string) {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete File",
+      message: `Are you sure you want to delete "${name}"? This action is irreversible.`,
+      confirmLabel: "Delete Forever",
+      confirmVariant: "danger",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        try {
+          await deleteFileAction(path);
+          if (selectedNode?.path === path) setSelectedNode(null);
+          loadTree();
+          loadGitStatus();
+          toast.success("Deleted");
+        } catch (error) {
+          toast.error("Failed to delete");
+        }
+      },
+      onCancel: () => setConfirmModal(null)
+    });
   }
 
   // --- File System Actions with Undo/Redo support ---
@@ -910,6 +972,29 @@ function EditorInternal() {
     setIsDirty(true);
   };
 
+  const handleJsonRemoveProject = (index: number) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Remove Project",
+      message: "Are you sure you want to remove this project from the list?",
+      confirmLabel: "Remove",
+      confirmVariant: "danger",
+      onConfirm: () => {
+        setConfirmModal(null);
+        try {
+          const jsonData = JSON.parse(content);
+          if (Array.isArray(jsonData)) {
+            const newData = [...jsonData];
+            newData.splice(index, 1);
+            handleJsonVisualChange(newData);
+            toast.success("Project removed from list");
+          }
+        } catch (e) {}
+      },
+      onCancel: () => setConfirmModal(null)
+    });
+  };
+
   // --- Drop target for Root ---
   const [{ isOverRoot }, dropToRoot] = useDrop(() => ({
     accept: ItemTypes.FILE,
@@ -925,7 +1010,9 @@ function EditorInternal() {
   }), [handleMove]);
 
   return (
-    <div className="flex flex-col h-screen max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-100px)] overflow-hidden bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800">
+    <div className="flex flex-col h-screen max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-100px)] overflow-hidden bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+        {confirmConfig && <ConfirmModal {...confirmConfig} />}
+        
         <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
           <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
             <button 
@@ -949,26 +1036,30 @@ function EditorInternal() {
           </div>
           
           <div className="flex items-center gap-1 sm:gap-2">
-            {isMdx && (
-              <div className="hidden md:flex bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mr-4">
-                <button onClick={() => setPreviewMode('edit')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Edit</button>
-                <button onClick={() => setPreviewMode('split')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'split' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Split</button>
-                <button onClick={() => setPreviewMode('preview')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'preview' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Prev</button>
-              </div>
-            )}
-
-            {isJson && hasVisualEditor && (
-              <div className="hidden md:flex bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mr-4">
-                <button onClick={() => setPreviewMode('edit')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Source</button>
-                <button onClick={() => setPreviewMode('visual')} className={`px-3 py-1 text-xs font-medium rounded-md ${previewMode === 'visual' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500'}`}>Visual</button>
+            {(isMdx || (isJson && hasVisualEditor)) && (
+              <div className="flex bg-gray-200 dark:bg-gray-800 rounded-lg p-1 mr-2 lg:mr-4">
+                {isMdx ? (
+                  <>
+                    <button onClick={() => setPreviewMode('edit')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Edit</button>
+                    <button onClick={() => setPreviewMode('split')} className={`hidden sm:block px-3 py-1 text-xs font-bold rounded-md transition-all ${previewMode === 'split' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Split</button>
+                    <button onClick={() => setPreviewMode('preview')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'preview' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Prev</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => setPreviewMode('edit')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Source</button>
+                    <button onClick={() => setPreviewMode('visual')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'visual' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Visual</button>
+                  </>
+                )}
               </div>
             )}
             
             <button
               onClick={handleSave}
               disabled={saving || (!isMdx && !isJson)}
-              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm ${
-                isDirty ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-sm border ${
+                isDirty 
+                  ? 'bg-blue-600 border-blue-500 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500'
               }`}
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -977,7 +1068,7 @@ function EditorInternal() {
             <button
               onClick={handleDeploy}
               disabled={gitOperation === 'deploy'}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:border-purple-500 text-purple-600 dark:text-purple-400 rounded-lg font-bold transition-all text-sm"
             >
               {gitOperation === 'deploy' || deployStatus.isActive ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
               <span className="hidden sm:inline">Deploy</span>
@@ -997,16 +1088,21 @@ function EditorInternal() {
               <div className="flex p-2 bg-gray-100 dark:bg-gray-800/50">
                 <button 
                   onClick={() => setSidebarTab('files')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all ${sidebarTab === 'files' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 m-1 rounded-lg text-xs font-bold transition-all ${sidebarTab === 'files' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-gray-50' : 'text-gray-500 hover:text-gray-700'}`}
                 >
                   <Folder className="w-3.5 h-3.5" /> Files
                 </button>
                 <button 
                   onClick={() => setSidebarTab('git')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold transition-all relative ${sidebarTab === 'git' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 m-1 rounded-lg text-xs font-bold transition-all border-2 ${
+                    sidebarTab === 'git' 
+                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-gray-50 border-transparent' 
+                      : gitStatus.status !== 'Clean'
+                        ? 'border-red-500/50 text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/10'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  <GitBranch className="w-3.5 h-3.5" /> Source & Deploy
-                  {gitStatus.status !== 'Clean' && <div className="absolute top-2 right-4 w-1.5 h-1.5 bg-red-500 rounded-full" />}
+                  <GitBranch className={`w-3.5 h-3.5 ${gitStatus.status !== 'Clean' ? 'text-red-500' : ''}`} /> Source & Deploy
                 </button>
               </div>
 
@@ -1015,46 +1111,19 @@ function EditorInternal() {
                   <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex flex-col gap-2">
                     <button 
                       onClick={() => setShowCreateModal(true)}
-                      className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm transition-colors"
+                      className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all"
                     >
                       <PenSquare className="w-4 h-4" /> New Article
                     </button>
                     <div className="flex gap-2">
-                      <button onClick={handleCreateFolder} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
+                      <button onClick={handleCreateFolder} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all">
                         <FolderPlus className="w-3.5 h-3.5" /> Folder
                       </button>
-                      <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300">
+                      <button onClick={() => fileInputRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all">
                         <Upload className="w-3.5 h-3.5" /> Upload
                       </button>
                     </div>
                     <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleUpload} />
-                    
-                    {/* History & Refresh Controls */}
-                    <div className="flex gap-1 mt-1">
-                      <button 
-                        onClick={handleUndo}
-                        disabled={undoStack.length === 0}
-                        title="Undo (Move/Rename)"
-                        className="flex-1 flex items-center justify-center p-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <Undo2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={handleRedo}
-                        disabled={redoStack.length === 0}
-                        title="Redo"
-                        className="flex-1 flex items-center justify-center p-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <Redo2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => { loadTree(); loadGitStatus(); }}
-                        title="Refresh"
-                        className="flex-1 flex items-center justify-center p-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <RotateCw className="w-4 h-4" />
-                      </button>
-                    </div>
                   </div>
                   
                   <div 
@@ -1086,6 +1155,33 @@ function EditorInternal() {
                         )}
                       </div>
                     )}
+                  </div>
+
+                  {/* History & Refresh Controls - MOVED TO BOTTOM */}
+                  <div className="p-3 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-gray-50/50 dark:bg-gray-900/50">
+                    <button 
+                      onClick={handleUndo}
+                      disabled={undoStack.length === 0}
+                      title="Undo"
+                      className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-xs font-bold text-gray-600 dark:text-gray-400"
+                    >
+                      <Undo2 className="w-3.5 h-3.5" /> Undo
+                    </button>
+                    <button 
+                      onClick={handleRedo}
+                      disabled={redoStack.length === 0}
+                      title="Redo"
+                      className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-xs font-bold text-gray-600 dark:text-gray-400"
+                    >
+                      <Redo2 className="w-3.5 h-3.5" /> Redo
+                    </button>
+                    <button 
+                      onClick={() => { loadTree(); loadGitStatus(); }}
+                      title="Refresh"
+                      className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400"
+                    >
+                      <RotateCw className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </>
               ) : (
@@ -1132,7 +1228,7 @@ function EditorInternal() {
                   {/* Git Status */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Git Status</h4>
-                    <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] leading-relaxed overflow-x-auto whitespace-pre">
+                    <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] border border-gray-200 dark:border-gray-700 leading-relaxed overflow-x-auto whitespace-pre">
                       {gitStatus.status === 'Clean' ? (
                         <div className="flex items-center gap-2 text-green-600">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Working directory clean
@@ -1142,7 +1238,7 @@ function EditorInternal() {
                       )}
                     </div>
                     {gitStatus.diff && (
-                      <div className="bg-gray-900 rounded-xl p-3 font-mono text-[9px] leading-tight overflow-x-auto whitespace-pre text-gray-300">
+                      <div className="bg-gray-900 rounded-xl p-3 font-mono text-[9px] border border-gray-800 leading-tight overflow-x-auto whitespace-pre text-gray-300">
                         {gitStatus.diff}
                       </div>
                     )}
@@ -1174,7 +1270,7 @@ function EditorInternal() {
           {/* Overlay for mobile sidebar */}
           {isSidebarOpen && (
             <div 
-              className="lg:hidden absolute inset-0 z-30 bg-black/40"
+              className="lg:hidden absolute inset-0 z-30 bg-black/60"
               onClick={() => setIsSidebarOpen(false)}
             />
           )}
@@ -1193,7 +1289,7 @@ function EditorInternal() {
                             try {
                               const jsonData = JSON.parse(content);
                               if (Array.isArray(jsonData)) {
-                                return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} />;
+                                return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} onRemoveRequest={handleJsonRemoveProject} />;
                               }
                               return <div className="p-12 text-center text-gray-500">Visual editor only supports array-based JSON for now.</div>;
                             } catch (e) {
@@ -1234,10 +1330,10 @@ function EditorInternal() {
                       <img 
                         src={`/assets/${getFileInfo().type}/${getFileInfo().slug}/${selectedNode.name}`} 
                         alt={selectedNode.name} 
-                        className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg mb-8" 
+                        className="max-w-full max-h-[60vh] object-contain rounded-lg border border-gray-200 dark:border-gray-800 mb-8" 
                       />
                     ) : (
-                      <div className="p-8 rounded-full bg-gray-100 dark:bg-gray-800 mb-6">
+                      <div className="p-8 rounded-full bg-gray-100 dark:bg-gray-800 mb-6 border border-gray-200 dark:border-gray-700">
                         {(() => {
                           const Icon = getFileIcon(selectedNode.name);
                           return <Icon className="w-16 h-16 text-gray-400" />;
@@ -1246,7 +1342,7 @@ function EditorInternal() {
                     )}
                     <h3 className="text-xl font-bold mb-2">{selectedNode.name}</h3>
                     <div className="flex items-center gap-4 text-gray-500 mb-6">
-                      <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono">
+                      <span className="px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-xs font-mono">
                         {formatSize(selectedNode.size)}
                       </span>
                       <span className="text-xs uppercase tracking-widest">{selectedNode.name.split('.').pop()}</span>
@@ -1255,13 +1351,13 @@ function EditorInternal() {
                       <a 
                         href={`/assets/${getFileInfo().type}/${getFileInfo().slug}/${selectedNode.name}`}
                         download
-                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium shadow-sm"
+                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-bold text-sm"
                       >
                         <Download className="w-4 h-4" /> Download
                       </a>
                       <button 
                         onClick={() => handleRename(selectedNode.path)}
-                        className="flex items-center gap-2 px-6 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
+                        className="flex items-center gap-2 px-6 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl transition-colors font-bold text-sm"
                       >
                         <PenSquare className="w-4 h-4" /> Rename
                       </button>
@@ -1270,19 +1366,20 @@ function EditorInternal() {
                 )}
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4">
-                <div className="p-6 rounded-full bg-gray-100 dark:bg-gray-800">
-                  <Plus className="w-12 h-12 text-gray-300" />
+              <div className="flex-1 flex flex-col items-center justify-center text-gray-500 space-y-4 px-6 text-center">
+                <div className="p-6 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <Plus className="w-12 h-12 text-gray-300 dark:text-gray-600" />
                 </div>
-                <p className="text-lg font-medium">Select a file to edit or view</p>
-                <div className="flex items-center gap-8 text-xs text-gray-400">
+                <p className="text-lg font-bold text-gray-900 dark:text-white">Select a file to begin</p>
+                <p className="text-sm max-w-xs text-gray-500 dark:text-gray-400">Choose a file from the sidebar or create a new article to get started.</p>
+                <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-xs text-gray-400 font-medium">
                   <div className="flex items-center gap-2">
-                    <kbd className="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">Ctrl+S</kbd>
-                    <span>Save</span>
+                    <kbd className="px-2 py-1 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 font-mono">Ctrl+S</kbd>
+                    <span>Quick Save</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <ArrowRight className="w-3 h-3" />
-                    <span>Drag & Drop to move files</span>
+                    <span>Drag & Drop files</span>
                   </div>
                 </div>
               </div>
@@ -1292,8 +1389,8 @@ function EditorInternal() {
 
         {/* Create Post Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 w-full max-w-md overflow-hidden">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 w-full max-w-md overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-900/50">
                 <h3 className="font-bold text-gray-900 dark:text-white">New Article</h3>
                 <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -1338,14 +1435,14 @@ function EditorInternal() {
                 <div className="pt-2 flex gap-3">
                   <button 
                     onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-800 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                   >
                     Cancel
                   </button>
                   <button 
                     onClick={handleCreatePost}
                     disabled={loading || !newPostData.title || !newPostData.slug}
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold transition-all flex items-center justify-center gap-2"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <PenSquare className="w-4 h-4" />}
                     Create
@@ -1359,7 +1456,7 @@ function EditorInternal() {
   );
 }
 
-// --- Main Editor Wrapper (Fixes DnD Context Error) ---
+// --- Main Editor Wrapper ---
 
 export default function ContentEditor() {
   const [mounted, setMounted] = useState(false);

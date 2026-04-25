@@ -27,10 +27,23 @@ export default function Mermaid({ chart }: MermaidProps) {
         try {
           // Generate a unique ID for each chart
           const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+          
+          // Validate first to avoid Mermaid's internal error rendering
+          await mermaid.parse(chart);
+          
           const { svg } = await mermaid.render(id, chart);
           setSvg(svg);
           setError(null);
         } catch (err) {
+          // Quietly handle the error without letting Mermaid inject SVGs into the body
+          // and cleanup any potential stray element Mermaid might have left
+          const strays = document.querySelectorAll('svg[id^="mermaid-"]');
+          strays.forEach(s => {
+            if (!document.querySelector('.mermaid-container')?.contains(s)) {
+              s.remove();
+            }
+          });
+          
           console.error('Mermaid render error:', err);
           setError('Failed to render diagram');
         }
