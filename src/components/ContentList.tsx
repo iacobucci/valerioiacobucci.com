@@ -140,8 +140,13 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
             // Handle relative cover image
             let finalCover = item.cover;
             if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
+              const date = item.updated || item.date;
+              const version = date ? new Date(date).getTime() : '';
               const normalized = finalCover.startsWith('./') ? finalCover.slice(2) : finalCover;
               finalCover = `/assets/${type}/${item.slug}/${normalized}`;
+              if (version) {
+                finalCover += `?v=${version}`;
+              }
             }
             
             const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
@@ -172,6 +177,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                         src={coverSrc}
                         alt={item.title}
                         fill
+                        unoptimized
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     </div>

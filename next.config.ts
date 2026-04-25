@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
 				pathname: '/u/**',
 			},
 		],
+		localPatterns: [
+			{
+				pathname: '/**',
+			},
+		],
 	},
 	async rewrites() {
 		return [
