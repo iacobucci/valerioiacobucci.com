@@ -30,6 +30,7 @@ import { serializeMdxAction } from '@/lib/actions/mdx';
 import { MDXRemote } from 'next-mdx-remote';
 import { mdxComponents } from '@/components/mdx-components';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
+import Video from '@/components/mdx/Video';
 import { 
   Save, Send, FileText, ChevronRight, ChevronDown, 
   Loader2, Folder, File, Image as ImageIcon, Box, 
@@ -1165,6 +1166,10 @@ function EditorInternal() {
         finalSrc = `/assets/${type}/${slug}/${normalizedSrc}`;
       }
       return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;
+    },
+    Video: (props: any) => {
+      const { type, slug } = getFileInfo();
+      return <Video {...props} assetPath={`/assets/${type}/${slug}`} />;
     }
   };
 
