@@ -36,7 +36,8 @@ The project follows specific naming and color conventions to distinguish between
 - **Featured Projects**: Significant works highlighted on the homepage (Project terminology).
 - **Selected Articles**: Best blog posts and experiments (Blog terminology).
 - **Visual Cues**: 
-  - **Yellow/Amber**: Used for Selected/Featured items.
+  - **Yellow/Amber**: Used for Selected Articles.
+  - **Blue**: Used for Featured Projects.
   - **Red**: Used for Draft items in the editor.
 - **Microblog Updates**: Referred to as "Latestst updates" (EN), "Ultimissimi aggiornamenti" (IT), or "Laatsteste updates" (NL).
 

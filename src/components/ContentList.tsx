@@ -225,9 +225,13 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                   <div className="flex flex-col flex-1 justify-center py-2">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       {hasSelected && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-[10px] font-black uppercase tracking-widest ring-1 ring-yellow-200 dark:ring-yellow-800">
-                          <MdStar className="text-yellow-500" />
-                          {t('favorites_title')}
+                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-1 ${
+                          type === 'blog' 
+                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 ring-yellow-200 dark:ring-yellow-800'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-800'
+                        }`}>
+                          {type === 'blog' ? <MdStar className="text-yellow-500" /> : <MdStar className="text-blue-500" />}
+                          {type === 'blog' ? t('favorites_title') : 'Featured Project'}
                         </span>
                       )}
 

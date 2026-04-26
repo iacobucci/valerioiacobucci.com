@@ -6,7 +6,6 @@ import {
   listContentAction, 
   getContentAction, 
   saveContentAction, 
-  publishContentAction, 
   uploadFileAction, 
   deleteFileAction, 
   createDirectoryAction,
@@ -41,8 +40,8 @@ import {
   Trash2, Upload, Plus, FolderPlus, Download, X,
   PenSquare, Menu, MoreVertical, Minimize, GitBranch,
   ArrowRight, GitCommit, GitPullRequest, Rocket, 
-  RefreshCw, Terminal as TerminalIcon, AlertCircle, CheckCircle2,
-  List, Code, ArrowUp, ArrowDown, Tag, ExternalLink, GripVertical,
+  RefreshCw, Terminal as TerminalIcon, CheckCircle2,
+  Code, ArrowUp, ArrowDown, Tag, ExternalLink,
   Undo2, Redo2, RotateCw, Archive, ArchiveRestore, RotateCcw, Copy
 } from 'lucide-react';
 import { FaGithub } from 'react-icons/fa6';
@@ -258,9 +257,13 @@ function FrontmatterModal({ isOpen, data, availableTags, onSave, onCancel }: Fro
                   value=""
                 >
                   <option value="" className="normal-case">Existing Tags...</option>
-                  {availableTags.filter(t => !formData.tags.includes(t)).map(t => (
-                    <option key={t} value={t}>{t.toUpperCase()}</option>
-                  ))}
+                  {availableTags
+                    .map(t => t.toLowerCase().trim())
+                    .filter((t, i, arr) => t && arr.indexOf(t) === i) // Unique
+                    .filter(t => !formData.tags.map(tag => tag.toLowerCase().trim()).includes(t))
+                    .map(t => (
+                      <option key={t} value={t}>{t.toUpperCase()}</option>
+                    ))}
                 </select>
                 <input 
                   type="text" 
@@ -689,9 +692,9 @@ function ProjectCardEditor({
                 type="checkbox" 
                 checked={project.selected} 
                 onChange={(e) => onUpdate(index, 'selected', e.target.checked)}
-                className="w-4 h-4 rounded-lg border-gray-300 dark:border-gray-700 text-amber-500 focus:ring-amber-500"
+                className="w-4 h-4 rounded-lg border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500"
               />
-              <span className={`text-xs font-bold ${project.selected ? 'text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'}`}>Featured Project</span>
+              <span className={`text-xs font-bold ${project.selected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>Featured Project</span>
             </label>
             <div className="flex-1" />
             <button 
@@ -719,8 +722,11 @@ interface JsonVisualEditorProps {
 
 function ProjectsVisualEditor({ data, onChange, onRemoveRequest, setInputConfig, availableTags }: JsonVisualEditorProps) {
   const unifiedTags = useMemo(() => {
-    const tags = new Set<string>(availableTags);
-    data.forEach(p => p.tech?.forEach((t: string) => tags.add(t)));
+    const tags = new Set<string>(availableTags.map(t => t.toLowerCase().trim()));
+    data.forEach(p => p.tech?.forEach((t: string) => {
+      const normalized = t.toLowerCase().trim();
+      if (normalized) tags.add(normalized);
+    }));
     return Array.from(tags).sort();
   }, [data, availableTags]);
 
@@ -817,6 +823,12 @@ function EditorInternal() {
   // History for Undo/Redo
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
   const [redoStack, setRedoStack] = useState<HistoryItem[]>([]);
+
+  const isMdx = !!selectedNode?.name.endsWith('.mdx');
+  const isJson = !!selectedNode?.name.endsWith('.json');
+  const isTxt = !!selectedNode?.name.endsWith('.txt');
+  const isImage = !!selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
+  const hasVisualEditor = selectedNode?.name === 'projects.json';
 
   const loadTree = useCallback(async () => {
     try {
@@ -930,14 +942,14 @@ function EditorInternal() {
         }
 
         if (window.innerWidth < 1024) setIsSidebarOpen(false);
-      } catch (error) {
-        toast.error("Failed to load file content");
+      } catch {
+        toast.error("Failed to load file tree");
       } finally {
         setLoading(false);
       }
     }
     loadFileContent();
-  }, [selectedNode]);
+  }, [selectedNode, isTxt]);
 
   const updatePreview = useCallback(async (text: string) => {
     if (!text || !selectedNode?.name.endsWith('.mdx')) return;
@@ -974,7 +986,7 @@ function EditorInternal() {
       setIsDirty(false);
       toast.success("Saved locally");
       loadGitStatus(); // Fetch git status only on save
-    } catch (error) {
+    } catch {
       toast.error("Failed to save");
     } finally {
       setSaving(false);
@@ -1031,7 +1043,7 @@ function EditorInternal() {
       } else {
         toast.error(`Push failed. You might need to pull first.`);
       }
-    } catch (error) {
+    } catch {
       toast.error("Push failed");
     } finally {
       setGitOperation('none');
@@ -1049,7 +1061,7 @@ function EditorInternal() {
       } else {
         toast.error(result.error || "Pull failed");
       }
-    } catch (error) {
+    } catch {
       toast.error("Pull failed");
     } finally {
       setGitOperation('none');
@@ -1294,7 +1306,7 @@ function EditorInternal() {
           updated: data.updated as string | undefined,
           draft: !!data.draft,
           selected: !!data.selected,
-          tags: (data.tags as string[]) || [],
+          tags: ((data.tags as string[]) || []).map(t => String(t).toLowerCase().trim()).filter(Boolean),
           ...data
         }
       });
@@ -1452,7 +1464,7 @@ function EditorInternal() {
       toast.success(`${files.length} files uploaded`);
       loadTree();
       loadGitStatus();
-    } catch (error) {
+    } catch {
       toast.error("Upload failed");
     } finally {
       setLoading(false);
@@ -1517,12 +1529,6 @@ function EditorInternal() {
       return <Video {...props} assetPath={`/assets/${type}/${slug}`} />;
     }
   };
-
-  const isMdx = !!selectedNode?.name.endsWith('.mdx');
-  const isJson = !!selectedNode?.name.endsWith('.json');
-  const isTxt = !!selectedNode?.name.endsWith('.txt');
-  const isImage = !!selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
-  const hasVisualEditor = selectedNode?.name === 'projects.json';
 
   const handleJsonVisualChange = (newData: any[]) => {
     setContent(JSON.stringify(newData, null, 2));
