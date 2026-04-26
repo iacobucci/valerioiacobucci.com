@@ -13,6 +13,7 @@ import remarkGfm from 'remark-gfm';
 import {mdxComponents} from '@/components/mdx-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
+import Video from '@/components/mdx/Video';
 
 const CONTENT_TYPE = 'blog';
 
@@ -109,7 +110,8 @@ export default async function BlogPostPage({
       }
       // eslint-disable-next-line @next/next/no-img-element
       return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;
-    }
+    },
+    Video: (props: any) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />
   };
 
   return (

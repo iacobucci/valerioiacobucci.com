@@ -34,6 +34,8 @@ export async function GET(
     '.svg': 'image/svg+xml',
     '.glb': 'model/gltf-binary',
     '.gltf': 'model/gltf+json',
+    '.mp4': 'video/mp4',
+    '.webm': 'video/webm',
   };
 
   const contentType = contentTypes[extension] || 'application/octet-stream';
