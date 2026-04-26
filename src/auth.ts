@@ -50,8 +50,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 export async function isAuthorized() {
   const session = await auth();
   const user = session?.user as { email?: string | null; username?: string } | undefined;
+  
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminUsername = process.env.ADMIN_GITHUB_USERNAME;
+
   return (
-    user?.email?.toLowerCase().trim() === "iacobuccivalerio@gmail.com" || 
-    user?.username === "iacobucci"
+    (adminEmail && user?.email?.toLowerCase().trim() === adminEmail.toLowerCase().trim()) || 
+    (adminUsername && user?.username === adminUsername)
   );
 }

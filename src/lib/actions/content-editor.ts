@@ -3,11 +3,19 @@
 import { isAuthorized } from "@/auth";
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import { revalidatePath } from "next/cache";
 import sharp from 'sharp';
 
 const CONTENT_PATH = path.join(process.cwd(), 'content');
+
+function resolveAndValidatePath(relativePath: string): string {
+  const fullPath = path.resolve(CONTENT_PATH, relativePath);
+  if (!fullPath.startsWith(CONTENT_PATH)) {
+    throw new Error("Invalid path: Out of bounds");
+  }
+  return fullPath;
+}
 
 export interface FileNode {
   name: string;
@@ -63,8 +71,7 @@ export async function getContentAction(relativeFilePath: string) {
     throw new Error("Unauthorized");
   }
 
-  const fullPath = path.join(CONTENT_PATH, relativeFilePath);
-  if (!fullPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
+  const fullPath = resolveAndValidatePath(relativeFilePath);
   if (!fs.existsSync(fullPath)) throw new Error("File not found");
 
   return fs.readFileSync(fullPath, 'utf8');
@@ -75,8 +82,7 @@ export async function saveContentAction(relativeFilePath: string, content: strin
     throw new Error("Unauthorized");
   }
 
-  const fullPath = path.join(CONTENT_PATH, relativeFilePath);
-  if (!fullPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
+  const fullPath = resolveAndValidatePath(relativeFilePath);
 
   fs.writeFileSync(fullPath, content, 'utf8');
   revalidatePath("/", "layout");
@@ -93,14 +99,18 @@ export async function uploadFileAction(formData: FormData) {
   
   if (!file) throw new Error("No file uploaded");
 
-  const dirPath = path.join(CONTENT_PATH, relativeDirPath);
-  if (!dirPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
+  const dirPath = resolveAndValidatePath(relativeDirPath);
   
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 
   const fullPath = path.join(dirPath, file.name);
+  // Re-validate final path in case file.name contains traversal
+  if (!path.resolve(fullPath).startsWith(CONTENT_PATH)) {
+    throw new Error("Invalid file name");
+  }
+
   const buffer = Buffer.from(await file.arrayBuffer());
   
   fs.writeFileSync(fullPath, buffer);
@@ -112,8 +122,7 @@ export async function deleteFileAction(relativeFilePath: string) {
     throw new Error("Unauthorized");
   }
 
-  const fullPath = path.join(CONTENT_PATH, relativeFilePath);
-  if (!fullPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
+  const fullPath = resolveAndValidatePath(relativeFilePath);
 
   if (fs.statSync(fullPath).isDirectory()) {
     fs.rmSync(fullPath, { recursive: true, force: true });
@@ -129,11 +138,11 @@ export async function renameFileAction(oldRelativePath: string, newName: string)
     throw new Error("Unauthorized");
   }
 
-  const oldFullPath = path.join(CONTENT_PATH, oldRelativePath);
+  const oldFullPath = resolveAndValidatePath(oldRelativePath);
   const newFullPath = path.join(path.dirname(oldFullPath), newName);
 
-  if (!oldFullPath.startsWith(CONTENT_PATH) || !newFullPath.startsWith(CONTENT_PATH)) {
-    throw new Error("Invalid path");
+  if (!newFullPath.startsWith(CONTENT_PATH)) {
+    throw new Error("Invalid new name");
   }
 
   fs.renameSync(oldFullPath, newFullPath);
@@ -145,12 +154,12 @@ export async function moveFileAction(oldRelativePath: string, newParentRelativeP
     throw new Error("Unauthorized");
   }
 
-  const oldFullPath = path.join(CONTENT_PATH, oldRelativePath);
-  const newParentFullPath = path.join(CONTENT_PATH, newParentRelativePath);
+  const oldFullPath = resolveAndValidatePath(oldRelativePath);
+  const newParentFullPath = resolveAndValidatePath(newParentRelativePath);
   const newFullPath = path.join(newParentFullPath, path.basename(oldRelativePath));
 
-  if (!oldFullPath.startsWith(CONTENT_PATH) || !newFullPath.startsWith(CONTENT_PATH)) {
-    throw new Error("Invalid path");
+  if (!newFullPath.startsWith(CONTENT_PATH)) {
+    throw new Error("Invalid move destination");
   }
 
   fs.renameSync(oldFullPath, newFullPath);
@@ -162,8 +171,7 @@ export async function compressImageAction(relativeFilePath: string) {
     throw new Error("Unauthorized");
   }
 
-  const fullPath = path.join(CONTENT_PATH, relativeFilePath);
-  if (!fullPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
+  const fullPath = resolveAndValidatePath(relativeFilePath);
 
   const ext = path.extname(fullPath);
   const base = fullPath.slice(0, -ext.length);
@@ -181,10 +189,23 @@ export async function createDirectoryAction(relativeDirPath: string) {
     throw new Error("Unauthorized");
   }
 
-  const fullPath = path.join(CONTENT_PATH, relativeDirPath);
-  if (!fullPath.startsWith(CONTENT_PATH)) throw new Error("Invalid path");
+  const fullPath = resolveAndValidatePath(relativeDirPath);
 
   fs.mkdirSync(fullPath, { recursive: true });
+  return { success: true };
+}
+
+export async function createFileAction(relativeFilePath: string, content: string = '') {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const fullPath = resolveAndValidatePath(relativeFilePath);
+  if (fs.existsSync(fullPath)) {
+    throw new Error("File already exists");
+  }
+
+  fs.writeFileSync(fullPath, content, 'utf8');
   return { success: true };
 }
 
@@ -239,8 +260,13 @@ export async function gitCommitAction(message: string) {
   }
 
   try {
-    execSync('git -C content add .', { stdio: 'inherit' });
-    execSync(`git -C content commit -m "${message.replace(/"/g, '\\"')}"`, { stdio: 'inherit' });
+    spawnSync('git', ['-C', 'content', 'add', '.'], { stdio: 'inherit' });
+    const result = spawnSync('git', ['-C', 'content', 'commit', '-m', message], { stdio: 'inherit' });
+    
+    if (result.status !== 0) {
+      throw new Error(`Git commit failed with status ${result.status}`);
+    }
+    
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -253,7 +279,10 @@ export async function gitPushAction() {
   }
 
   try {
-    execSync('git -C content push', { stdio: 'inherit' });
+    const result = spawnSync('git', ['-C', 'content', 'push'], { stdio: 'inherit' });
+    if (result.status !== 0) {
+       throw new Error(`Git push failed with status ${result.status}`);
+    }
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -267,7 +296,10 @@ export async function gitPullAction() {
 
   try {
     // Using rebase for a cleaner history in a single-user workflow
-    execSync('git -C content pull --rebase', { stdio: 'inherit' });
+    const result = spawnSync('git', ['-C', 'content', 'pull', '--rebase'], { stdio: 'inherit' });
+    if (result.status !== 0) {
+       throw new Error(`Git pull failed with status ${result.status}`);
+    }
     return { success: true };
   } catch (error: any) {
     return { 
@@ -284,7 +316,7 @@ export async function gitStashAction() {
   }
 
   try {
-    execSync('git -C content stash', { stdio: 'inherit' });
+    spawnSync('git', ['-C', 'content', 'stash'], { stdio: 'inherit' });
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -297,7 +329,10 @@ export async function gitStashPopAction() {
   }
 
   try {
-    execSync('git -C content stash pop', { stdio: 'inherit' });
+    const result = spawnSync('git', ['-C', 'content', 'stash', 'pop'], { stdio: 'inherit' });
+    if (result.status !== 0) {
+       throw new Error("Stash pop failed. You might have conflicts with your current changes.");
+    }
     return { success: true };
   } catch (error: any) {
     return { success: false, error: "Stash pop failed. You might have conflicts with your current changes." };
@@ -311,7 +346,7 @@ export async function gitResetAction() {
 
   try {
     // Hard reset to the last committed state to recover from messy states
-    execSync('git -C content reset --hard', { stdio: 'inherit' });
+    spawnSync('git', ['-C', 'content', 'reset', '--hard'], { stdio: 'inherit' });
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

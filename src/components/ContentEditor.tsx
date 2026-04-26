@@ -22,6 +22,7 @@ import {
   gitStashAction,
   gitStashPopAction,
   gitResetAction,
+  createFileAction,
   FileNode
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
@@ -52,7 +53,6 @@ const ItemTypes = {
 
 interface Project {
   title: string;
-  description: string;
   github_repo: string;
   website_url?: string;
   tech: string[];
@@ -121,6 +121,66 @@ function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", confir
           <button 
             onClick={onConfirm}
             className={`px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${variants[confirmVariant]}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface InputDialogProps {
+  isOpen: boolean;
+  title: string;
+  defaultValue?: string;
+  placeholder?: string;
+  confirmLabel?: string;
+  onConfirm: (value: string) => void;
+  onCancel: () => void;
+}
+
+function InputDialog({ isOpen, title, defaultValue = "", placeholder = "", confirmLabel = "OK", onConfirm, onCancel }: InputDialogProps) {
+  const [value, setValue] = useState(defaultValue);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setValue(defaultValue);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [isOpen, defaultValue]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl w-full max-w-md overflow-hidden">
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">{title}</h3>
+          <input 
+            ref={inputRef}
+            type="text" 
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={placeholder}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onConfirm(value);
+              if (e.key === 'Escape') onCancel();
+            }}
+            className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
+          />
+        </div>
+        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
+          <button 
+            onClick={onCancel}
+            className="px-4 py-2 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={() => onConfirm(value)}
+            className="px-4 py-2 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-500 transition-colors"
           >
             {confirmLabel}
           </button>
@@ -282,10 +342,11 @@ interface DraggableProjectCardProps {
   onUpdate: (index: number, field: string, value: any) => void;
   onRemove: (index: number) => void;
   onMove: (dragIndex: number, hoverIndex: number) => void;
+  setInputConfig: (config: InputDialogProps | null) => void;
 }
 
 function DraggableProjectCard({ 
-  project, index, allTechTags, onUpdate, onRemove, onMove 
+  project, index, allTechTags, onUpdate, onRemove, onMove, setInputConfig 
 }: DraggableProjectCardProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -362,15 +423,6 @@ function DraggableProjectCard({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Description</label>
-            <textarea 
-              value={project.description}
-              onChange={(e) => onUpdate(index, 'description', e.target.value)}
-              rows={3}
-              className="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white resize-none text-sm"
-            />
-          </div>
-          <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center justify-between">
               <span>Technologies</span>
             </label>
@@ -402,8 +454,17 @@ function DraggableProjectCard({
               </select>
               <button 
                 onClick={() => {
-                  const t = prompt('New tech tag:');
-                  if (t && !project.tech.includes(t)) onUpdate(index, 'tech', [...project.tech, t]);
+                  setInputConfig({
+                    isOpen: true,
+                    title: "New Tech Tag",
+                    placeholder: "e.g. Next.js, Rust...",
+                    confirmLabel: "Add Tag",
+                    onConfirm: (t) => {
+                      setInputConfig(null);
+                      if (t && !project.tech.includes(t)) onUpdate(index, 'tech', [...project.tech, t]);
+                    },
+                    onCancel: () => setInputConfig(null)
+                  });
                 }}
                 className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold"
               >
@@ -441,9 +502,10 @@ interface JsonVisualEditorProps {
   data: any[];
   onChange: (newData: any[]) => void;
   onRemoveRequest: (index: number) => void;
+  setInputConfig: (config: InputDialogProps | null) => void;
 }
 
-function ProjectsVisualEditor({ data, onChange, onRemoveRequest }: JsonVisualEditorProps) {
+function ProjectsVisualEditor({ data, onChange, onRemoveRequest, setInputConfig }: JsonVisualEditorProps) {
   const allTechTags = useMemo(() => {
     const tags = new Set<string>();
     data.forEach(p => p.tech?.forEach((t: string) => tags.add(t)));
@@ -463,17 +525,16 @@ function ProjectsVisualEditor({ data, onChange, onRemoveRequest }: JsonVisualEdi
     newData[index] = { ...newData[index], [field]: value };
     onChange(newData);
   };
-
-  const addItem = () => {
-    const newItem: Project = {
-      title: 'New Project',
-      description: '',
-      github_repo: '',
-      tech: [],
-      selected: false
-    };
-    onChange([newItem, ...data]);
+const addItem = () => {
+  const newItem: Project = {
+    title: 'New Project',
+    github_repo: '',
+    tech: [],
+    selected: false
   };
+  onChange([newItem, ...data]);
+};
+
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto pb-24">
@@ -502,6 +563,7 @@ function ProjectsVisualEditor({ data, onChange, onRemoveRequest }: JsonVisualEdi
             onUpdate={updateItem}
             onRemove={onRemoveRequest}
             onMove={moveProject}
+            setInputConfig={setInputConfig}
           />
         ))}
       </div>
@@ -530,8 +592,9 @@ function EditorInternal() {
   const [isDirty, setIsDirty] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Confirmation Modal State
+  // Confirmation & Input Modal State
   const [confirmConfig, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+  const [inputConfig, setInputConfig] = useState<InputDialogProps | null>(null);
 
   // History for Undo/Redo
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
@@ -672,22 +735,32 @@ function EditorInternal() {
   }, [handleSave]);
 
   const handleGitCommit = async () => {
-    const message = prompt("Commit message:", "Update from web editor");
-    if (!message) return;
-    setGitOperation('commit');
-    try {
-      const result = await gitCommitAction(message);
-      if (result.success) {
-        toast.success("Committed locally");
-        loadGitStatus();
-      } else {
-        toast.error(`Error: ${result.error}`);
-      }
-    } catch (error) {
-      toast.error("Commit failed");
-    } finally {
-      setGitOperation('none');
-    }
+    setInputConfig({
+      isOpen: true,
+      title: "Commit Changes",
+      defaultValue: "Update from web editor",
+      placeholder: "Commit message...",
+      confirmLabel: "Commit",
+      onConfirm: async (message) => {
+        setInputConfig(null);
+        if (!message) return;
+        setGitOperation('commit');
+        try {
+          const result = await gitCommitAction(message);
+          if (result.success) {
+            toast.success("Committed locally");
+            loadGitStatus();
+          } else {
+            toast.error(`Error: ${result.error}`);
+          }
+        } catch (error) {
+          toast.error("Commit failed");
+        } finally {
+          setGitOperation('none');
+        }
+      },
+      onCancel: () => setInputConfig(null)
+    });
   };
 
   const handleGitPush = async () => {
@@ -898,9 +971,18 @@ function EditorInternal() {
 
   async function handleRename(oldPath: string) {
     const oldName = oldPath.split('/').pop() || "";
-    const newName = prompt("New name:", oldName);
-    if (!newName || newName === oldName) return;
-    await performAction('rename', { oldPath, newName });
+    setInputConfig({
+      isOpen: true,
+      title: "Rename File/Folder",
+      defaultValue: oldName,
+      confirmLabel: "Rename",
+      onConfirm: async (newName) => {
+        setInputConfig(null);
+        if (!newName || newName === oldName) return;
+        await performAction('rename', { oldPath, newName });
+      },
+      onCancel: () => setInputConfig(null)
+    });
   }
 
   async function handleMove(oldPath: string, newParentPath: string) {
@@ -925,16 +1007,59 @@ function EditorInternal() {
   }
 
   async function handleCreateFolder() {
-    const name = prompt("Folder name:");
-    if (!name) return;
-    
-    let basePath = "";
-    if (selectedNode) {
-      basePath = selectedNode.type === 'directory' ? selectedNode.path : selectedNode.path.split('/').slice(0, -1).join('/');
-    }
-    
-    const fullPath = basePath ? `${basePath}/${name}` : name;
-    await performAction('create_folder', { path: fullPath });
+    setInputConfig({
+      isOpen: true,
+      title: "New Folder",
+      placeholder: "Folder name...",
+      confirmLabel: "Create",
+      onConfirm: async (name) => {
+        setInputConfig(null);
+        if (!name) return;
+        
+        let basePath = "";
+        if (selectedNode) {
+          basePath = selectedNode.type === 'directory' ? selectedNode.path : selectedNode.path.split('/').slice(0, -1).join('/');
+        }
+        
+        const fullPath = basePath ? `${basePath}/${name}` : name;
+        await performAction('create_folder', { path: fullPath });
+      },
+      onCancel: () => setInputConfig(null)
+    });
+  }
+
+  async function handleCreateFile() {
+    setInputConfig({
+      isOpen: true,
+      title: "New File",
+      placeholder: "Filename (e.g. data.json, post.mdx)...",
+      confirmLabel: "Create",
+      onConfirm: async (name) => {
+        setInputConfig(null);
+        if (!name) return;
+        
+        let basePath = "";
+        if (selectedNode) {
+          basePath = selectedNode.type === 'directory' ? selectedNode.path : selectedNode.path.split('/').slice(0, -1).join('/');
+        }
+        
+        const fullPath = basePath ? `${basePath}/${name}` : name;
+        setLoading(true);
+        try {
+          const result = await createFileAction(fullPath, '');
+          if (result.success) {
+            toast.success("File created");
+            loadTree();
+            loadGitStatus();
+          }
+        } catch (error: any) {
+          toast.error(error.message || "Failed to create file");
+        } finally {
+          setLoading(false);
+        }
+      },
+      onCancel: () => setInputConfig(null)
+    });
   }
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -1074,6 +1199,7 @@ function EditorInternal() {
   return (
     <div className="flex flex-col h-screen max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-100px)] overflow-hidden bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         {confirmConfig && <ConfirmModal {...confirmConfig} />}
+        {inputConfig && <InputDialog {...inputConfig} />}
         
         <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
           <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
@@ -1090,7 +1216,7 @@ function EditorInternal() {
             {selectedNode && (
               <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 overflow-hidden">
                 <ChevronRight className="w-4 h-4 shrink-0" />
-                <span className={`font-mono truncate ${isDirty ? 'italic' : ''}`}>
+                <span className={`font-mono truncate content-center ${isDirty ? 'italic' : ''}`}>
                   {selectedNode.name}{isDirty ? '*' : ''}
                 </span>
               </div>
@@ -1178,6 +1304,9 @@ function EditorInternal() {
                       <PenSquare className="w-4 h-4" /> New Article
                     </button>
                     <div className="flex gap-2">
+                      <button onClick={handleCreateFile} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all">
+                        <File className="w-3.5 h-3.5" /> File
+                      </button>
                       <button onClick={handleCreateFolder} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all">
                         <FolderPlus className="w-3.5 h-3.5" /> Folder
                       </button>
@@ -1372,7 +1501,7 @@ function EditorInternal() {
                             try {
                               const jsonData = JSON.parse(content);
                               if (Array.isArray(jsonData)) {
-                                return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} onRemoveRequest={handleJsonRemoveProject} />;
+                                return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} onRemoveRequest={handleJsonRemoveProject} setInputConfig={setInputConfig} />;
                               }
                               return <div className="p-12 text-center text-gray-500">Visual editor only supports array-based JSON for now.</div>;
                             } catch (e) {

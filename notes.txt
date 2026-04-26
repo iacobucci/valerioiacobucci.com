@@ -1,55 +1,54 @@
-features
-	[x] tailwind
-		[x] dark mode
-	[x] framer motion
-	[x] version
-		[x] git rev-parse HEAD
-	[x] i18n
-		[x] interface
-			[x] automatic user languages
-			translations
-				[x] english
-				[x] italian
-				[x] dutch
-	[x] mdx content
-		[x] blog
-			[x] hmr
-			[x] fallback to english
-			[x] tag filtering
-			[x] descriptions and cover images
-			[x]  word counting
-		[x] other content based posts
-	[x] react three fiber
-		[x] viewer
-	[x] page search
-	[x] icons
-	[x] rss feed
-	[x] postgres
-		[x] typeorm
-		[x] github login for posting and adding reactions
+[x] core infrastructure
+	[x] next.js with server side rendering
+	[x] typescript (strict mode)
+	[x] postgresql with typeorm
+	[x] tailwind css with dark mode
+	[x] multilingual interface (en, it, nl)
+	[x] deployment on vps with systemd & nginx
 
-components
-	[x] navbar
-		[x] dark mode switcher
-		[x] language switcher
-		[x] searchbar
-		[x] user menu
-	[x] terminal
-	[x] footer
-	[x] post list
-	[x] toast
-		[x] github login button in toast
+[x] multilingual blog (mdx)
+	[x] markdown based with frontmatter
+	[x] fallback to english for missing translations
+	[x] mermaid diagrams support
+	[x] three.js (react three fiber) visualizations
+	[x] hot module replacement (hmr) for content
+	[x] tag filtering and word count
+	[x] content hosted in a separate git submodule
 
-[x] fake terminal
-	[x] lispv interpreter
-	[ ] minigames
-
-[x] blog
-	[x] 3d visualizations
-	[x] migrate content on other repo
+[x] online content editor
+	[x] secure administration area
+	[x] file system management (create, rename, move, delete)
+	[x] integrated code editor (mdx, json)
+	[x] visual editor for projects
+	[x] drag & drop file organization
+	[x] image upload and webp compression (sharp)
+	[x] git controls (commit, push, pull, stash, reset)
+	[x] server-side deployment control (systemd integration)
+	[x] preview mode (edit, split, preview)
 
 [x] microblog
+	[x] database-backed feed
+	[x] image support
+	[x] interactive reactions with emoji
+	[x] user profile pictures in reactions
+	[x] admin-only posting capability
 
-[x] projects
-	[x] README.md fetched from github
-	[x] apps
+[x] user system & auth
+	[x] github oauth integration (nextauth/auth.js)
+	[x] role-based permissions (admin via email/username)
+	[x] secure session management
+
+[x] projects showcases
+	[x] dynamic fetching of data from github api
+	[x] star counts and project details
+	[x] client-side readme.md fetching and rendering
+	[x] relative path resolution for images in readmes
+	[x] mermaid diagrams in readmes
+	[x] carousel and list views
+
+[x] discovery & utilities
+	[x] global search bar (pages, blog, projects)
+	[x] rss feed (multilingual)
+	[x] fake interactive terminal (repl)
+		[x] lispv interpreter (custom language)
+		[ ] minigames and extra programs
