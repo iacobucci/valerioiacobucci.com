@@ -5,10 +5,10 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import localFont from 'next/font/local';
 
-import face from '@/app/[locale]/cv/face.jpg';
+import face from '@/app/[locale]/(main)/cv/face.jpg';
 
 const cmunrm = localFont({
-	src: '../app/[locale]/cv/cmunrm.ttf',
+	src: '../app/[locale]/(main)/cv/cmunrm.ttf',
 	display: 'swap',
 });
 
