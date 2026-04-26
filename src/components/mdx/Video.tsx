@@ -22,7 +22,13 @@ export const Video: React.FC<VideoProps> = ({ src, sources, assetPath, children,
   }));
 
   return (
-    <video className={className || "w-full rounded-lg my-8"} {...props} src={finalSrc}>
+    <video
+      className={className || "w-full rounded-lg my-8"}
+      playsInline
+      preload="metadata"
+      {...props}
+      src={finalSrc}
+    >
       {finalSources?.map((s, i) => (
         <source key={i} src={s.src} type={s.type} />
       ))}

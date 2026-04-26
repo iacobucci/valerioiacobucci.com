@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { Readable } from 'stream';
 
 export async function GET(
   request: NextRequest,
@@ -22,9 +23,11 @@ export async function GET(
     return new NextResponse('Not Found', { status: 404 });
   }
 
-  const fileBuffer = fs.readFileSync(filePath);
+  const stats = fs.statSync(filePath);
+  const etag = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+  const range = request.headers.get('range');
   const extension = path.extname(filename).toLowerCase();
-  
+
   const contentTypes: Record<string, string> = {
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
@@ -40,12 +43,45 @@ export async function GET(
 
   const contentType = contentTypes[extension] || 'application/octet-stream';
 
-  const stats = fs.statSync(filePath);
-  const etag = `W/"${stats.size}-${stats.mtime.getTime()}"`;
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : stats.size - 1;
 
-  return new NextResponse(fileBuffer, {
+    if (start >= stats.size) {
+      return new NextResponse(null, {
+        status: 416,
+        headers: {
+          'Content-Range': `bytes */${stats.size}`,
+        },
+      });
+    }
+
+    const chunksize = (end - start) + 1;
+    const file = fs.createReadStream(filePath, { start, end });
+    const stream = Readable.toWeb(file) as ReadableStream;
+
+    return new NextResponse(stream, {
+      status: 206,
+      headers: {
+        'Content-Range': `bytes ${start}-${end}/${stats.size}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize.toString(),
+        'Content-Type': contentType,
+        'ETag': etag,
+        'Cache-Control': 'public, max-age=3600, must-revalidate',
+      },
+    });
+  }
+
+  const file = fs.createReadStream(filePath);
+  const stream = Readable.toWeb(file) as ReadableStream;
+
+  return new NextResponse(stream, {
     headers: {
       'Content-Type': contentType,
+      'Content-Length': stats.size.toString(),
+      'Accept-Ranges': 'bytes',
       'Cache-Control': 'public, max-age=3600, must-revalidate',
       'ETag': etag,
       'Last-Modified': stats.mtime.toUTCString(),
