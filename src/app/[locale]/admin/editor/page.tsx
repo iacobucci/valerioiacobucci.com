@@ -25,8 +25,8 @@ export default async function AdminEditorPage({
   }
 
   return (
-    <div className="h-[calc(100vh-64px)] bg-gray-100 dark:bg-gray-950 p-4 sm:p-6 overflow-hidden">
-      <div className="max-w-7xl mx-auto h-full">
+    <div className="fixed inset-0 top-16 bg-gray-100 dark:bg-gray-950 p-0 sm:p-6 overflow-hidden">
+      <div className="max-w-7xl mx-auto h-full sm:rounded-xl overflow-hidden border-t sm:border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <ContentEditor />
       </div>
     </div>

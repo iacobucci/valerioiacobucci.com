@@ -1220,7 +1220,7 @@ function EditorInternal() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+    <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900">
         {confirmConfig && <ConfirmModal {...confirmConfig} />}
         {inputConfig && <InputDialog {...inputConfig} />}
         
@@ -1511,12 +1511,12 @@ function EditorInternal() {
           )}
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-white dark:bg-gray-950">
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-white dark:bg-gray-950 min-h-0">
             {selectedNode ? (
               <>
                 {(isMdx || isJson) ? (
                   <>
-                    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-full">
+                    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-full min-h-0">
                       {/* Visual Editor View */}
                       {isJson && hasVisualEditor && previewMode === 'visual' && (
                         <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/10">
@@ -1545,14 +1545,14 @@ function EditorInternal() {
                       
                       {/* Source Editor View */}
                       {(previewMode === 'edit' || (isMdx && previewMode === 'split') || (isJson && previewMode !== 'visual')) && (
-                        <div className={`flex-1 flex flex-col order-2 lg:order-1 ${previewMode === 'split' ? 'border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800' : ''}`}>
+                        <div className={`flex-1 flex flex-col min-h-0 order-2 lg:order-1 ${previewMode === 'split' ? 'border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800' : ''}`}>
                           <textarea
                             value={content}
                             onChange={(e) => {
                               setContent(e.target.value);
                               setIsDirty(true);
                             }}
-                            className="flex-1 p-4 sm:p-6 font-mono text-base sm:text-sm resize-none focus:outline-none bg-transparent text-gray-800 dark:text-gray-200 leading-relaxed"
+                            className="flex-1 p-4 sm:p-6 font-mono text-base sm:text-sm resize-none focus:outline-none bg-transparent text-gray-800 dark:text-gray-200 leading-relaxed overflow-y-auto"
                             placeholder="Start writing..."
                           />
                         </div>
