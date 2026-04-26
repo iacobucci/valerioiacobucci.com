@@ -18,6 +18,7 @@ interface SearchResult {
 
 export default function Search() {
 	const tBlog = useTranslations('blog');
+	const tSearch = useTranslations('search');
 	const [isOpen, setIsOpen] = useState(false);
 	const [query, setQuery] = useState('');
 	const [allData, setAllData] = useState<SearchResult[]>([]);
@@ -115,10 +116,10 @@ export default function Search() {
 			<button
 				onClick={handleOpen}
 				className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700 group"
-				aria-label="Search"
+				aria-label={tSearch('button_label')}
 			>
 				<MdSearch className="h-5 w-5 group-hover:scale-110 transition-transform" />
-				<span className="hidden lg:inline text-xs font-medium opacity-60">Search...</span>
+				<span className="hidden lg:inline text-xs font-medium opacity-60">{tSearch('button_label')}</span>
 				<kbd className="hidden lg:flex items-center gap-1 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-[10px] font-bold opacity-60">
 					<Command size={10} /> K
 				</kbd>
@@ -151,7 +152,7 @@ export default function Search() {
 										setSelectedIndex(0);
 									}}
 									onKeyDown={handleKeyDown}
-									placeholder="What are you looking for?"
+									placeholder={tSearch('placeholder')}
 									className="flex-1 bg-transparent border-none outline-none text-lg text-gray-900 dark:text-white placeholder-gray-400"
 								/>
 								<button
@@ -204,15 +205,15 @@ export default function Search() {
 									</div>
 								) : query ? (
 									<div className="p-12 text-center">
-										<p className="text-gray-500 dark:text-gray-400">No results found for &quot;{query}&quot;</p>
+										<p className="text-gray-500 dark:text-gray-400">{tSearch('no_results', { query })}</p>
 									</div>
 								) : (
 									<div className="p-8 text-center text-gray-400 space-y-2">
-										<p className="text-sm font-medium">Type to search blog posts, projects, and pages.</p>
+										<p className="text-sm font-medium">{tSearch('hint')}</p>
 										<div className="flex justify-center gap-4 text-[10px] font-bold uppercase tracking-tighter">
-											<span className="flex items-center gap-1"><Command size={10} /> K to search</span>
-											<span className="flex items-center gap-1">↑↓ to navigate</span>
-											<span className="flex items-center gap-1">Enter to select</span>
+											<span className="flex items-center gap-1"><Command size={10} /> {tSearch('kbd_hint')}</span>
+											<span className="flex items-center gap-1">{tSearch('nav_hint')}</span>
+											<span className="flex items-center gap-1">{tSearch('select_hint')}</span>
 										</div>
 									</div>
 								)}

@@ -10,7 +10,20 @@
 		"intro": "Computer Engineering student at the University of Bologna.",
 		"read_blog": "Read Blog",
 		"view_projects": "View Projects",
-		"connect": "Connect with me"
+		"connect": "Connect with me",
+		"rss": {
+			"title": "Stay Updated",
+			"description": "Follow my RSS feed to stay up to date with my latest posts and projects."
+		}
+	},
+	"search": {
+		"placeholder": "What are you looking for?",
+		"no_results": "No results found for \"{query}\"",
+		"hint": "Type to search blog posts, projects, and pages.",
+		"kbd_hint": "K to search",
+		"nav_hint": "↑↓ to navigate",
+		"select_hint": "Enter to select",
+		"button_label": "Search..."
 	},
 	"blog": {
 		"title": "Blog",
@@ -53,7 +66,12 @@
 		"featured_title": "Other projects",
 		"featured_description": "Some of my favorite tools and experiments.",
 		"view_all": "View All Projects",
+		"count": "{count} projects",
 		"loading": "Loading projects...",
+		"readme_loading": "Fetching README from GitHub...",
+		"readme_error": "Failed to load README",
+		"readme_error_unexpected": "An unexpected error occurred",
+		"close_modal": "Close Modal",
 		"error": "Error loading projects. Please try again later.",
 		"no_projects": "No projects found.",
 		"featured_badge": "Featured",

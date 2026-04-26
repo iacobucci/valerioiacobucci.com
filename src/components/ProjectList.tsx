@@ -170,7 +170,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
         />
 
         <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-          {selectedTechs.length === 0 ? projects.length : filteredProjects.length} projects
+          {t('count', { count: selectedTechs.length === 0 ? projects.length : filteredProjects.length })}
         </div>
       </div>
 

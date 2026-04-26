@@ -100,6 +100,15 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 					);
 				})}
 			</div>
+
+			<div className="sm:hidden flex justify-center pt-8">
+				<Link 
+					href="/blog" 
+					className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-fg-light dark:text-fg-dark font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg"
+				>
+					{tBlog('view_all')} <MdArrowForward />
+				</Link>
+			</div>
 		</section>
 	);
 }

@@ -10,7 +10,20 @@
 		"intro": "Studente di Ingegneria Informatica all'Università di Bologna.",
 		"read_blog": "Leggi il Blog",
 		"view_projects": "Vedi i Progetti",
-		"connect": "Contattami"
+		"connect": "Contattami",
+		"rss": {
+			"title": "Rimani Aggiornato",
+			"description": "Segui il mio feed RSS per rimanere aggiornato sui miei ultimi articoli e progetti."
+		}
+	},
+	"search": {
+		"placeholder": "Cosa stai cercando?",
+		"no_results": "Nessun risultato trovato per \"{query}\"",
+		"hint": "Scrivi per cercare articoli, progetti e pagine.",
+		"kbd_hint": "K per cercare",
+		"nav_hint": "↑↓ per navigare",
+		"select_hint": "Enter per selezionare",
+		"button_label": "Cerca..."
 	},
 	"blog": {
 		"title": "Blog",
@@ -40,7 +53,12 @@
 		"featured_title": "Altri progetti",
 		"featured_description": "Alcuni dei miei strumenti ed esperimenti preferiti.",
 		"view_all": "Vedi tutti i progetti",
+		"count": "{count} progetti",
 		"loading": "Caricamento progetti...",
+		"readme_loading": "Recupero del README da GitHub...",
+		"readme_error": "Impossibile caricare il README",
+		"readme_error_unexpected": "Si è verificato un errore imprevisto",
+		"close_modal": "Chiudi",
 		"error": "Errore nel caricamento dei progetti. Riprova più tardi.",
 		"no_projects": "Nessun progetto trovato.",
 		"featured_badge": "In Evidenza",

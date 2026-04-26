@@ -10,7 +10,20 @@
 		"intro": "Student Computer Engineering aan de Universiteit van Bologna.",
 		"read_blog": "Blog Lezen",
 		"view_projects": "Projecten Bekijken",
-		"connect": "Contact met mij opnemen"
+		"connect": "Contact met mij opnemen",
+		"rss": {
+			"title": "Blijf op de hoogte",
+			"description": "Volg mijn RSS-feed om op de hoogte te blijven van mijn nieuwste berichten en projecten."
+		}
+	},
+	"search": {
+		"placeholder": "Waar ben je naar op zoek?",
+		"no_results": "Geen resultaten gevonden voor \"{query}\"",
+		"hint": "Typ om blogberichten, projecten en pagina's te zoeken.",
+		"kbd_hint": "K om te zoeken",
+		"nav_hint": "↑↓ om te navigeren",
+		"select_hint": "Enter om te selecteren",
+		"button_label": "Zoeken..."
 	},
 	"blog": {
 		"title": "Blog",
@@ -40,7 +53,12 @@
 		"featured_title": "Andere projecten",
 		"featured_description": "Enkele van mijn favoriete tools en experimenten.",
 		"view_all": "Bekijk alle projecten",
+		"count": "{count} projecten",
 		"loading": "Projecten laden...",
+		"readme_loading": "README ophalen van GitHub...",
+		"readme_error": "README kon niet worden geladen",
+		"readme_error_unexpected": "Er is een onverwachte fout opgetreden",
+		"close_modal": "Modal Sluiten",
 		"error": "Fout bij het laden van projecten. Probeer het later opnieuw.",
 		"no_projects": "Geen projecten gevonden.",
 		"featured_badge": "Uitgelicht",

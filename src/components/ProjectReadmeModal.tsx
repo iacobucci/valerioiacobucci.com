@@ -7,6 +7,7 @@ import { MDXRemote } from 'next-mdx-remote';
 import { mdxComponents } from './mdx-components';
 import { getProjectReadmeAction } from '@/lib/actions/projects';
 import { ProjectGitHubData } from '@/lib/projects';
+import { useTranslations } from 'next-intl';
 
 interface ProjectReadmeModalProps {
   project: ProjectGitHubData | null;
@@ -15,6 +16,7 @@ interface ProjectReadmeModalProps {
 }
 
 export default function ProjectReadmeModal({ project, isOpen, onClose }: ProjectReadmeModalProps) {
+  const t = useTranslations('projects');
   const [mdxSource, setMdxSource] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,17 +32,17 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
           if (result.success) {
             setMdxSource(result.mdxSource);
           } else {
-            setError(result.error || 'Failed to load README');
+            setError(result.error || t('readme_error'));
           }
         } catch (err) {
-          setError('An unexpected error occurred');
+          setError(t('readme_error_unexpected'));
         } finally {
           setIsLoading(false);
         }
       };
       fetchReadme();
     }
-  }, [isOpen, project]);
+  }, [isOpen, project, t]);
 
   // Handle escape key
   useEffect(() => {
@@ -92,7 +94,7 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20 space-y-4">
                   <div className="w-12 h-12 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin" />
-                  <p className="text-gray-500 dark:text-gray-400 font-medium">Fetching README from GitHub...</p>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">{t('readme_loading')}</p>
                 </div>
               ) : error ? (
                 <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-2xl border border-red-200 dark:border-red-800 text-center">
@@ -101,7 +103,7 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
                     onClick={onClose}
                     className="mt-4 px-6 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors text-sm font-bold"
                   >
-                    Close Modal
+                    {t('close_modal')}
                   </button>
                 </div>
               ) : mdxSource ? (

@@ -16,9 +16,9 @@ export default async function HomeFinalCTA({ locale }: { locale: string }) {
 							<FaRss className="text-3xl" />
 						</div>
 						<div className="space-y-4">
-							<h3 className="text-3xl font-black text-fg-light dark:text-fg-dark tracking-tight">Stay Updated</h3>
+							<h3 className="text-3xl font-black text-fg-light dark:text-fg-dark tracking-tight">{t('home.rss.title')}</h3>
 							<p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed max-w-sm">
-								Follow my RSS feed to stay up to date with my latest posts and projects.
+								{t('home.rss.description')}
 							</p>
 						</div>
 					</div>

@@ -75,7 +75,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-            title="GitHub"
+            title={t('github')}
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
           >
