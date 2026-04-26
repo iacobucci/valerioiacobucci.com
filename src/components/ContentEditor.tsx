@@ -774,7 +774,7 @@ const addItem = () => {
       <div className="space-y-6">
         {data.map((project, idx) => (
           <ProjectCardEditor 
-            key={`${project.github_repo}-${idx}`}
+            key={idx}
             project={project}
             index={idx}
             total={data.length}
