@@ -30,6 +30,20 @@ function --publish {
 	--watch
 }
 
+function --publish-app {
+	echo "Pushing main repository (skipping content)..."
+	if ! git diff --quiet || ! git diff --cached --quiet; then
+		git add -A
+		git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
+		git push
+	fi
+
+	echo "Triggering remote update on VPS (app only)..."
+	ssh valerio@valerioiacobucci.com "bash /home/valerio/source/web/valerioiacobucci.com/scripts/update.sh --setup --no-content"
+
+	--watch
+}
+
 function --setup {
 	systemctl --user stop $UPDATE_SERVICE
 	systemd-run --user --no-block --unit=$UPDATE_SERVICE bash -c "/home/valerio/source/web/valerioiacobucci.com/scripts/update.sh --job $1"
@@ -43,11 +57,15 @@ function --job {
 	echo "Pulling latest changes from main repository..."
 	git pull
 
-	echo "Updating content repository..."
-	if [ -d "content/.git" ]; then
-		git -C content pull
+	if [ "$1" != "--no-content" ]; then
+		echo "Updating content repository..."
+		if [ -d "content/.git" ]; then
+			git -C content pull
+		else
+			git clone ssh://valerio@rockbp:/git/content.git content
+		fi
 	else
-		git clone ssh://valerio@rockbp:/git/content.git content
+		echo "Skipping content update as requested."
 	fi
 
 	echo "Installing dependencies..."

@@ -4,15 +4,17 @@ interface VideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
   src?: string;
   sources?: { src: string; type: string }[];
   assetPath?: string;
+  version?: string | number;
 }
 
-export const Video: React.FC<VideoProps> = ({ src, sources, assetPath, children, className, ...props }) => {
+export const Video: React.FC<VideoProps> = ({ src, sources, assetPath, version, children, className, ...props }) => {
   const resolvePath = (path: string) => {
     if (!path || path.startsWith('http') || path.startsWith('/') || path.startsWith('data:')) {
       return path;
     }
     const normalized = path.startsWith('./') ? path.slice(2) : path;
-    return `${assetPath}/${normalized}`;
+    const fullPath = `${assetPath}/${normalized}`;
+    return version ? `${fullPath}?v=${version}` : fullPath;
   };
 
   const finalSrc = src ? resolvePath(src) : undefined;

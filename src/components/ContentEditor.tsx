@@ -42,7 +42,7 @@ import {
   ArrowRight, GitCommit, GitPullRequest, Rocket, 
   RefreshCw, Terminal as TerminalIcon, CheckCircle2,
   Code, ArrowUp, ArrowDown, Tag, ExternalLink,
-  Undo2, Redo2, RotateCw, Archive, ArchiveRestore, RotateCcw, Copy
+  Undo2, Redo2, RotateCw, Archive, ArchiveRestore, RotateCcw, Copy, Zap, ZapOff
 } from 'lucide-react';
 import { FaGithub } from 'react-icons/fa6';
 import { toast } from '@/lib/toast';
@@ -812,8 +812,20 @@ function EditorInternal() {
   const [newPostData, setNewPostData] = useState({ title: '', slug: '', description: '' });
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [isDirty, setIsDirty] = useState(false);
+  const [autosave, setAutosave] = useState(false);
+  const [previewVersion, setPreviewVersion] = useState(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
+
+  // Load/Save autosave preference
+  useEffect(() => {
+    const saved = localStorage.getItem('editor-autosave');
+    if (saved !== null) setAutosave(saved === 'true');
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('editor-autosave', String(autosave));
+  }, [autosave]);
 
   // Confirmation & Input Modal State
   const [confirmConfig, setConfirmModal] = useState<ConfirmModalProps | null>(null);
@@ -874,6 +886,13 @@ function EditorInternal() {
     loadGitStatus();
     loadTags();
   }, [loadTree, loadGitStatus, loadTags]);
+
+  // Update preview version when tree changes to bust cache
+  useEffect(() => {
+    if (tree.length > 0) {
+      setPreviewVersion(Date.now());
+    }
+  }, [tree]);
 
   // Handle initial path selection
   useEffect(() => {
@@ -978,20 +997,30 @@ function EditorInternal() {
     });
   };
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (silent = false) => {
     if (!selectedNode || selectedNode.type === 'directory') return;
     setSaving(true);
     try {
       await saveContentAction(selectedNode.path, content);
       setIsDirty(false);
-      toast.success("Saved locally");
+      if (!silent) toast.success("Saved locally");
       loadGitStatus(); // Fetch git status only on save
     } catch {
-      toast.error("Failed to save");
+      if (!silent) toast.error("Failed to save");
     } finally {
       setSaving(false);
     }
   }, [selectedNode, content, loadGitStatus]);
+
+  // Autosave effect
+  useEffect(() => {
+    if (autosave && isDirty && !saving && (isMdx || isJson || isTxt)) {
+      const timer = setTimeout(() => {
+        handleSave(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [content, autosave, isDirty, saving, handleSave, isMdx, isJson, isTxt]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1511,7 +1540,7 @@ function EditorInternal() {
       const { type, slug } = getFileInfo();
       if (slug && url && typeof url === 'string' && !url.startsWith('http') && !url.startsWith('/') && !url.startsWith('data:')) {
         const normalizedUrl = url.startsWith('./') ? url.slice(2) : url;
-        url = `/assets/${type}/${slug}/${normalizedUrl}`;
+        url = `/assets/${type}/${slug}/${normalizedUrl}?v=${previewVersion}`;
       }
       return <ModelViewerWrapper {...props} url={url} />;
     },
@@ -1520,13 +1549,13 @@ function EditorInternal() {
       const { type, slug } = getFileInfo();
       if (slug && src && typeof src === 'string' && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
         const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
-        finalSrc = `/assets/${type}/${slug}/${normalizedSrc}`;
+        finalSrc = `/assets/${type}/${slug}/${normalizedSrc}?v=${previewVersion}`;
       }
       return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;
     },
     Video: (props: any) => {
       const { type, slug } = getFileInfo();
-      return <Video {...props} assetPath={`/assets/${type}/${slug}`} />;
+      return <Video {...props} assetPath={`/assets/${type}/${slug}`} version={previewVersion} />;
     }
   };
 
@@ -1623,8 +1652,21 @@ function EditorInternal() {
             )}
             
             <button
-              onClick={handleSave}
-              disabled={saving || (!isMdx && !isJson)}
+              onClick={() => setAutosave(!autosave)}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-xs sm:text-sm border ${
+                autosave 
+                  ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400' 
+                  : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'
+              }`}
+              title={autosave ? "Autosave ON" : "Autosave OFF"}
+            >
+              {autosave ? <Zap className="w-4 h-4" /> : <ZapOff className="w-4 h-4" />}
+              <span className="hidden lg:inline">Autosave</span>
+            </button>
+            
+            <button
+              onClick={() => handleSave()}
+              disabled={saving || (!isMdx && !isJson && !isTxt)}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-sm border ${
                 isDirty 
                   ? 'bg-blue-600 border-blue-500 text-white' 
@@ -1879,7 +1921,7 @@ function EditorInternal() {
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-white dark:bg-gray-950 min-h-0">
             {selectedNode ? (
               <>
-                {(isMdx || isJson) ? (
+                {(isMdx || isJson || isTxt) ? (
                   <>
                     <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-full min-h-0">
                       {/* Visual Editor View */}

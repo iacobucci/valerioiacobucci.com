@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "publish": "scripts/update.sh --publish",
+    "publish-app": "scripts/update.sh --publish-app",
     "watch": "scripts/update.sh --watch",
     "lint": "eslint"
   },
