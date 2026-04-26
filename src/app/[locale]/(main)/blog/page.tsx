@@ -43,7 +43,7 @@ export default async function BlogIndexPage({
         </header>
         
         <div className="max-w-4xl mx-auto">
-          <ContentList items={posts} type="blog" locale={locale} />
+          <ContentList items={posts} type="blog" locale={locale} isAuthorized={authorized} />
         </div>
       </main>
     </div>

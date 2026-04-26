@@ -4,7 +4,7 @@ import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Link} from '@/i18n/routing';
 import {ArrowLeft} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
-import {MdLanguage} from 'react-icons/md';
+import {MdLanguage, MdEdit} from 'react-icons/md';
 import { Metadata } from 'next';
 import { isAuthorized } from '@/auth';
 
@@ -116,13 +116,25 @@ export default async function BlogPostPage({
     <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <article>
         <header className="mb-12">
-          <Link
-            href="/blog"
-            className="text-gray-900 hover:text-gray-700 dark:text-gray-200 dark:hover:text-white transition-colors inline-flex items-center mb-6"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            {t('back')}
-          </Link>
+          <div className="flex justify-between items-center mb-6">
+            <Link
+              href="/blog"
+              className="text-gray-900 hover:text-gray-700 dark:text-gray-200 dark:hover:text-white transition-colors inline-flex items-center"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t('back')}
+            </Link>
+
+            {authorized && (
+              <Link
+                href={`/admin/editor?path=${post.slug}/${post.language}.mdx`}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95"
+              >
+                <MdEdit className="w-4 h-4" />
+                Edit Post
+              </Link>
+            )}
+          </div>
           
           {post.isFallback && (
             <div className="mb-8 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl flex items-start gap-3 text-orange-800 dark:text-orange-200 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">

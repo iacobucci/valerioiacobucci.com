@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
-import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage } from 'react-icons/md';
+import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit } from 'react-icons/md';
 import { Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -14,9 +14,10 @@ interface ContentListProps {
   items: ContentMetadata[];
   type: string;
   locale: string;
+  isAuthorized?: boolean;
 }
 
-export default function ContentList({ items, type, locale }: ContentListProps) {
+export default function ContentList({ items, type, locale, isAuthorized }: ContentListProps) {
   const router = useRouter();
   const t = useTranslations('blog');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -195,7 +196,7 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                 key={item.slug}
                 onMouseEnter={() => setFocusedIndex(index)}
                 style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
-                className={`card-enter transition-all duration-200 rounded-2xl ${
+                className={`card-enter transition-all duration-200 rounded-2xl relative ${
                   isFocused 
                     ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.01]' 
                     : ''
@@ -284,6 +285,18 @@ export default function ContentList({ items, type, locale }: ContentListProps) {
                     </div>
                   </div>
                 </Link>
+
+                {isAuthorized && (
+                  <div className="absolute top-8 right-8 z-20">
+                    <Link
+                      href={`/admin/editor?path=${item.slug}/${item.language}.mdx`}
+                      className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-90"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MdEdit className="w-5 h-5" />
+                    </Link>
+                  </div>
+                )}
               </motion.div>
             );
           })}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
   listContentAction, 
   getContentAction, 
@@ -574,6 +575,8 @@ const addItem = () => {
 // --- Main Editor Internal ---
 
 function EditorInternal() {
+  const searchParams = useSearchParams();
+  const initialPath = searchParams.get('path');
   const [tree, setTree] = useState<FileNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<FileNode | null>(null);
   const [content, setContent] = useState('');
@@ -636,6 +639,36 @@ function EditorInternal() {
     loadTree();
     loadGitStatus();
   }, [loadTree, loadGitStatus]);
+
+  // Handle initial path selection
+  useEffect(() => {
+    if (initialPath && tree.length > 0) {
+      const parts = initialPath.split('/');
+      const newExpanded = new Set<string>();
+      let current = '';
+      for (const part of parts) {
+        current = current ? `${current}/${part}` : part;
+        newExpanded.add(current);
+      }
+      setExpandedPaths(prev => new Set([...prev, ...newExpanded]));
+
+      const findNode = (nodes: FileNode[], target: string): FileNode | null => {
+        for (const node of nodes) {
+          if (node.path === target) return node;
+          if (node.children) {
+            const found = findNode(node.children, target);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const targetNode = findNode(tree, initialPath);
+      if (targetNode) {
+        setSelectedNode(targetNode);
+      }
+    }
+  }, [initialPath, tree]);
 
   // Selective polling: only for deployment status when tab is active
   useEffect(() => {
@@ -1197,7 +1230,7 @@ function EditorInternal() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-h-[calc(100vh-80px)] sm:max-h-[calc(100vh-100px)] overflow-hidden bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
+    <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
         {confirmConfig && <ConfirmModal {...confirmConfig} />}
         {inputConfig && <InputDialog {...inputConfig} />}
         
