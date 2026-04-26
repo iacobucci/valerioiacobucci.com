@@ -336,54 +336,43 @@ function DraggableFile({
 
 // --- Draggable Project Card ---
 
-interface DraggableProjectCardProps {
+interface ProjectCardEditorProps {
   project: Project;
   index: number;
+  total: number;
   allTechTags: string[];
   onUpdate: (index: number, field: string, value: any) => void;
   onRemove: (index: number) => void;
-  onMove: (dragIndex: number, hoverIndex: number) => void;
+  onMove: (index: number, direction: 'up' | 'down') => void;
   setInputConfig: (config: InputDialogProps | null) => void;
 }
 
-function DraggableProjectCard({ 
-  project, index, allTechTags, onUpdate, onRemove, onMove, setInputConfig 
-}: DraggableProjectCardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  const [{ isDragging }, drag] = useDrag({
-    type: ItemTypes.PROJECT,
-    item: { index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const [, drop] = useDrop({
-    accept: ItemTypes.PROJECT,
-    hover(item: { index: number }, monitor) {
-      if (!ref.current) return;
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) return;
-
-      onMove(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
-  });
-
-  drag(drop(ref));
-
+function ProjectCardEditor({ 
+  project, index, total, allTechTags, onUpdate, onRemove, onMove, setInputConfig 
+}: ProjectCardEditorProps) {
   return (
-    <div 
-      ref={ref}
-      className={`group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 transition-all ${isDragging ? 'opacity-0' : 'opacity-100'}`}
-    >
-      <div className="absolute -left-8 top-1/2 -translate-y-1/2 cursor-grab active:cursor-grabbing p-2 text-gray-300 dark:text-gray-700 hover:text-gray-500 transition-colors">
-        <GripVertical className="w-5 h-5" />
+    <div className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 transition-all flex flex-col sm:flex-row gap-6">
+      {/* Reorder Arrows */}
+      <div className="flex sm:flex-col items-center justify-center gap-2 pb-4 sm:pb-0 sm:pr-4 border-b sm:border-b-0 sm:border-r border-gray-100 dark:border-gray-800">
+        <button
+          onClick={() => onMove(index, 'up')}
+          disabled={index === 0}
+          className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 disabled:opacity-30 disabled:hover:text-gray-400 disabled:hover:border-gray-200 transition-all shadow-sm"
+          title="Move Up"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+        <button
+          onClick={() => onMove(index, 'down')}
+          disabled={index === total - 1}
+          className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 disabled:opacity-30 disabled:hover:text-gray-400 disabled:hover:border-gray-200 transition-all shadow-sm"
+          title="Move Down"
+        >
+          <ArrowDown className="w-5 h-5" />
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
         <div className="space-y-4">
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Title</label>
@@ -513,11 +502,12 @@ function ProjectsVisualEditor({ data, onChange, onRemoveRequest, setInputConfig 
     return Array.from(tags).sort();
   }, [data]);
 
-  const moveProject = useCallback((dragIndex: number, hoverIndex: number) => {
+  const moveProject = useCallback((index: number, direction: 'up' | 'down') => {
     const newData = [...data];
-    const dragItem = newData[dragIndex];
-    newData.splice(dragIndex, 1);
-    newData.splice(hoverIndex, 0, dragItem);
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= data.length) return;
+    
+    [newData[index], newData[newIndex]] = [newData[newIndex], newData[index]];
     onChange(newData);
   }, [data, onChange]);
 
@@ -544,7 +534,6 @@ const addItem = () => {
           <Box className="w-8 h-8 text-blue-500" /> Projects Manager
         </h2>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-gray-400 italic">Drag cards to reorder</span>
           <button 
             onClick={addItem}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
@@ -554,12 +543,13 @@ const addItem = () => {
         </div>
       </div>
 
-      <div className="space-y-6 pl-4">
+      <div className="space-y-6">
         {data.map((project, idx) => (
-          <DraggableProjectCard 
+          <ProjectCardEditor 
             key={`${project.github_repo}-${idx}`}
             project={project}
             index={idx}
+            total={data.length}
             allTechTags={allTechTags}
             onUpdate={updateItem}
             onRemove={onRemoveRequest}
