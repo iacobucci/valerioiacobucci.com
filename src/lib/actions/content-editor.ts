@@ -6,6 +6,7 @@ import path from 'path';
 import { execSync, spawnSync } from 'child_process';
 import { revalidatePath } from "next/cache";
 import sharp from 'sharp';
+import matter from 'gray-matter';
 
 const CONTENT_PATH = path.join(process.cwd(), 'content');
 
@@ -163,6 +164,142 @@ export async function moveFileAction(oldRelativePath: string, newParentRelativeP
   }
 
   fs.renameSync(oldFullPath, newFullPath);
+  return { success: true };
+}
+
+export async function downloadDirectoryAction(relativeDirPath: string) {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const fullPath = resolveAndValidatePath(relativeDirPath);
+  const zipPath = path.join('/tmp', `download-${Date.now()}.zip`);
+
+  try {
+    // -r recursive, -j junk paths (don't include parent dirs) -> actually we want the folder content
+    // We cd into the parent and zip the folder name
+    const parentDir = path.dirname(fullPath);
+    const folderName = path.basename(fullPath);
+    
+    spawnSync('zip', ['-r', zipPath, folderName], { cwd: parentDir });
+    
+    const buffer = fs.readFileSync(zipPath);
+    fs.unlinkSync(zipPath);
+    
+    return { 
+      success: true, 
+      data: buffer.toString('base64'), 
+      fileName: `${folderName}.zip` 
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function uploadZipAction(formData: FormData) {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const relativeParentPath = formData.get('dir') as string;
+  const file = formData.get('file') as File;
+  
+  if (!file) throw new Error("No file uploaded");
+
+  const parentPath = resolveAndValidatePath(relativeParentPath);
+  const zipPath = path.join('/tmp', `upload-${Date.now()}.zip`);
+
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    fs.writeFileSync(zipPath, buffer);
+    
+    // Unzip into the parent directory
+    spawnSync('unzip', ['-o', zipPath, '-d', parentPath]);
+    fs.unlinkSync(zipPath);
+    
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getTagsAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const tags = new Set<string>();
+  
+  function scan(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name !== '.git' && entry.name !== 'node_modules') {
+          scan(fullPath);
+        }
+      } else if (entry.name.endsWith('.mdx')) {
+        try {
+          const content = fs.readFileSync(fullPath, 'utf8');
+          const { data } = matter(content);
+          if (Array.isArray(data.tags)) {
+            data.tags.forEach(t => {
+              const tag = String(t).trim().toLowerCase();
+              if (tag) tags.add(tag);
+            });
+          }
+        } catch (error: any) {}
+      } else if (entry.name === 'projects.json') {
+        try {
+          const content = fs.readFileSync(fullPath, 'utf8');
+          const data = JSON.parse(content);
+          if (Array.isArray(data)) {
+            data.forEach(project => {
+              if (Array.isArray(project.tech)) {
+                project.tech.forEach((t: any) => {
+                  const tag = String(t).trim().toLowerCase();
+                  if (tag) tags.add(tag);
+                });
+              }
+            });
+          }
+        } catch (error: any) {}
+      }
+    }
+  }
+
+  scan(CONTENT_PATH);
+  return Array.from(tags).sort();
+}
+
+export async function duplicateAction(relativeFilePath: string) {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const fullPath = resolveAndValidatePath(relativeFilePath);
+  const dir = path.dirname(fullPath);
+  const ext = path.extname(fullPath);
+  const baseName = path.basename(fullPath, ext);
+  
+  let newName = `${baseName}_copy${ext}`;
+  let newPath = path.join(dir, newName);
+  
+  // Ensure unique name
+  let counter = 1;
+  while (fs.existsSync(newPath)) {
+    newName = `${baseName}_copy_${counter}${ext}`;
+    newPath = path.join(dir, newName);
+    counter++;
+  }
+
+  if (fs.statSync(fullPath).isDirectory()) {
+    fs.cpSync(fullPath, newPath, { recursive: true });
+  } else {
+    fs.copyFileSync(fullPath, newPath);
+  }
+  
   return { success: true };
 }
 

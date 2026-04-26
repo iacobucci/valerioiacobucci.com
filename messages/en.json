@@ -28,7 +28,7 @@
 	"blog": {
 		"title": "Blog",
 		"description": "Thoughts on engineering and whatever else.",
-		"favorites_title": "Selected Posts",
+		"favorites_title": "Selected Articles",
 		"favorites_description": "A selection of my best articles and experiments.",
 		"recent_title": "Latest Updates",
 		"recent_description": "Freshly published articles and thoughts.",
@@ -48,7 +48,7 @@
 	"microblog": {
 		"title": "Microblog",
 		"description": "Short thoughts and updates.",
-		"recent_title": "Latest Updates",
+		"recent_title": "Latestst updates",
 		"view_all": "View Full Stream",
 		"no_posts": "No posts yet.",
 		"load_more": "Load more",

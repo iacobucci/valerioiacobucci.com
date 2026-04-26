@@ -31,7 +31,8 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
     const tags = new Set<string>();
     items.forEach(item => {
       item.tags?.forEach(tag => {
-        if (tag !== 'favorites') tags.add(tag);
+        const normalized = tag.toLowerCase().trim();
+        if (normalized && normalized !== 'favorites') tags.add(normalized);
       });
     });
     return Array.from(tags).sort((a, b) => a.localeCompare(b));
@@ -41,7 +42,9 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
     let filtered = [...items];
     
     if (selectedTag) {
-      filtered = filtered.filter(item => item.tags?.includes(selectedTag));
+      filtered = filtered.filter(item => 
+        item.tags?.some(tag => tag.toLowerCase().trim() === selectedTag.toLowerCase().trim())
+      );
     }
 
     // Always sort by ORIGINAL publication date newest first
@@ -149,7 +152,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
               All
             </button>
             {allTags.map(tag => {
-              const active = selectedTag === tag;
+              const active = selectedTag?.toLowerCase() === tag.toLowerCase();
               
               return (
                 <button
@@ -161,7 +164,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                       : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                  #{tag}
+                  #{tag.toUpperCase()}
                 </button>
               );
             })}
@@ -234,7 +237,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                             key={tag}
                             className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400"
                           >
-                            #{tag}
+                            #{tag.toUpperCase()}
                           </span>
                         ))}
                       </div>

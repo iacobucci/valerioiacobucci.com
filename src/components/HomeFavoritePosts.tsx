@@ -114,7 +114,7 @@ export default async function HomeFavoritePosts({ locale }: { locale: string }) 
 											)}
 											{post.tags?.slice(0, 2).map(tag => (
 												<span key={tag} className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
-													#{tag}
+													#{tag.toUpperCase()}
 												</span>
 											))}
 										</>

@@ -75,7 +75,7 @@ export default async function HomeRecentPosts({ locale }: { locale: string }) {
 									<div className="flex gap-2">
 										{post.tags?.slice(0, 2).map(tag => (
 											<span key={tag} className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
-												#{tag}
+												#{tag.toUpperCase()}
 											</span>
 										))}
 									</div>

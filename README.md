@@ -29,6 +29,17 @@ This is the source code for the personal website of Valerio Iacobucci, available
 - Lightweight build for low end hardware.
 - Separate repos for code and content.
 
+## Visual Identity
+
+The project follows specific naming and color conventions to distinguish between content types:
+
+- **Featured Projects**: Significant works highlighted on the homepage (Project terminology).
+- **Selected Articles**: Best blog posts and experiments (Blog terminology).
+- **Visual Cues**: 
+  - **Yellow/Amber**: Used for Selected/Featured items.
+  - **Red**: Used for Draft items in the editor.
+- **Microblog Updates**: Referred to as "Latestst updates" (EN), "Ultimissimi aggiornamenti" (IT), or "Laatsteste updates" (NL).
+
 ## Tech Stack
 
 The project is built with the following technologies:

@@ -28,7 +28,7 @@
 	"blog": {
 		"title": "Blog",
 		"description": "Gedachten over engineering en al het andere.",
-		"favorites_title": "Geselecteerde Berichten",
+		"favorites_title": "Geselecteerde Artikelen",
 		"favorites_description": "Een selectie van mijn beste artikelen en experimenten.",
 		"recent_title": "Laatste Updates",
 		"recent_description": "Vers gepubliceerde artikelen en gedachten.",
@@ -69,7 +69,7 @@
 	},
 	"microblog": {
 		"title": "Microblog",
-		"recent_title": "Laatste Updates",
+		"recent_title": "Laatsteste updates",
 		"description": "Korte gedachten en updates.",
 		"view_all": "Bekijk volledige stream",
 		"no_posts": "Nog geen berichten.",
@@ -91,8 +91,8 @@
 	"terminal": {
 		"welcome": "Probeer \"help\" om te beginnen.",
 		"help": "Beschikbare commando's: ",
-		"whoami": "Valerio - Software Engineer & Nuxt Liefhebber",
-		"about": "Ik ben een full-stack ontwikkelaar met een passie voor het bouwen von moderne webapplicaties met Nuxt en Vue.",
+		"whoami": "Valerio - Software Engineer",
+		"about": "Ik ben een full-stack ontwikkelaar met een passie voor het bouwen von moderne webapplicaties.",
 		"redirecting_blog": "Doorsturen naar blog...",
 		"redirecting_projects": "Doorsturen naar projecten...",
 		"redirecting_microblog": "Doorsturen naar microblog...",

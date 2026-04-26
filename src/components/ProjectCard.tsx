@@ -92,9 +92,9 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
         {project.tech.map((tech) => (
           <span
             key={tech}
-            className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
+            className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
           >
-            {tech}
+            {tech.toUpperCase()}
           </span>
         ))}
       </div>
