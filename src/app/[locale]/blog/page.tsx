@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getPosts } from '@/lib/content';
 import ContentList from '@/components/ContentList';
 import { Metadata } from 'next';
+import { isAuthorized } from '@/auth';
 
 export async function generateMetadata({
   params,
@@ -26,7 +27,8 @@ export default async function BlogIndexPage({
   setRequestLocale(locale);
   const t = await getTranslations('blog');
 
-  const posts = await getPosts('blog', locale);
+  const authorized = await isAuthorized();
+  const posts = await getPosts('blog', locale, authorized);
 
   return (
     <div className="flex flex-col flex-1 bg-bg-light dark:bg-bg-dark font-sans">

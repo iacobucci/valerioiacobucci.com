@@ -6,6 +6,7 @@ import {ArrowLeft} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
 import {MdLanguage} from 'react-icons/md';
 import { Metadata } from 'next';
+import { isAuthorized } from '@/auth';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
@@ -73,8 +74,9 @@ export default async function BlogPostPage({
   }
   
   const post = await getPost(CONTENT_TYPE, locale, slug);
+  const authorized = await isAuthorized();
 
-  if (!post || (post.draft && process.env.NODE_ENV !== 'development')) {
+  if (!post || (post.draft && !authorized && process.env.NODE_ENV !== 'development')) {
     notFound();
   }
 

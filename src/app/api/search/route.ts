@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getPosts } from '@/lib/content';
 import { getProjectsWithGitHubData } from '@/lib/projects';
+import { isAuthorized } from '@/auth';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
-  const blogPosts = (await getPosts('blog', locale, false)).filter(p => !p.draft);
+  
+  const authorized = await isAuthorized();
+  const blogPosts = await getPosts('blog', locale, authorized);
   const projects = await getProjectsWithGitHubData();
 
   // Load translations for static pages and projects
