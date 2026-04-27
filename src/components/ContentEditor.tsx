@@ -876,7 +876,7 @@ function EditorInternal() {
   // Confirmation & Input Modal State
   const [confirmConfig, setConfirmModal] = useState<ConfirmModalProps | null>(null);
   const [inputConfig, setInputConfig] = useState<InputDialogProps | null>(null);
-  const [frontmatterConfig, setFrontmatterModal] = useState<{ isOpen: boolean; data: FrontmatterData } | null>(null);
+  const [frontmatterConfig, setFrontmatterModal] = useState<{ isOpen: boolean; data: FrontmatterData; path: string } | null>(null);
 
   // History for Undo/Redo
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
@@ -1377,6 +1377,7 @@ function EditorInternal() {
       const { data } = matter(fileContent);
       setFrontmatterModal({
         isOpen: true,
+        path: path,
         data: {
           ...data,
           title: (data.title as string) || '',
@@ -1398,11 +1399,19 @@ function EditorInternal() {
   }
 
   async function handleSaveFrontmatter(newData: FrontmatterData) {
-    if (!frontmatterConfig || !selectedNode) return;
+    if (!frontmatterConfig) return;
+    const targetPath = frontmatterConfig.path;
     setSaving(true);
     try {
-      // Use current content to avoid losing unsaved changes in the body
-      const { content: bodyContent } = matter(content);
+      // Use current content if we are editing the currently open file
+      // otherwise we need to fetch the content again to apply frontmatter
+      let bodyContent: string;
+      if (selectedNode && selectedNode.path === targetPath) {
+        bodyContent = matter(content).content;
+      } else {
+        const fileContent = await getContentAction(targetPath);
+        bodyContent = matter(fileContent).content;
+      }
       
       // Clean up newData to ensure only serializable fields are included
       // YAML stringifier (js-yaml used by gray-matter) throws on undefined values
@@ -1419,15 +1428,17 @@ function EditorInternal() {
       
       const newFileContent = matter.stringify(bodyContent, sanitizedData);
       
-      const result = await saveContentAction(selectedNode.path, newFileContent);
+      const result = await saveContentAction(targetPath, newFileContent);
       if (result.success) {
-        setContent(newFileContent);
+        if (selectedNode && selectedNode.path === targetPath) {
+          setContent(newFileContent);
+          setIsDirty(false);
+        }
         setFrontmatterModal(null);
-        setIsDirty(false);
         toast.success("Metadata updated");
         loadGitStatus();
-        // Force preview update if it's an MDX file
-        if (selectedNode.name.endsWith('.mdx')) {
+        // Force preview update if it's an MDX file and it's the currently open one
+        if (targetPath.endsWith('.mdx') && selectedNode && selectedNode.path === targetPath) {
           updatePreview(newFileContent);
         }
       } else {
