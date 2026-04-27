@@ -328,7 +328,7 @@ function FrontmatterModal({ isOpen, data, availableTags, onSave, onCancel }: Fro
         </div>
         <div className="px-8 py-6 bg-gray-50 dark:bg-gray-800/50 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-800">
           <button onClick={onCancel} className="px-5 py-2.5 rounded-2xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancel</button>
-          <button onClick={() => onSave(formData)} className="px-8 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-xl shadow-blue-500/25 transition-all active:scale-95">Save Changes</button>
+          <button onClick={() => onSave(formData)} className="px-8 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all active:scale-95">Save Changes</button>
         </div>
       </div>
     </div>
@@ -540,7 +540,7 @@ function DraggableFile({
               {isMdx && (
                 <button 
                   onClick={(e) => { e.stopPropagation(); setShowMenu(false); onEditFrontmatter(node.path); }}
-                  className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold"
+                  className="w-full text-left px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-xs flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold"
                 >
                   <Tag className="w-3.5 h-3.5" /> Edit Metadata
                 </button>
@@ -1403,15 +1403,39 @@ function EditorInternal() {
     try {
       // Use current content to avoid losing unsaved changes in the body
       const { content: bodyContent } = matter(content);
-      const newFileContent = matter.stringify(bodyContent, newData);
-      await saveContentAction(selectedNode.path, newFileContent);
-      setContent(newFileContent);
-      setFrontmatterModal(null);
-      setIsDirty(false);
-      toast.success("Metadata updated");
-      loadGitStatus();
-    } catch {
-      toast.error("Failed to save metadata");
+      
+      // Clean up newData to ensure only serializable fields are included
+      // YAML stringifier (js-yaml used by gray-matter) throws on undefined values
+      const sanitizedData = Object.fromEntries(
+        Object.entries(newData)
+          .filter(([_, v]) => v !== undefined)
+          .map(([k, v]) => {
+            if (k === 'tags' && Array.isArray(v)) {
+              return [k, v.map(t => String(t).toLowerCase().trim()).filter(Boolean)];
+            }
+            return [k, v];
+          })
+      );
+      
+      const newFileContent = matter.stringify(bodyContent, sanitizedData);
+      
+      const result = await saveContentAction(selectedNode.path, newFileContent);
+      if (result.success) {
+        setContent(newFileContent);
+        setFrontmatterModal(null);
+        setIsDirty(false);
+        toast.success("Metadata updated");
+        loadGitStatus();
+        // Force preview update if it's an MDX file
+        if (selectedNode.name.endsWith('.mdx')) {
+          updatePreview(newFileContent);
+        }
+      } else {
+        throw new Error("Save failed");
+      }
+    } catch (e: any) {
+      console.error("Error saving frontmatter:", e);
+      toast.error(e.message || "Failed to save metadata");
     } finally {
       setSaving(false);
     }
