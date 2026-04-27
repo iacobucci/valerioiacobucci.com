@@ -106,6 +106,8 @@ interface FrontmatterData {
   date: string;
   updated?: string;
   draft: boolean;
+  preview: boolean;
+  preview_passcode?: string;
   selected: boolean;
   tags: string[];
   [key: string]: any;
@@ -137,6 +139,11 @@ function FrontmatterModal({ isOpen, data, availableTags, onSave, onCancel }: Fro
 
   const handleTagRemove = (tag: string) => {
     setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
+  };
+
+  const generatePasscode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setFormData({ ...formData, preview_passcode: code, preview: true });
   };
 
   return (
@@ -213,6 +220,45 @@ function FrontmatterModal({ isOpen, data, availableTags, onSave, onCancel }: Fro
                     <span className="text-[10px] text-gray-500">Post will not be visible on the public site</span>
                   </div>
                 </label>
+
+                <div className={`p-4 rounded-2xl border transition-all ${
+                  formData.preview 
+                    ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50' 
+                    : 'bg-gray-50/50 dark:bg-gray-800/30 border-gray-100 dark:border-gray-800'
+                }`}>
+                  <label className="flex items-center gap-3 cursor-pointer mb-3">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.preview} 
+                      onChange={(e) => setFormData({ ...formData, preview: e.target.checked })}
+                      className="w-5 h-5 rounded-lg text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700"
+                    />
+                    <div>
+                      <span className={`block text-sm font-bold ${formData.preview ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>Enable Preview</span>
+                      <span className="text-[10px] text-gray-500">Allow access via secret passcode</span>
+                    </div>
+                  </label>
+                  
+                  {formData.preview && (
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={formData.preview_passcode || ''}
+                        onChange={(e) => setFormData({ ...formData, preview_passcode: e.target.value })}
+                        placeholder="6-digit code"
+                        maxLength={6}
+                        className="flex-1 px-3 py-1.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none"
+                      />
+                      <button 
+                        onClick={generatePasscode}
+                        className="px-3 py-1.5 rounded-xl bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-[10px] font-bold transition-colors uppercase"
+                      >
+                        Generate
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <label className={`flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${
                   formData.selected 
                     ? 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50' 
@@ -1324,19 +1370,24 @@ function EditorInternal() {
   async function handleEditFrontmatter(path: string) {
     setLoading(true);
     try {
-      const fileContent = await getContentAction(path);
+      // Use current content if it's the same file, otherwise fetch from disk
+      const fileContent = (selectedNode && selectedNode.path === path) 
+        ? content 
+        : await getContentAction(path);
       const { data } = matter(fileContent);
       setFrontmatterModal({
         isOpen: true,
         data: {
+          ...data,
           title: (data.title as string) || '',
           description: (data.description as string) || '',
-          date: (data.date as string) || new Date().toISOString(),
-          updated: data.updated as string | undefined,
+          date: data.date ? (data.date instanceof Date ? data.date.toISOString() : String(data.date)) : new Date().toISOString(),
+          updated: data.updated ? (data.updated instanceof Date ? data.updated.toISOString() : String(data.updated)) : undefined,
           draft: !!data.draft,
+          preview: !!data.preview,
+          preview_passcode: data.preview_passcode ? String(data.preview_passcode) : undefined,
           selected: !!data.selected,
-          tags: ((data.tags as string[]) || []).map(t => String(t).toLowerCase().trim()).filter(Boolean),
-          ...data
+          tags: (Array.isArray(data.tags) ? data.tags : []).map(t => String(t).toLowerCase().trim()).filter(Boolean),
         }
       });
     } catch {
@@ -1350,8 +1401,8 @@ function EditorInternal() {
     if (!frontmatterConfig || !selectedNode) return;
     setSaving(true);
     try {
-      const fileContent = await getContentAction(selectedNode.path);
-      const { content: bodyContent } = matter(fileContent);
+      // Use current content to avoid losing unsaved changes in the body
+      const { content: bodyContent } = matter(content);
       const newFileContent = matter.stringify(bodyContent, newData);
       await saveContentAction(selectedNode.path, newFileContent);
       setContent(newFileContent);
@@ -1707,7 +1758,7 @@ function EditorInternal() {
                   onClick={() => setSidebarTab('git')}
                   className={`flex-1 flex items-center justify-center gap-2 py-2 m-1 rounded-lg text-xs font-bold transition-all border-2 ${
                     sidebarTab === 'git' 
-                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-gray-50 border-transparent' 
+                      ? `bg-white dark:bg-gray-700 text-blue-600 dark:text-gray-50 ${gitStatus.status !== 'Clean' ? 'border-red-500/50' : 'border-transparent'}` 
                       : gitStatus.status !== 'Clean'
                         ? 'border-red-500/50 text-red-600 dark:text-red-400 bg-red-50/50 dark:bg-red-900/10'
                         : 'border-transparent text-gray-500 hover:text-gray-700'

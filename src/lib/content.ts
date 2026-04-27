@@ -19,6 +19,8 @@ export interface ContentMetadata {
   isFallback: boolean;
   language: string;
   draft?: boolean;
+  preview?: boolean;
+  preview_passcode?: string;
   selected?: boolean;
   [key: string]: unknown;
 }
@@ -77,6 +79,8 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     tags: data.tags || [],
     content,
     draft: data.draft === true,
+    preview: data.preview === true,
+    preview_passcode: data.preview_passcode ? String(data.preview_passcode) : undefined,
     selected: data.selected === true,
     ...data
   } as ContentMetadata;

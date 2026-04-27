@@ -53,11 +53,14 @@ export async function generateStaticParams() {
 }
 
 export default async function BlogPostPage({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{locale: string; slug: string}>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const {locale, slug} = await params;
+  const { pwd } = await searchParams;
   
   setRequestLocale(locale);
   
@@ -77,7 +80,9 @@ export default async function BlogPostPage({
   const post = await getPost(CONTENT_TYPE, locale, slug);
   const authorized = await isAuthorized();
 
-  if (!post || (post.draft && !authorized && process.env.NODE_ENV !== 'development')) {
+  const isPreviewValid = post?.preview && post?.preview_passcode && pwd === post.preview_passcode;
+
+  if (!post || (post.draft && !authorized && !isPreviewValid && process.env.NODE_ENV !== 'development')) {
     notFound();
   }
 
