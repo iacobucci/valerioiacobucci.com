@@ -1,4 +1,5 @@
-import projectsData from '../../content/projects.json';
+import fs from 'fs';
+import path from 'path';
 
 export interface Project {
 	title: string;
@@ -21,11 +22,33 @@ export interface ProjectGitHubData extends Project {
 	error?: string;
 }
 
+// In-memory cache for projects.json
+let cachedProjects: Project[] | null = null;
+let lastProjectsMtime: number = 0;
+
 /**
- * Loads projects from YAML file.
+ * Loads projects from JSON file with in-memory caching.
  */
 export function getProjects(): Project[] {
-	return projectsData;
+	try {
+		const projectsPath = path.join(process.cwd(), 'content', 'projects.json');
+		const stats = fs.statSync(projectsPath);
+		const mtime = stats.mtimeMs;
+
+		// Return cache if file hasn't changed
+		if (cachedProjects && mtime === lastProjectsMtime) {
+			return cachedProjects;
+		}
+
+		const fileContent = fs.readFileSync(projectsPath, 'utf8');
+		cachedProjects = JSON.parse(fileContent);
+		lastProjectsMtime = mtime;
+		return cachedProjects!;
+	} catch (error) {
+		console.error('Error reading projects.json:', error);
+		// Return last known good cache if available
+		return cachedProjects || [];
+	}
 }
 
 // In-memory cache for GitHub data
