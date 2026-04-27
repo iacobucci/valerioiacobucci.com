@@ -11,8 +11,10 @@ function --content {
 function --publish {
 	echo "Step 1/2: Pushing 'content' repository..."
 	if [ -d "content/.git" ]; then
-		git -C content add -A
-		git -C content commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
+		if ! git -C content diff --quiet || ! git -C content diff --cached --quiet; then
+			git -C content add -A
+			git -C content commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
+		fi
 		git -C content push
 	fi
 
@@ -21,8 +23,8 @@ function --publish {
 	if ! git diff --quiet || ! git diff --cached --quiet; then
 		git add -A
 		git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
-		git push
 	fi
+	git push
 
 	echo "Triggering remote update on VPS..."
 	ssh valerio@valerioiacobucci.com "bash /home/valerio/source/web/valerioiacobucci.com/scripts/update.sh --setup --full"
@@ -35,8 +37,8 @@ function --publish-app {
 	if ! git diff --quiet || ! git diff --cached --quiet; then
 		git add -A
 		git commit -m "$(date '+%Y-%m-%d %H:%M:%S')"
-		git push
 	fi
+	git push
 
 	echo "Triggering remote update on VPS (app only)..."
 	ssh valerio@valerioiacobucci.com "bash /home/valerio/source/web/valerioiacobucci.com/scripts/update.sh --setup --no-content"

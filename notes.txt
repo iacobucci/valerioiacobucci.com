@@ -25,6 +25,7 @@
 	[x] git controls (commit, push, pull, stash, reset)
 	[x] server-side deployment control (systemd integration)
 	[x] preview mode (edit, split, preview)
+	[x] update apps without re deploying the site.
 
 [x] microblog
 	[x] database-backed feed
@@ -51,4 +52,3 @@
 	[x] rss feed (multilingual)
 	[x] fake interactive terminal (repl)
 		[x] lispv interpreter (custom language)
-		[ ] minigames and extra programs

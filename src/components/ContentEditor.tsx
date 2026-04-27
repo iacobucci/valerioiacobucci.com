@@ -75,7 +75,8 @@ interface HistoryItem {
 function getFileIcon(fileName: string) {
   const ext = fileName.split('.').pop()?.toLowerCase();
   if (ext === 'mdx' || ext === 'md') return FileText;
-  if (ext === 'json') return Code;
+  if (ext === 'json' || ext === 'js' || ext === 'ts') return Code;
+  if (ext === 'html' || ext === 'css') return Code;
   if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(ext || '')) return ImageIcon;
   if (['gltf', 'glb', 'obj'].includes(ext || '')) return Box;
   return File;
@@ -885,6 +886,9 @@ function EditorInternal() {
   const isMdx = !!selectedNode?.name.endsWith('.mdx');
   const isJson = !!selectedNode?.name.endsWith('.json');
   const isTxt = !!selectedNode?.name.endsWith('.txt');
+  const isHtml = !!selectedNode?.name.endsWith('.html');
+  const isCss = !!selectedNode?.name.endsWith('.css');
+  const isJs = !!selectedNode?.name.endsWith('.js');
   const isImage = !!selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
   const hasVisualEditor = selectedNode?.name === 'projects.json';
 
@@ -983,7 +987,14 @@ function EditorInternal() {
     async function loadFileContent() {
       if (!selectedNode || selectedNode.type === 'directory') return;
       
-      const isTextFile = !!(selectedNode.name.endsWith('.mdx') || selectedNode.name.endsWith('.json') || selectedNode.name.endsWith('.txt'));
+      const isTextFile = !!(
+        selectedNode.name.endsWith('.mdx') || 
+        selectedNode.name.endsWith('.json') || 
+        selectedNode.name.endsWith('.txt') ||
+        selectedNode.name.endsWith('.html') ||
+        selectedNode.name.endsWith('.css') ||
+        selectedNode.name.endsWith('.js')
+      );
       if (!isTextFile) {
         setContent('');
         setIsDirty(false);
@@ -1000,8 +1011,6 @@ function EditorInternal() {
           setPreviewMode('visual');
         } else if (selectedNode.name.endsWith('.mdx')) {
           setPreviewMode(window.innerWidth < 1024 ? 'edit' : 'split');
-        } else if (isTxt) {
-          setPreviewMode('edit');
         } else {
           setPreviewMode('edit');
         }
@@ -1014,7 +1023,7 @@ function EditorInternal() {
       }
     }
     loadFileContent();
-  }, [selectedNode, isTxt]);
+  }, [selectedNode]);
 
   const updatePreview = useCallback(async (text: string) => {
     if (!text || !selectedNode?.name.endsWith('.mdx')) return;
@@ -1060,13 +1069,13 @@ function EditorInternal() {
 
   // Autosave effect
   useEffect(() => {
-    if (autosave && isDirty && !saving && (isMdx || isJson || isTxt)) {
+    if (autosave && isDirty && !saving && (isMdx || isJson || isTxt || isHtml || isCss || isJs)) {
       const timer = setTimeout(() => {
         handleSave(true);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [content, autosave, isDirty, saving, handleSave, isMdx, isJson, isTxt]);
+  }, [content, autosave, isDirty, saving, handleSave, isMdx, isJson, isTxt, isHtml, isCss, isJs]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1752,7 +1761,7 @@ function EditorInternal() {
             
             <button
               onClick={() => handleSave()}
-              disabled={saving || (!isMdx && !isJson && !isTxt)}
+              disabled={saving || (!isMdx && !isJson && !isTxt && !isHtml && !isCss && !isJs)}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-sm border ${
                 isDirty 
                   ? 'bg-blue-600 border-blue-500 text-white' 
@@ -2037,7 +2046,7 @@ function EditorInternal() {
                       )}
                       
                       {/* Source Editor View */}
-                      {(previewMode === 'edit' || (isMdx && previewMode === 'split') || (isJson && previewMode !== 'visual')) && (
+                      {(previewMode === 'edit' || (isMdx && previewMode === 'split') || (isJson && previewMode !== 'visual') || isHtml || isCss || isJs) && (
                         <div className={`flex-1 flex flex-col min-h-0 order-2 lg:order-1 ${previewMode === 'split' ? 'border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800' : ''}`}>
                           <textarea
                             value={content}
