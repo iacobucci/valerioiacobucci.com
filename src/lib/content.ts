@@ -88,16 +88,20 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     const cached = contentCache.get(filePath);
 
     if (cached && cached.mtime === mtime) {
-      return cached.data;
+      return { 
+        ...cached.data, 
+        isFallback: cached.data.language !== locale 
+      };
     }
 
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data, content } = matter(fileContents);
 
     const postData: ContentMetadata = {
+      ...data,
       slug,
       type,
-      isFallback,
+      isFallback: actualLocale !== locale,
       language: actualLocale,
       title: data.title || slug,
       date: data.date ? (data.date instanceof Date ? data.date.toISOString() : data.date) : undefined,
@@ -108,8 +112,7 @@ export async function getPost(type: string, locale: string, slug: string): Promi
       draft: data.draft === true,
       preview: data.preview === true,
       preview_passcode: data.preview_passcode ? String(data.preview_passcode) : undefined,
-      selected: data.selected === true,
-      ...data
+      selected: data.selected === true
     };
 
     contentCache.set(filePath, { data: postData, mtime });
