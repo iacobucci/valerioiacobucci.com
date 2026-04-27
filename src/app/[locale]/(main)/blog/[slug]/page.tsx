@@ -14,6 +14,7 @@ import {mdxComponents} from '@/components/mdx-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
+import ShareDraftButton from '@/components/ShareDraftButton';
 
 const CONTENT_TYPE = 'blog';
 
@@ -80,7 +81,10 @@ export default async function BlogPostPage({
   const post = await getPost(CONTENT_TYPE, locale, slug);
   const authorized = await isAuthorized();
 
-  const isPreviewValid = post?.preview && post?.preview_passcode && pwd === post.preview_passcode;
+  const isPreviewValid = post?.preview && (
+    !post.preview_passcode || 
+    (typeof pwd === 'string' && pwd === post.preview_passcode)
+  );
 
   if (!post || (post.draft && !authorized && !isPreviewValid && process.env.NODE_ENV !== 'development')) {
     notFound();
@@ -132,15 +136,25 @@ export default async function BlogPostPage({
               {t('back')}
             </Link>
 
-            {authorized && (
-              <Link
-                href={`/admin/editor?path=${post.slug}/${post.language}.mdx`}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95"
-              >
-                <MdEdit className="w-4 h-4" />
-                Edit Post
-              </Link>
-            )}
+            <div className="flex items-center gap-2">
+              {authorized && post.draft && (
+                <ShareDraftButton 
+                  slug={post.slug} 
+                  locale={locale} 
+                  passcode={post.preview_passcode} 
+                  isPreviewEnabled={!!post.preview} 
+                />
+              )}
+              {authorized && (
+                <Link
+                  href={`/admin/editor?path=${post.slug}/${post.language}.mdx`}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95"
+                >
+                  <MdEdit className="w-4 h-4" />
+                  Edit Post
+                </Link>
+              )}
+            </div>
           </div>
           
           {post.isFallback && (
