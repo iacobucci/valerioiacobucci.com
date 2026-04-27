@@ -1,6 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+// We import the JSON statically only to let Turbopack/Webpack track it for HMR in development.
+// In production, we ignore this and read from the filesystem to allow runtime updates.
+import projectsDataHMR from '../../content/projects.json';
+
 export interface Project {
 	title: string;
 	github_repo: string;
@@ -22,14 +26,20 @@ export interface ProjectGitHubData extends Project {
 	error?: string;
 }
 
-// In-memory cache for projects.json
+// In-memory cache for projects.json (Production only)
 let cachedProjects: Project[] | null = null;
 let lastProjectsMtime: number = 0;
 
 /**
- * Loads projects from JSON file with in-memory caching.
+ * Loads projects from JSON file with in-memory caching and HMR support.
  */
 export function getProjects(): Project[] {
+	// In development, return the imported data to enable HMR.
+	// Turbopack will automatically refresh the components when projects.json changes.
+	if (process.env.NODE_ENV === 'development') {
+		return projectsDataHMR;
+	}
+
 	try {
 		const projectsPath = path.join(process.cwd(), 'content', 'projects.json');
 		const stats = fs.statSync(projectsPath);
@@ -46,7 +56,6 @@ export function getProjects(): Project[] {
 		return cachedProjects!;
 	} catch (error) {
 		console.error('Error reading projects.json:', error);
-		// Return last known good cache if available
 		return cachedProjects || [];
 	}
 }

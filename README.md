@@ -41,6 +41,30 @@ The project follows specific naming and color conventions to distinguish between
   - **Red**: Used for Draft items in the editor.
 - **Microblog Updates**: Referred to as "Latestst updates" (EN), "Ultimissimi aggiornamenti" (IT), or "Laatsteste updates" (NL).
 
+## Technical Integrity
+
+### Hybrid Data Loading Strategy
+
+To balance developer experience (DX) and production flexibility, we use a hybrid approach for loading structured data (e.g., `projects.json`):
+
+1.  **Development Mode (HMR Support)**: We use static `import` statements. This allows Turbopack/Webpack to track the file as a dependency, enabling Hot Module Replacement (HMR) so the UI updates instantly when the file is modified.
+2.  **Production Mode (Runtime Updates)**: We bypass the static import and read directly from the filesystem using `fs.readFileSync`. We implement an in-memory cache that validates against the file's modification time (`mtimeMs`).
+
+This ensures that:
+- In development, you get instant feedback.
+- In production, you can update content via the web editor and see changes live without a new build or server restart.
+
+Example implementation pattern:
+```typescript
+import dataHMR from '../../content/data.json';
+
+export function getData() {
+  if (process.env.NODE_ENV === 'development') return dataHMR;
+  
+  // Production: logic with fs.statSync + fs.readFileSync + in-memory cache
+}
+```
+
 ## Tech Stack
 
 The project is built with the following technologies:
