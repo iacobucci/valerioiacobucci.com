@@ -28,7 +28,8 @@ import {
   uploadZipAction,
   getTagsAction,
   duplicateAction,
-  translateContentAction
+  translateContentAction,
+  checkTranslationFilesAction
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
 import { MDXRemote } from 'next-mdx-remote';
@@ -113,10 +114,17 @@ interface TranslateModalProps {
 function TranslateModal({ isOpen, onCancel, onConfirm, currentPath }: TranslateModalProps) {
   const locales = ['en', 'it', 'nl'];
   const [selectedLocales, setSelectedLocales] = useState<string[]>([]);
+  const [existingFiles, setExistingFiles] = useState<Record<string, boolean>>({});
   
   // Extract current locale from path (e.g., path/to/en.mdx)
   const currentLocale = currentPath.split('/').pop()?.split('.').slice(-2, -1)[0] || 'en';
   const availableTargetLocales = locales.filter(l => l !== currentLocale);
+
+  useEffect(() => {
+    if (isOpen) {
+      checkTranslationFilesAction(currentPath).then(setExistingFiles);
+    }
+  }, [isOpen, currentPath]);
 
   if (!isOpen) return null;
 
@@ -125,6 +133,8 @@ function TranslateModal({ isOpen, onCancel, onConfirm, currentPath }: TranslateM
       prev.includes(locale) ? prev.filter(l => l !== locale) : [...prev, locale]
     );
   };
+
+  const hasOverlap = selectedLocales.some(l => existingFiles[l]);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -154,15 +164,30 @@ function TranslateModal({ isOpen, onCancel, onConfirm, currentPath }: TranslateM
                     onChange={() => toggleLocale(locale)}
                     className="w-5 h-5 rounded-lg text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700"
                   />
-                  <div>
+                  <div className="flex-1">
                     <span className={`block text-sm font-bold ${selectedLocales.includes(locale) ? 'text-blue-700 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
                       {locale.toUpperCase()} {locale === 'en' ? '(English)' : locale === 'it' ? '(Italian)' : locale === 'nl' ? '(Dutch)' : ''}
                     </span>
+                    {existingFiles[locale] && (
+                      <span className="text-[10px] text-orange-600 dark:text-orange-400 font-medium flex items-center gap-1 mt-0.5">
+                        <Archive className="w-3 h-3" /> File already exists
+                      </span>
+                    )}
                   </div>
                 </label>
               ))}
             </div>
           </div>
+
+          {hasOverlap && (
+            <div className="p-4 rounded-2xl bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800/50 flex gap-3">
+              <Zap className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">
+                <strong>Warning:</strong> Some of the selected languages already have a translation file. These files will be <strong>permanently replaced</strong>.
+              </p>
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-4">
             <button 
               onClick={onCancel}
@@ -173,10 +198,14 @@ function TranslateModal({ isOpen, onCancel, onConfirm, currentPath }: TranslateM
             <button 
               onClick={() => onConfirm(selectedLocales)}
               disabled={selectedLocales.length === 0}
-              className="px-8 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
+              className={`px-8 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg transition-all flex items-center gap-2 ${
+                hasOverlap 
+                  ? 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/20' 
+                  : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+              }`}
             >
               <Languages className="w-4 h-4" />
-              Translate Now
+              {hasOverlap ? 'Overwrite & Translate' : 'Translate Now'}
             </button>
           </div>
         </div>

@@ -478,6 +478,24 @@ ${content}`;
   }
 }
 
+export async function checkTranslationFilesAction(relativePath: string) {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const fullPath = resolveAndValidatePath(relativePath);
+  const dirPath = path.dirname(fullPath);
+  const locales = ['en', 'it', 'nl'];
+  
+  const results: Record<string, boolean> = {};
+  for (const locale of locales) {
+    const targetPath = path.join(dirPath, `${locale}.mdx`);
+    results[locale] = fs.existsSync(targetPath);
+  }
+  
+  return results;
+}
+
 export async function getGitStatusAction() {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
