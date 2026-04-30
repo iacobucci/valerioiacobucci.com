@@ -39,6 +39,8 @@ The project follows specific naming and color conventions to distinguish between
   - **Yellow/Amber**: Used for Selected Articles.
   - **Blue**: Used for Featured Projects.
   - **Red**: Used for Draft items in the editor.
+- **Design Constraints**:
+  - **No shadows or blurs**: Buttons and interactive elements should avoid `shadow-*` and `backdrop-blur` classes to maintain a flat, clean aesthetic.
 - **Microblog Updates**: Referred to as "Latestst updates" (EN), "Ultimissimi aggiornamenti" (IT), or "Laatsteste updates" (NL).
 
 ## Technical Integrity

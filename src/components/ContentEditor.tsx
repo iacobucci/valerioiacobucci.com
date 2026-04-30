@@ -137,8 +137,8 @@ function TranslateModal({ isOpen, onCancel, onConfirm, currentPath }: TranslateM
   const hasOverlap = selectedLocales.some(l => existingFiles[l]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-900/50">
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Translate Article</h3>
@@ -198,10 +198,10 @@ function TranslateModal({ isOpen, onCancel, onConfirm, currentPath }: TranslateM
             <button 
               onClick={() => onConfirm(selectedLocales)}
               disabled={selectedLocales.length === 0}
-              className={`px-8 py-2.5 rounded-xl text-white text-sm font-bold shadow-lg transition-all flex items-center gap-2 ${
+              className={`px-8 py-2.5 rounded-xl text-white text-sm font-bold transition-all flex items-center gap-2 ${
                 hasOverlap 
-                  ? 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/20' 
-                  : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+                  ? 'bg-orange-600 hover:bg-orange-700' 
+                  : 'bg-blue-600 hover:bg-blue-700'
               }`}
             >
               <Languages className="w-4 h-4" />
