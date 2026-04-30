@@ -1043,6 +1043,26 @@ function EditorInternal() {
     return () => clearTimeout(timer);
   }, [content, updatePreview]);
 
+  const getFileInfo = useCallback(() => {
+    if (!selectedNode) return { type: 'blog', slug: '' };
+    const parts = selectedNode.path.split('/');
+    if (parts.length === 1) return { type: 'blog', slug: '' };
+    if (parts.length === 2) return { type: 'blog', slug: parts[0] };
+    return { type: parts[0], slug: parts[1] };
+  }, [selectedNode]);
+
+  const handlePreview = useCallback(() => {
+    if (!selectedNode || !selectedNode.path.endsWith('.mdx')) return;
+    
+    const parts = selectedNode.path.split('/');
+    const { type, slug } = getFileInfo();
+    const fileName = parts[parts.length - 1];
+    const lang = fileName.replace('.mdx', '');
+    
+    const url = `/${lang}/${type}/${slug}`;
+    window.open(url, '_blank');
+  }, [selectedNode, getFileInfo]);
+
   const toggleExpand = (path: string) => {
     setExpandedPaths(prev => {
       const next = new Set(prev);
@@ -1620,14 +1640,6 @@ function EditorInternal() {
     }
   }
 
-  const getFileInfo = useCallback(() => {
-    if (!selectedNode) return { type: 'blog', slug: '' };
-    const parts = selectedNode.path.split('/');
-    if (parts.length === 1) return { type: 'blog', slug: '' };
-    if (parts.length === 2) return { type: 'blog', slug: parts[0] };
-    return { type: parts[0], slug: parts[1] };
-  }, [selectedNode]);
-
   const components = {
     ...mdxComponents,
     ModelViewer: (props: { url: string; [key: string]: unknown }) => {
@@ -1747,6 +1759,19 @@ function EditorInternal() {
             )}
             
             <button
+              onClick={handlePreview}
+              disabled={!selectedNode || !selectedNode.path.endsWith('.mdx')}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-sm border ${
+                selectedNode?.path.endsWith('.mdx') 
+                  ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50' 
+                  : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 opacity-50 cursor-not-allowed'
+              }`}
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="hidden sm:inline">Preview</span>
+            </button>
+
+            <button
               onClick={() => setAutosave(!autosave)}
               className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-bold transition-all text-xs sm:text-sm border ${
                 autosave 
@@ -1759,6 +1784,7 @@ function EditorInternal() {
               <span className="hidden lg:inline">Autosave</span>
             </button>
             
+
             <button
               onClick={() => handleSave()}
               disabled={saving || (!isMdx && !isJson && !isTxt && !isHtml && !isCss && !isJs)}
@@ -1770,14 +1796,6 @@ function EditorInternal() {
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               <span className="hidden sm:inline">Save</span>
-            </button>
-            <button
-              onClick={handleDeploy}
-              disabled={gitOperation === 'deploy'}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 hover:border-purple-500 text-purple-600 dark:text-purple-400 rounded-lg font-bold transition-all text-sm"
-            >
-              {gitOperation === 'deploy' || deployStatus.isActive ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
-              <span className="hidden sm:inline">Deploy</span>
             </button>
           </div>
         </div>
@@ -1959,9 +1977,17 @@ function EditorInternal() {
                         <span className="text-[10px] font-bold">Hard Reset</span>
                         <span className="text-[8px] text-red-400 text-center leading-tight">Discard all changes</span>
                       </button>
-                    </div>
-                  </div>
-
+                      <button
+                        onClick={handleDeploy}
+                        disabled={gitOperation !== 'none' || deployStatus.isActive}
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800 hover:border-purple-500 transition-all group disabled:opacity-50"
+                      >
+                        {deployStatus.isActive ? <RefreshCw className="w-5 h-5 text-purple-500 animate-spin" /> : <Rocket className="w-5 h-5 text-purple-500 group-hover:scale-110 transition-transform" />}
+                        <span className="text-[10px] font-bold">Deploy</span>
+                        <span className="text-[8px] text-purple-400 text-center leading-tight">Rebuild & Restart</span>
+                      </button>
+                      </div>
+                      </div>
                   {/* Git Status */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Git Status</h4>

@@ -3,9 +3,8 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
-import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit } from 'react-icons/md';
+import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useTranslations } from 'next-intl';
@@ -23,6 +22,8 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [visibleCount, setVisibleCount] = useState(6);
+  // Default to true for admins, false for visitors
+  const [showDrafts, setShowDrafts] = useState(isAuthorized);
   const listRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +42,14 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   const filteredItems = useMemo(() => {
     let filtered = [...items];
     
+    // Safety check: if NOT authorized, NEVER show drafts
+    // If authorized, respect the toggle
+    const shouldHideDrafts = !isAuthorized || !showDrafts;
+    
+    if (shouldHideDrafts) {
+      filtered = filtered.filter(item => !item.draft);
+    }
+
     if (selectedTag) {
       filtered = filtered.filter(item => 
         item.tags?.some(tag => tag.toLowerCase().trim() === selectedTag.toLowerCase().trim())
@@ -53,7 +62,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
-  }, [items, selectedTag]);
+  }, [items, selectedTag, showDrafts, isAuthorized]);
 
   const visibleItems = useMemo(() => {
     return filteredItems.slice(0, visibleCount);
@@ -119,7 +128,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   useEffect(() => {
     setFocusedIndex(-1);
     setVisibleCount(6);
-  }, [selectedTag]);
+  }, [selectedTag, showDrafts]);
 
   // Scroll focused item into view
   useEffect(() => {
@@ -135,7 +144,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   return (
     <div className="space-y-8">
       {/* Controls */}
-      <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
@@ -170,144 +179,157 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
             })}
           </div>
         )}
+
+        {isAuthorized && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowDrafts(!showDrafts)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                showDrafts 
+                  ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50' 
+                  : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400'
+              }`}
+              title={showDrafts ? "Hide Drafts (Visitor View)" : "Show All (Admin View)"}
+            >
+              {showDrafts ? <MdVisibility className="w-4 h-4" /> : <MdVisibilityOff className="w-4 h-4" />}
+              {showDrafts ? "Admin View" : "Visitor View"}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* List */}
       <div className="grid grid-cols-1 gap-6" ref={listRef}>
-        <AnimatePresence mode="popLayout" initial={false}>
-          {visibleItems.map((item, index) => {
-            // Handle relative cover image
-            let finalCover = item.cover;
-            if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
-              const date = item.updated || item.date;
-              const version = date ? new Date(date).getTime() : '';
-              const normalized = finalCover.startsWith('./') ? finalCover.slice(2) : finalCover;
-              finalCover = `/assets/${type}/${item.slug}/${normalized}`;
-              if (version) {
-                finalCover += `?v=${version}`;
-              }
+        {visibleItems.map((item, index) => {
+          // Handle relative cover image
+          let finalCover = item.cover;
+          if (typeof finalCover === 'string' && !finalCover.startsWith('http') && !finalCover.startsWith('/')) {
+            const date = item.updated || item.date;
+            const version = date ? new Date(date).getTime() : '';
+            const normalized = finalCover.startsWith('./') ? finalCover.slice(2) : finalCover;
+            finalCover = `/assets/${type}/${item.slug}/${normalized}`;
+            if (version) {
+              finalCover += `?v=${version}`;
             }
-            
-            const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
-            const isFocused = index === focusedIndex;
-            const hasSelected = item.selected;
+          }
+          
+          const coverSrc = typeof finalCover === 'string' ? finalCover : undefined;
+          const isFocused = index === focusedIndex;
+          const hasSelected = item.selected;
 
-            return (
-              <motion.div
-                layout
-                exit={{ opacity: 0, scale: 0.95 }}
-                key={item.slug}
-                onMouseEnter={() => setFocusedIndex(index)}
-                style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
-                className={`card-enter transition-all duration-200 rounded-2xl relative ${
-                  isFocused 
-                    ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.01]' 
-                    : ''
-                }`}
+          return (
+            <div
+              key={`${item.slug}-${item.language}`}
+              onMouseEnter={() => setFocusedIndex(index)}
+              style={{ animationDelay: `${Math.min(index, 10) * 50}ms` }}
+              className={`card-enter transition-all duration-200 rounded-2xl relative ${
+                isFocused 
+                  ? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.01]' 
+                  : ''
+              }`}
+            >
+              <Link
+                href={`/${type}/${item.slug}`}
+                onMouseEnter={() => router.prefetch(`/${type}/${item.slug}`)}
+                className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 transition-all duration-300 overflow-hidden hover:shadow-xl"
               >
-                <Link
-                  href={`/${type}/${item.slug}`}
-                  onMouseEnter={() => router.prefetch(`/${type}/${item.slug}`)}
-                  className="group flex flex-col sm:flex-row gap-6 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-white dark:hover:bg-gray-800/50 transition-all duration-300 overflow-hidden hover:shadow-xl"
-                >
-                  {coverSrc && (
-                    <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">
-                      <Image
-                        src={coverSrc}
-                        alt={item.title}
-                        fill
-                        unoptimized
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="flex flex-col flex-1 justify-center py-2">
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      {hasSelected && (
-                        <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-1 ${
-                          type === 'blog' 
-                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 ring-yellow-200 dark:ring-yellow-800'
-                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-800'
-                        }`}>
-                          {type === 'blog' ? <MdStar className="text-yellow-500" /> : <MdStar className="text-blue-500" />}
-                          {type === 'blog' ? t('favorites_title') : 'Featured Project'}
-                        </span>
-                      )}
-
-                      <div className="flex flex-wrap gap-2">
-                        {item.tags?.map(tag => (
-                          <span 
-                            key={tag}
-                            className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400"
-                          >
-                            #{tag.toUpperCase()}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      {item.isFallback && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest">
-                          <MdLanguage className="w-3 h-3" />
-                          {item.language.toUpperCase()} ONLY
-                        </span>
-                      )}
-
-                      {item.draft && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest">
-                          {t('draft_badge')}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-                      {item.title}
-                    </h3>
-                    
-                    {item.description && (
-                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 leading-relaxed">
-                        {item.description}
-                      </p>
-                    )}
-                    
-                    <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mt-auto">
-                      {item.date && (
-                        <div className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5" title="Published date">
-                          <MdCalendarToday className="w-3.5 h-3.5" />
-                          <FormattedDate date={item.date} locale={locale} />
-                        </div>
-                      )}
-                      {item.updated && (
-                        <div className="text-xs font-medium text-blue-500/80 dark:text-blue-400/80 flex items-center gap-1.5" title="Last updated">
-                          <MdEditCalendar className="w-3.5 h-3.5" />
-                          <FormattedDate date={item.updated} locale={locale} />
-                        </div>
-                      )}
-                      {item.readingTime && (
-                        <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
-                          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-                          {item.readingTime} min
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-
-                {isAuthorized && (
-                  <div className="absolute top-8 right-8 z-20">
-                    <Link
-                      href={`/admin/editor?path=${item.slug}/${item.language}.mdx`}
-                      className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-90"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MdEdit className="w-5 h-5" />
-                    </Link>
+                {coverSrc && (
+                  <div className="relative w-full sm:w-48 h-48 sm:h-auto rounded-xl overflow-hidden shrink-0">
+                    <Image
+                      src={coverSrc}
+                      alt={item.title}
+                      fill
+                      unoptimized
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
                   </div>
                 )}
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                
+                <div className="flex flex-col flex-1 justify-center py-2">
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    {hasSelected && (
+                      <span className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-1 ${
+                        type === 'blog' 
+                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 ring-yellow-200 dark:ring-yellow-800'
+                          : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-800'
+                      }`}>
+                        {type === 'blog' ? <MdStar className="text-yellow-500" /> : <MdStar className="text-blue-500" />}
+                        {type === 'blog' ? t('favorites_title') : 'Featured Project'}
+                      </span>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                      {item.tags?.map(tag => (
+                        <span 
+                          key={tag}
+                          className="text-[10px] font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400"
+                        >
+                          #{tag.toUpperCase()}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    {item.isFallback && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold uppercase tracking-widest">
+                        <MdLanguage className="w-3 h-3" />
+                        {item.language.toUpperCase()} ONLY
+                      </span>
+                    )}
+
+                    {item.draft && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-[10px] font-bold uppercase tracking-widest">
+                        {t('draft_badge')}
+                      </span>
+                    )}
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
+                    {item.title}
+                  </h3>
+                  
+                  {item.description && (
+                    <p className="text-gray-600 dark:text-gray-400 line-clamp-2 mb-4 leading-relaxed">
+                      {item.description}
+                    </p>
+                  )}
+                  
+                  <div className="flex flex-wrap items-center gap-y-2 gap-x-4 mt-auto">
+                    {item.date && (
+                      <div className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5" title="Published date">
+                        <MdCalendarToday className="w-3.5 h-3.5" />
+                        <FormattedDate date={item.date} locale={locale} />
+                      </div>
+                    )}
+                    {item.updated && (
+                      <div className="text-xs font-medium text-blue-500/80 dark:text-blue-400/80 flex items-center gap-1.5" title="Last updated">
+                        <MdEditCalendar className="w-3.5 h-3.5" />
+                        <FormattedDate date={item.updated} locale={locale} />
+                      </div>
+                    )}
+                    {item.readingTime && (
+                      <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                        <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                        {item.readingTime} min
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+
+              {isAuthorized && (
+                <div className="absolute top-8 right-8 z-20">
+                  <Link
+                    href={`/admin/editor?path=${item.slug}/${item.language}.mdx`}
+                    className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all shadow-md flex items-center justify-center hover:scale-110 active:scale-90"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MdEdit className="w-5 h-5" />
+                  </Link>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Loader for infinite scroll */}
