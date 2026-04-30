@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MdLogout, MdPerson, MdEdit, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import GitHubLoginButton from "./GitHubLoginButton";
 import { Link } from "@/i18n/routing";
-import { useParams } from "next/navigation";
 import { useDrafts } from "./DraftsContext";
 import { useTranslations } from "next-intl";
 
@@ -16,8 +15,6 @@ export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { showDrafts, setShowDrafts } = useDrafts();
   const menuRef = useRef<HTMLDivElement>(null);
-  const params = useParams();
-  const locale = params.locale as string;
   const tAuth = useTranslations("auth");
 
   useEffect(() => {

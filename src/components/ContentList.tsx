@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit } from 'react-icons/md';
@@ -125,10 +125,12 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   }, [visibleItems, focusedIndex, router, type]);
 
   // Reset focus and count when filters change
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setFocusedIndex(-1);
     setVisibleCount(6);
   }, [selectedTag, showDrafts]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Scroll focused item into view
   useEffect(() => {
