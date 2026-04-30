@@ -86,7 +86,9 @@
 	},
 	"auth": {
 		"login": "Login",
-		"logout": "Logout"
+		"logout": "Logout",
+		"admin_view": "Admin View",
+		"visitor_view": "Visitor View"
 	},
 	"terminal": {
 		"welcome": "Try \"help\" to start.",

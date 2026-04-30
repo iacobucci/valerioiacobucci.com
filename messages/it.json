@@ -86,7 +86,9 @@
 	},
 	"auth": {
 		"login": "Accedi",
-		"logout": "Esci"
+		"logout": "Esci",
+		"admin_view": "Vista Admin",
+		"visitor_view": "Vista Visitatore"
 	},
 	"terminal": {
 		"welcome": "Prova \"help\" per iniziare.",

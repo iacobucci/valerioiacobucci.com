@@ -86,7 +86,9 @@
 	},
 	"auth": {
 		"login": "Inloggen",
-		"logout": "Uitloggen"
+		"logout": "Uitloggen",
+		"admin_view": "Beheerdersweergave",
+		"visitor_view": "Bezoekersweergave"
 	},
 	"terminal": {
 		"welcome": "Probeer \"help\" om te beginnen.",

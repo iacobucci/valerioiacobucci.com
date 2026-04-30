@@ -4,17 +4,21 @@ import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MdLogout, MdPerson, MdEdit } from "react-icons/md";
+import { MdLogout, MdPerson, MdEdit, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import GitHubLoginButton from "./GitHubLoginButton";
 import { Link } from "@/i18n/routing";
 import { useParams } from "next/navigation";
+import { useDrafts } from "./DraftsContext";
+import { useTranslations } from "next-intl";
 
 export default function UserMenu() {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const { showDrafts, setShowDrafts } = useDrafts();
   const menuRef = useRef<HTMLDivElement>(null);
   const params = useParams();
   const locale = params.locale as string;
+  const tAuth = useTranslations("auth");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,14 +89,27 @@ export default function UserMenu() {
             </div>
             
             {isAuthorized && (
-              <Link
-                href="/admin/editor"
-                className="flex items-center w-full gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <MdEdit className="w-4 h-4" />
-                Content Editor
-              </Link>
+              <>
+                <Link
+                  href="/admin/editor"
+                  className="flex items-center w-full gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <MdEdit className="w-4 h-4" />
+                  Content Editor
+                </Link>
+
+                <button
+                  onClick={() => {
+                    setShowDrafts(!showDrafts);
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center w-full gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                >
+                  {showDrafts ? <MdVisibility className="w-4 h-4" /> : <MdVisibilityOff className="w-4 h-4" />}
+                  {showDrafts ? tAuth("admin_view") : tAuth("visitor_view")}
+                </button>
+              </>
             )}
 
             <button
