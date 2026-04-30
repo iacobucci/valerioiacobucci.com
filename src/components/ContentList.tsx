@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
-import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit, MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit } from 'react-icons/md';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useTranslations } from 'next-intl';
+import { useDrafts } from './DraftsContext';
 
 interface ContentListProps {
   items: ContentMetadata[];
@@ -19,11 +20,10 @@ interface ContentListProps {
 export default function ContentList({ items, type, locale, isAuthorized }: ContentListProps) {
   const router = useRouter();
   const t = useTranslations('blog');
+  const { showDrafts } = useDrafts();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [visibleCount, setVisibleCount] = useState(6);
-  // Default to true for admins, false for visitors
-  const [showDrafts, setShowDrafts] = useState(isAuthorized);
   const listRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -125,10 +125,12 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   }, [visibleItems, focusedIndex, router, type]);
 
   // Reset focus and count when filters change
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setFocusedIndex(-1);
     setVisibleCount(6);
   }, [selectedTag, showDrafts]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Scroll focused item into view
   useEffect(() => {
@@ -177,23 +179,6 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                 </button>
               );
             })}
-          </div>
-        )}
-
-        {isAuthorized && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowDrafts(!showDrafts)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                showDrafts 
-                  ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50' 
-                  : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400'
-              }`}
-              title={showDrafts ? "Hide Drafts (Visitor View)" : "Show All (Admin View)"}
-            >
-              {showDrafts ? <MdVisibility className="w-4 h-4" /> : <MdVisibilityOff className="w-4 h-4" />}
-              {showDrafts ? "Admin View" : "Visitor View"}
-            </button>
           </div>
         )}
       </div>

@@ -24,6 +24,7 @@ export interface FileNode {
   type: 'file' | 'directory';
   children?: FileNode[];
   size?: number;
+  isDraft?: boolean;
 }
 
 export async function listContentAction(): Promise<FileNode[]> {
@@ -42,23 +43,41 @@ export async function listContentAction(): Promise<FileNode[]> {
         const relativePath = path.relative(CONTENT_PATH, fullPath);
         
         if (entry.isDirectory()) {
+          const children = getTree(fullPath);
+          const hasDraft = children.some(child => child.isDraft);
           return {
             name: entry.name,
             path: relativePath,
             type: 'directory' as const,
-            children: getTree(fullPath)
+            children,
+            isDraft: hasDraft
           };
         } else {
           const stats = fs.statSync(fullPath);
+          let isDraft = false;
+          if (entry.name.endsWith('.mdx')) {
+            try {
+              const content = fs.readFileSync(fullPath, 'utf8');
+              const { data } = matter(content);
+              isDraft = !!data.draft;
+            } catch {
+              // Ignore parse errors
+            }
+          }
           return {
             name: entry.name,
             path: relativePath,
             type: 'file' as const,
-            size: stats.size
+            size: stats.size,
+            isDraft
           };
         }
       })
       .sort((a, b) => {
+        // 'apps' directory always first
+        if (a.name === 'apps' && a.type === 'directory') return -1;
+        if (b.name === 'apps' && b.type === 'directory') return 1;
+
         if (a.type === b.type) return a.name.localeCompare(b.name);
         return a.type === 'directory' ? -1 : 1;
       });
@@ -375,6 +394,88 @@ Write your content here...
 
   revalidatePath("/", "layout");
   return { success: true, path: `${slug}/en.mdx` };
+}
+
+export async function translateContentAction(relativePath: string, targetLocale: string) {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured in environment variables.");
+  }
+
+  const fullPath = resolveAndValidatePath(relativePath);
+  if (!fs.existsSync(fullPath)) {
+    throw new Error("Source file not found");
+  }
+
+  const sourceContent = fs.readFileSync(fullPath, 'utf8');
+  const dirPath = path.dirname(fullPath);
+  
+  // Naming convention: locale.mdx
+  const targetPath = path.join(dirPath, `${targetLocale}.mdx`);
+  const sourceLocale = path.basename(fullPath, '.mdx');
+
+  const { data, content } = matter(sourceContent);
+
+  const prompt = `You are a professional translator. Translate the following content from ${sourceLocale} to ${targetLocale}.
+Keep all Markdown formatting, links, and code blocks exactly as they are.
+Translate the frontmatter 'title' and 'description' if they exist.
+If the content is in MDX, preserve all components and their props.
+Return ONLY the translated document with its frontmatter.
+
+Document:
+---
+title: ${data.title || ''}
+description: ${data.description || ''}
+---
+${content}`;
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "Gemini API error");
+    }
+
+    const result = await response.json();
+    let translatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!translatedText) throw new Error("Translation failed: Empty response");
+
+    // Clean markdown blocks if Gemini wrapped them
+    translatedText = translatedText.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
+
+    // Merge translated frontmatter with original fields (tags, date, cover, etc.)
+    const { data: translatedData, content: translatedBody } = matter(translatedText);
+    
+    const finalData = {
+      ...data,
+      title: translatedData.title || data.title,
+      description: translatedData.description || data.description,
+    };
+
+    const finalContent = matter.stringify(translatedBody, finalData);
+    fs.writeFileSync(targetPath, finalContent);
+
+    revalidatePath('/', 'layout');
+    return { success: true, path: path.relative(CONTENT_PATH, targetPath) };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { success: false, error: message };
+  }
 }
 
 export async function getGitStatusAction() {
