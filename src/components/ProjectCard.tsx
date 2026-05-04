@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch, FaRegGem } from 'react-icons/fa';
-import { ProjectGitHubData } from '@/lib/projects';
+import type { ProjectGitHubData } from '@/lib/projects';
 import { getLanguageColor } from '@/lib/colors';
 import { useTranslations } from 'next-intl';
 

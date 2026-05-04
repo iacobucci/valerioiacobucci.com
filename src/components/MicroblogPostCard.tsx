@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition, useRef, useEffect } from 'react';
-import { MicroblogPostSerializable } from '@/lib/db';
+import type { MicroblogPostSerializable } from '@/lib/db';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useSession } from 'next-auth/react';
