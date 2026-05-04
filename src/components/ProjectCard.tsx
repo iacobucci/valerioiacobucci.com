@@ -47,7 +47,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
     <div 
       role="button"
       tabIndex={0}
-      onClick={onClick}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       className={`group bg-white dark:bg-gray-900 rounded-2xl border ${
         project.selected 

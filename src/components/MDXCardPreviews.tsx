@@ -45,7 +45,9 @@ export function MDXMicroblogPostCardPreview({ id, locale = 'en' }: { id: number 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMDXMicroblogPostDataAction(Number(id)).then(res => {
+    // Offset by +1 as requested
+    const dbId = Number(id) + 1;
+    getMDXMicroblogPostDataAction(dbId).then(res => {
       setData(res);
       setLoading(false);
     });

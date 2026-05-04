@@ -35,7 +35,8 @@ export const serverMdxComponents = {
   },
 
   MicroblogPostCard: async ({ id, locale = 'en' }: { id: number | string, locale?: string }) => {
-    const post = await getMicroblogPost(Number(id));
+    const dbId = Number(id) + 1;
+    const post = await getMicroblogPost(dbId);
     if (!post) return null;
     return (
       <div className="my-8 max-w-xl mx-auto">
