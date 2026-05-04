@@ -46,11 +46,17 @@ export function MDXMicroblogPostCardPreview({ id, locale = 'en' }: { id: number 
 
   useEffect(() => {
     // Offset by +1 as requested
-    const dbId = Number(id) + 1;
-    getMDXMicroblogPostDataAction(dbId).then(res => {
-      setData(res);
+    const numericId = typeof id === 'number' ? id : parseInt(String(id), 10);
+    const dbId = numericId + 1;
+    
+    if (!isNaN(dbId)) {
+      getMDXMicroblogPostDataAction(dbId).then(res => {
+        setData(res);
+        setLoading(false);
+      });
+    } else {
       setLoading(false);
-    });
+    }
   }, [id]);
 
   if (loading) return <PreviewPlaceholder label="Microblog Post" id={id} color="border-purple-300 dark:border-purple-700 text-purple-600" />;

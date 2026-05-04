@@ -35,7 +35,11 @@ export const serverMdxComponents = {
   },
 
   MicroblogPostCard: async ({ id, locale = 'en' }: { id: number | string, locale?: string }) => {
-    const dbId = Number(id) + 1;
+    const numericId = typeof id === 'number' ? id : parseInt(String(id), 10);
+    const dbId = numericId + 1;
+    
+    if (isNaN(dbId)) return null;
+
     const post = await getMicroblogPost(dbId);
     if (!post) return null;
     return (
