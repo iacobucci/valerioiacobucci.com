@@ -1,9 +1,6 @@
-'use client';
-
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import Mermaid from './mdx/Mermaid';
-import { MDXProjectCardPreview, MDXMicroblogPostCardPreview, MDXBlogPostCardPreview } from './MDXCardPreviews';
 
 type MDXProps = {
   children?: React.ReactNode;
@@ -102,8 +99,4 @@ export const mdxComponents = {
   tr: (props: MDXProps) => (
     <tr className="even:bg-gray-50 dark:even:bg-gray-900/50" {...props} />
   ),
-
-  ProjectCard: (props: { id: string }) => <MDXProjectCardPreview {...props} />,
-  MicroblogPostCard: (props: { id: number | string, locale?: string }) => <MDXMicroblogPostCardPreview {...props} />,
-  BlogPostCard: (props: { id: string, lang: string }) => <MDXBlogPostCardPreview {...props} />,
 };
