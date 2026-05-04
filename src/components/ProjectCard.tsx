@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch, FaRegGem } from 'react-icons/fa';
 import type { ProjectGitHubData } from '@/lib/projects';
 import { getLanguageColor } from '@/lib/colors';
 import { useTranslations } from 'next-intl';
+import ProjectReadmeModal from './ProjectReadmeModal';
 
 interface ProjectCardProps {
   project: ProjectGitHubData;
@@ -13,11 +14,20 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const t = useTranslations('projects');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClick?.();
+      handleCardClick();
     }
   };
 
@@ -139,6 +149,14 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
           </a>
         )}
       </div>
+
+      {!onClick && (
+        <ProjectReadmeModal 
+          project={project}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
