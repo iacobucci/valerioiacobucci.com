@@ -123,6 +123,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	return (
 		<div 
 			id={`post-${post.id - 1}`}
+			suppressHydrationWarning
 			className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow text-left group scroll-mt-24"
 		>
 			<div className="flex flex-col gap-4">

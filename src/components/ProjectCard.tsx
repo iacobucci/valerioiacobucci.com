@@ -49,6 +49,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       tabIndex={0}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
+      suppressHydrationWarning
       className={`group bg-white dark:bg-gray-900 rounded-2xl border ${
         project.selected 
           ? 'border-gray-300 dark:border-gray-700 bg-blue-50/20 dark:bg-blue-900/5' 

@@ -23,6 +23,7 @@ export default function BlogPostCard({ post, locale }: BlogPostCardProps) {
 	return (
 		<Link 
 			href={`/blog/${post.slug}`}
+			suppressHydrationWarning
 			className="group flex flex-col bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-2xl transition-all h-full"
 		>
 			{finalCover && (
