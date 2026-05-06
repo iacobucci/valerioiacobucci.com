@@ -33,6 +33,7 @@ import {
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
 import { MDXRemote } from 'next-mdx-remote';
+import { clientMdxComponents } from '@/components/mdx-client-components';
 import { mdxComponents } from '@/components/mdx-components';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
@@ -1795,7 +1796,7 @@ function EditorInternal() {
   }
 
   const components = {
-    ...mdxComponents,
+    ...clientMdxComponents,
     ModelViewer: (props: { url: string; [key: string]: unknown }) => {
       let url = props.url;
       const { type, slug } = getFileInfo();

@@ -1,8 +1,11 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch, FaRegGem } from 'react-icons/fa';
-import { ProjectGitHubData } from '@/lib/projects';
+import type { ProjectGitHubData } from '@/lib/projects';
 import { getLanguageColor } from '@/lib/colors';
 import { useTranslations } from 'next-intl';
+import ProjectReadmeModal from './ProjectReadmeModal';
 
 interface ProjectCardProps {
   project: ProjectGitHubData;
@@ -11,11 +14,20 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const t = useTranslations('projects');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
+  const handleCardClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      onClick?.();
+      handleCardClick();
     }
   };
 
@@ -35,8 +47,9 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
     <div 
       role="button"
       tabIndex={0}
-      onClick={onClick}
+      onClick={handleCardClick}
       onKeyDown={handleKeyDown}
+      suppressHydrationWarning
       className={`group bg-white dark:bg-gray-900 rounded-2xl border ${
         project.selected 
           ? 'border-gray-300 dark:border-gray-700 bg-blue-50/20 dark:bg-blue-900/5' 
@@ -137,6 +150,14 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
           </a>
         )}
       </div>
+
+      {!onClick && (
+        <ProjectReadmeModal 
+          project={project}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose } from 'react-icons/md';
 import { MDXRemote } from 'next-mdx-remote';
-import { mdxComponents } from './mdx-components';
+import { clientMdxComponents } from './mdx-client-components';
 import { getProjectReadmeAction } from '@/lib/actions/projects';
 import { ProjectGitHubData } from '@/lib/projects';
 import { useTranslations } from 'next-intl';
@@ -56,7 +56,10 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8"
+          onClick={(e) => e.stopPropagation()}
+        >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -110,7 +113,7 @@ export default function ProjectReadmeModal({ project, isOpen, onClose }: Project
                 <article className="prose prose-neutral prose-lg dark:prose-invert max-w-none">
                   <MDXRemote 
                     {...mdxSource} 
-                    components={mdxComponents} 
+                    components={clientMdxComponents} 
                   />
                 </article>
               ) : null}

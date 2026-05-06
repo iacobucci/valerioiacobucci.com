@@ -10,7 +10,7 @@ import { isAuthorized } from '@/auth';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
-import {mdxComponents} from '@/components/mdx-components';
+import {serverMdxComponents} from '@/components/mdx-server-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
@@ -96,7 +96,7 @@ export default async function BlogPostPage({
   
   // Custom components to handle relative paths for this specific post
   const components = {
-    ...mdxComponents,
+    ...serverMdxComponents,
     ModelViewer: (props: { url: string; [key: string]: unknown }) => {
       let url = props.url;
       if (url && typeof url === 'string' && !url.startsWith('http') && !url.startsWith('/') && !url.startsWith('data:')) {
