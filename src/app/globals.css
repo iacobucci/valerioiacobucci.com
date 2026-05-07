@@ -40,11 +40,13 @@
 :root {
 	--background: #ffffff;
 	--foreground: #000000;
+	--mermaid-accent: #2563eb;
 }
 
 .dark {
 	--background: #121216;
 	--foreground: #e0e0e6;
+	--mermaid-accent: #60a5fa;
 }
 
 @keyframes fadeInUp {

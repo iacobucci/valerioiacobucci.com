@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
-import Mermaid from './mdx/Mermaid';
+import Mermaid from './mdx/MermaidBM';
 
 type MDXProps = {
   children?: React.ReactNode;
