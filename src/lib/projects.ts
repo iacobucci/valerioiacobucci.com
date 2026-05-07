@@ -86,10 +86,12 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 		const data = await res.json();
 
 		return {
+			title: data.name,
 			description: data.description ?? '',
 			stars: data.stargazers_count,
 			forks: data.forks_count,
 			github_url: data.html_url,
+			website_url: data.homepage || undefined,
 			language: data.language,
 			last_commit: data.pushed_at
 		};
@@ -118,6 +120,33 @@ export async function getGitHubData(repo: string): Promise<Partial<ProjectGitHub
 	projectsCache[repo] = data;
 	lastFetchTime = Date.now();
 	return data;
+}
+
+/**
+ * Gets a single project by its repo name, fetching from GitHub if needed.
+ * Works for both projects in projects.json and any other GitHub repo.
+ */
+export async function getProjectByRepo(repo: string): Promise<ProjectGitHubData | null> {
+	const projects = getProjects();
+	const existingProject = projects.find(p => p.github_repo === repo);
+	
+	const githubData = await getGitHubData(repo);
+	if (githubData.error && !existingProject) return null;
+
+	return {
+		title: existingProject?.title ?? githubData.title ?? repo.split('/').pop() ?? repo,
+		github_repo: repo,
+		tech: existingProject?.tech ?? (githubData.language ? [githubData.language] : []),
+		website_url: existingProject?.website_url ?? githubData.website_url,
+		selected: existingProject?.selected ?? false,
+		...githubData,
+		description: githubData.description ?? '',
+		stars: githubData.stars ?? 0,
+		forks: githubData.forks ?? 0,
+		commits: githubData.commits ?? 0,
+		last_commit: githubData.last_commit ?? '',
+		github_url: githubData.github_url ?? `https://github.com/${repo}`
+	} as ProjectGitHubData;
 }
 
 /**

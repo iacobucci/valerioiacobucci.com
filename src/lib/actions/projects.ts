@@ -73,27 +73,48 @@ export async function getProjectReadmeAction(repo: string) {
       }
     );
 
-    // 4. Serialize to MDX
-    const mdxSource = await serialize(processedMarkdown, {
-      mdxOptions: {
-        remarkPlugins: [remarkGfm],
-        rehypePlugins: [
-          rehypeMermaid,
-          [
-            rehypePrettyCode,
-            {
-              theme: 'tokyo-night',
-              keepBackground: false,
-            },
+    // 4. Serialize to MDX with a fallback to plain MD if it fails
+    let mdxSource;
+    try {
+      mdxSource = await serialize(processedMarkdown, {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [
+            rehypeMermaid,
+            [
+              rehypePrettyCode,
+              {
+                theme: 'tokyo-night',
+                keepBackground: false,
+              },
+            ],
           ],
-        ],
-        format: 'mdx',
-      },
-    });
+          format: 'mdx',
+        },
+      });
+    } catch (serializeError) {
+      console.warn(`MDX serialization failed for ${repo}, falling back to MD format:`, serializeError);
+      mdxSource = await serialize(processedMarkdown, {
+        mdxOptions: {
+          remarkPlugins: [remarkGfm],
+          rehypePlugins: [
+            rehypeMermaid,
+            [
+              rehypePrettyCode,
+              {
+                theme: 'tokyo-night',
+                keepBackground: false,
+              },
+            ],
+          ],
+          format: 'md',
+        },
+      });
+    }
 
     return { success: true, mdxSource };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in getProjectReadmeAction:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }

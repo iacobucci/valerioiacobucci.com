@@ -4,7 +4,7 @@ import { serialize } from 'next-mdx-remote/serialize';
 import remarkGfm from 'remark-gfm';
 import rehypePrettyCode from 'rehype-pretty-code';
 import { rehypeMermaid } from '../mdx';
-import { getProjects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
+import { getProjectByRepo } from '@/lib/projects';
 import { getMicroblogPost } from '@/lib/microblog';
 import { getPost } from '@/lib/content';
 
@@ -26,27 +26,13 @@ export async function serializeMdxAction(content: string) {
       },
     });
     return { success: true, source: mdxSource };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
 
 export async function getMDXProjectCardDataAction(id: string) {
-  const projects = getProjects();
-  const project = projects.find(p => p.github_repo === id);
-  if (!project) return null;
-
-  const githubData = await getGitHubData(project.github_repo);
-  return {
-    ...project,
-    ...githubData,
-    description: githubData.description ?? '',
-    stars: githubData.stars ?? 0,
-    forks: githubData.forks ?? 0,
-    commits: githubData.commits ?? 0,
-    last_commit: githubData.last_commit ?? '',
-    github_url: githubData.github_url ?? `https://github.com/${project.github_repo}`
-  } as ProjectGitHubData;
+  return await getProjectByRepo(id);
 }
 
 export async function getMDXMicroblogPostDataAction(id: number) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { getProjects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
+import { getProjectByRepo } from '@/lib/projects';
 import { getMicroblogPost } from '@/lib/microblog';
 import { getPost } from '@/lib/content';
 import ProjectCard from './ProjectCard';
@@ -11,21 +11,8 @@ export const serverMdxComponents = {
   ...coreMdxComponents,
 
   ProjectCard: async ({ id }: { id: string }) => {
-    const projects = getProjects();
-    const project = projects.find(p => p.github_repo === id);
-    if (!project) return null;
-
-    const githubData = await getGitHubData(project.github_repo);
-    const fullProject = {
-      ...project,
-      ...githubData,
-      description: githubData.description ?? '',
-      stars: githubData.stars ?? 0,
-      forks: githubData.forks ?? 0,
-      commits: githubData.commits ?? 0,
-      last_commit: githubData.last_commit ?? '',
-      github_url: githubData.github_url ?? `https://github.com/${project.github_repo}`
-    } as ProjectGitHubData;
+    const fullProject = await getProjectByRepo(id);
+    if (!fullProject) return null;
 
     return (
       <div className="my-8 max-w-xl mx-auto">
