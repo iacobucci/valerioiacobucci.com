@@ -402,8 +402,6 @@ function EditorInternal() {
       requestAnimationFrame(() => {
         textarea.selectionStart = textarea.selectionEnd = start + 1;
       });
-      
-      toast.success("Tab inserted");
     }
     
     touchStartRef.current = null;
