@@ -83,6 +83,7 @@ function EditorInternal() {
   const [previewVersion, setPreviewVersion] = useState(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   // Load/Save autosave preference
   useEffect(() => {
@@ -318,16 +319,95 @@ function EditorInternal() {
     }
   }, [content, autosave, isDirty, saving, handleSave, isMdx, isJson, isTxt, isHtml, isCss, isJs]);
 
+  const convertSpacesToTabs = useCallback(() => {
+    const newContent = content.replace(/ {4}/g, '\t');
+    if (newContent !== content) {
+      setContent(newContent);
+      setIsDirty(true);
+      toast.success("Converted 4-spaces to tabs");
+    }
+  }, [content]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         handleSave();
       }
+      if ((e.altKey && e.shiftKey && e.key === 'F') || (e.altKey && e.shiftKey && e.key === 'f')) {
+        e.preventDefault();
+        convertSpacesToTabs();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave]);
+  }, [handleSave, convertSpacesToTabs]);
+
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const newContent = content.substring(0, start) + '\t' + content.substring(end);
+      setContent(newContent);
+      setIsDirty(true);
+
+      requestAnimationFrame(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 1;
+      });
+    } else if (e.key === 'Enter') {
+      // Auto-indentation logic: inherit tabs/spaces from current line
+      const lines = content.substring(0, start).split('\n');
+      const currentLine = lines[lines.length - 1];
+      const indentationMatch = currentLine.match(/^([ \t]+)/);
+      
+      if (indentationMatch) {
+        e.preventDefault();
+        const indentation = indentationMatch[1];
+        const newContent = content.substring(0, start) + '\n' + indentation + content.substring(end);
+        setContent(newContent);
+        setIsDirty(true);
+
+        requestAnimationFrame(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 1 + indentation.length;
+        });
+      }
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLTextAreaElement>) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLTextAreaElement>) => {
+    if (!touchStartRef.current) return;
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    
+    // Swipe right (horizontal) with at least 50px distance and low vertical movement
+    if (deltaX > 60 && Math.abs(deltaY) < 30) {
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      
+      const newContent = content.substring(0, start) + '\t' + content.substring(end);
+      setContent(newContent);
+      setIsDirty(true);
+      
+      requestAnimationFrame(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 1;
+      });
+      
+      toast.success("Tab inserted");
+    }
+    
+    touchStartRef.current = null;
+  };
 
   const handleGitCommit = async () => {
     setInputConfig({
@@ -1329,6 +1409,9 @@ function EditorInternal() {
                               setContent(e.target.value);
                               setIsDirty(true);
                             }}
+                            onKeyDown={handleEditorKeyDown}
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
                             className="flex-1 p-4 sm:p-6 font-mono text-base sm:text-sm resize-none focus:outline-none bg-transparent text-gray-800 dark:text-gray-200 leading-relaxed overflow-y-auto"
                             placeholder="Start writing..."
                           />
