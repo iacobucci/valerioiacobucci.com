@@ -69,3 +69,45 @@
 	scroll-snap-align: start;
 	scroll-margin-top: 4rem; /* Match navbar height */
 }
+
+/* Rehype Pretty Code styles */
+code {
+  counter-reset: line;
+}
+
+[data-rehype-pretty-code-figure] pre {
+  @apply rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-950! p-0! my-8! shadow-xl overflow-hidden;
+}
+
+[data-rehype-pretty-code-figure] code {
+  @apply grid min-w-full break-words bg-transparent! p-0!;
+}
+
+[data-line] {
+  @apply px-4 py-0.5 border-l-4 border-l-transparent;
+}
+
+[data-highlighted-line] {
+  @apply bg-blue-500/10 border-l-blue-500;
+}
+
+[data-highlighted-chars] {
+  @apply bg-blue-500/20 rounded-sm py-0.5 px-1;
+}
+
+[data-rehype-pretty-code-title] {
+  @apply px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-t-xl text-gray-700 dark:text-gray-300;
+}
+
+[data-rehype-pretty-code-figure] [data-language] {
+  @apply relative;
+}
+
+[data-rehype-pretty-code-figure] [data-language]::before {
+  content: attr(data-language);
+  @apply absolute top-0 right-4 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-gray-500 bg-gray-800/50 rounded-b opacity-0 transition-opacity;
+}
+
+[data-rehype-pretty-code-figure]:hover [data-language]::before {
+  @apply opacity-100;
+}

@@ -4,10 +4,17 @@ import Mermaid from './mdx/MermaidBM';
 
 type MDXProps = {
   children?: React.ReactNode;
+  className?: string;
   [key: string]: unknown;
 };
 
 export const mdxComponents = {
+  div: (props: MDXProps) => {
+    if (props.className === 'mermaid-block') {
+      return <Mermaid chart={props['data-chart'] as string} />;
+    }
+    return <div {...props} />;
+  },
   h1: (props: MDXProps) => (
     <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white" {...props} />
   ),
@@ -36,7 +43,20 @@ export const mdxComponents = {
     if (props.className === 'language-mermaid') {
       return <Mermaid chart={props.children?.toString() || ''} />;
     }
-    return <code className="bg-gray-100 dark:bg-gray-800 rounded px-1.5 py-0.5 font-mono text-sm" {...props} />;
+
+    // Inline code detection: no language class
+    const isInline = !props.className || !props.className.includes('language-');
+
+    if (isInline) {
+      return (
+        <code 
+          className="bg-gray-100 dark:bg-gray-800 rounded px-1.5 py-0.5 font-mono text-sm border border-gray-200 dark:border-gray-700" 
+          {...props} 
+        />
+      );
+    }
+
+    return <code {...props} />;
   },
   pre: (props: MDXProps) => {
     const isMermaid = React.isValidElement(props.children) && 
@@ -45,7 +65,7 @@ export const mdxComponents = {
     if (isMermaid) {
       return <>{props.children}</>;
     }
-    return <pre className="bg-gray-950 text-gray-100 rounded-lg p-4 overflow-x-auto my-6 text-sm" {...props} />;
+    return <pre className="bg-gray-950 text-gray-100 rounded-xl p-4 overflow-x-auto my-8 text-sm border border-gray-800 shadow-xl" {...props} />;
   },
   a: ({ href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     if (href?.startsWith('/')) {

@@ -2,6 +2,8 @@
 
 import { serialize } from 'next-mdx-remote/serialize';
 import remarkGfm from 'remark-gfm';
+import rehypePrettyCode from 'rehype-pretty-code';
+import { rehypeMermaid } from '../mdx';
 import { getProjects, getGitHubData, ProjectGitHubData } from '@/lib/projects';
 import { getMicroblogPost } from '@/lib/microblog';
 import { getPost } from '@/lib/content';
@@ -11,6 +13,16 @@ export async function serializeMdxAction(content: string) {
     const mdxSource = await serialize(content, {
       mdxOptions: {
         remarkPlugins: [remarkGfm],
+        rehypePlugins: [
+          rehypeMermaid,
+          [
+            rehypePrettyCode,
+            {
+              theme: 'tokyo-night',
+              keepBackground: false,
+            },
+          ],
+        ],
       },
     });
     return { success: true, source: mdxSource };

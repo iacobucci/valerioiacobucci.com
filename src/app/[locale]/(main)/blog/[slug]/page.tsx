@@ -10,6 +10,8 @@ import { isAuthorized } from '@/auth';
 
 import {MDXRemote} from 'next-mdx-remote/rsc';
 import remarkGfm from 'remark-gfm';
+import rehypePrettyCode from 'rehype-pretty-code';
+import {rehypeMermaid} from '@/lib/mdx';
 import {serverMdxComponents} from '@/components/mdx-server-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
@@ -219,6 +221,16 @@ export default async function BlogPostPage({
             options={{
               mdxOptions: {
                 remarkPlugins: [remarkGfm],
+                rehypePlugins: [
+                  rehypeMermaid,
+                  [
+                    rehypePrettyCode,
+                    {
+                      theme: 'tokyo-night',
+                      keepBackground: false,
+                    },
+                  ],
+                ],
               },
             }}
           />
