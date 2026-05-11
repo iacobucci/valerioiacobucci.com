@@ -18,8 +18,11 @@ export async function serializeMdxAction(content: string) {
           [
             rehypePrettyCode,
             {
-              theme: 'tokyo-night',
-              keepBackground: false,
+              theme: {
+                dark: 'github-dark',
+                light: 'github-light',
+              },
+              keepBackground: true,
             },
           ],
         ],

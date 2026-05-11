@@ -76,11 +76,24 @@ code {
 }
 
 [data-rehype-pretty-code-figure] pre {
-  @apply rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-950! p-0! my-8! shadow-xl overflow-hidden;
+  @apply rounded-xl border border-gray-100 dark:border-gray-800 p-0! my-8! shadow-xl overflow-hidden;
+  background-color: var(--shiki-light-bg) !important;
+}
+
+.dark [data-rehype-pretty-code-figure] pre {
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 [data-rehype-pretty-code-figure] code {
   @apply grid min-w-full break-words bg-transparent! p-0!;
+}
+
+[data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-light);
+}
+
+.dark [data-rehype-pretty-code-figure] code span {
+  color: var(--shiki-dark);
 }
 
 [data-line] {

@@ -84,8 +84,11 @@ export async function getProjectReadmeAction(repo: string) {
             [
               rehypePrettyCode,
               {
-                theme: 'tokyo-night',
-                keepBackground: false,
+                theme: {
+                  dark: 'github-dark',
+                  light: 'github-light',
+                },
+                keepBackground: true,
               },
             ],
           ],
@@ -102,8 +105,11 @@ export async function getProjectReadmeAction(repo: string) {
             [
               rehypePrettyCode,
               {
-                theme: 'tokyo-night',
-                keepBackground: false,
+                theme: {
+                  dark: 'github-dark',
+                  light: 'github-light',
+                },
+                keepBackground: true,
               },
             ],
           ],
