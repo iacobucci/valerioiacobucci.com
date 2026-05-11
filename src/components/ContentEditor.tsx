@@ -979,6 +979,23 @@ function EditorInternal() {
         const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
         finalSrc = `/assets/${type}/${slug}/${normalizedSrc}?v=${previewVersion}`;
       }
+
+      const isSvg = typeof finalSrc === 'string' && finalSrc.split('?')[0].toLowerCase().endsWith('.svg');
+
+      if (isSvg) {
+        return (
+          <object 
+            data={finalSrc} 
+            type="image/svg+xml" 
+            className="rounded-lg my-8 w-full h-auto"
+            aria-label={alt}
+            style={{ display: 'block' }}
+          >
+            {alt}
+          </object>
+        );
+      }
+
       return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;
     },
     Video: (props: any) => {

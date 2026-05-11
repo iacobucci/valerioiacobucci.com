@@ -92,6 +92,22 @@ export const mdxComponents = {
     );
   },
   img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+     const isSvg = typeof src === 'string' && src.split('?')[0].toLowerCase().endsWith('.svg');
+
+     if (isSvg) {
+       return (
+         <object 
+           data={src} 
+           type="image/svg+xml" 
+           className="rounded-lg my-8 w-full h-auto"
+           aria-label={alt}
+           style={{ display: 'block' }}
+         >
+           {alt}
+         </object>
+       );
+     }
+
      return (
        // eslint-disable-next-line @next/next/no-img-element
        <img 
