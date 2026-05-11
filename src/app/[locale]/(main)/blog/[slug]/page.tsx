@@ -17,6 +17,8 @@ import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
 import ShareDraftButton from '@/components/ShareDraftButton';
+import * as path from 'path';
+import { getSvgDimensions } from '@/lib/image-utils';
 
 const CONTENT_TYPE = 'blog';
 
@@ -112,9 +114,12 @@ export default async function BlogPostPage({
     },
     img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
       let finalSrc = src;
+      let localPath = '';
+
       if (src && typeof src === 'string' && !src.startsWith('http') && !src.startsWith('/') && !src.startsWith('data:')) {
         const normalizedSrc = src.startsWith('./') ? src.slice(2) : src;
         finalSrc = `/assets/${CONTENT_TYPE}/${slug}/${normalizedSrc}`;
+        localPath = path.join(process.cwd(), 'content', slug, normalizedSrc);
         if (version) {
           finalSrc += `?v=${version}`;
         }
@@ -123,16 +128,20 @@ export default async function BlogPostPage({
       const isSvg = typeof finalSrc === 'string' && finalSrc.split('?')[0].toLowerCase().endsWith('.svg');
 
       if (isSvg && typeof finalSrc === 'string') {
+        const dimensions = localPath ? getSvgDimensions(localPath) : null;
+        const style = dimensions?.aspectRatio ? { aspectRatio: `${dimensions.aspectRatio}` } : {};
+
         return (
-          <object 
-            data={finalSrc} 
-            type="image/svg+xml" 
-            className="rounded-lg my-8 w-full h-auto"
-            aria-label={alt}
-            style={{ display: 'block' }}
-          >
-            {alt}
-          </object>
+          <div className="rounded-lg my-8 w-full overflow-hidden bg-gray-50 dark:bg-gray-900/50" style={style}>
+            <object 
+              data={finalSrc} 
+              type="image/svg+xml" 
+              className="w-full h-full block"
+              aria-label={alt}
+            >
+              {alt}
+            </object>
+          </div>
         );
       }
 
