@@ -18,7 +18,7 @@ import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
 import ShareDraftButton from '@/components/ShareDraftButton';
 import * as path from 'path';
-import { getSvgDimensions } from '@/lib/image-utils';
+import { getSvgDimensions } from '@/lib/image-utils-server';
 
 const CONTENT_TYPE = 'blog';
 
