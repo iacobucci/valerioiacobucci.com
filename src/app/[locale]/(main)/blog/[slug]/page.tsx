@@ -122,7 +122,7 @@ export default async function BlogPostPage({
 
       const isSvg = typeof finalSrc === 'string' && finalSrc.split('?')[0].toLowerCase().endsWith('.svg');
 
-      if (isSvg) {
+      if (isSvg && typeof finalSrc === 'string') {
         return (
           <object 
             data={finalSrc} 
@@ -137,7 +137,7 @@ export default async function BlogPostPage({
       }
 
       // eslint-disable-next-line @next/next/no-img-element
-      return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;
+      return <img {...props} src={finalSrc as string} alt={alt} className="rounded-lg my-8 w-full" />;
     },
     Video: (props: any) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />
   };

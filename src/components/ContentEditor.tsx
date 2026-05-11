@@ -982,7 +982,7 @@ function EditorInternal() {
 
       const isSvg = typeof finalSrc === 'string' && finalSrc.split('?')[0].toLowerCase().endsWith('.svg');
 
-      if (isSvg) {
+      if (isSvg && typeof finalSrc === 'string') {
         return (
           <object 
             data={finalSrc} 
@@ -996,7 +996,7 @@ function EditorInternal() {
         );
       }
 
-      return <img {...props} src={finalSrc} alt={alt} className="rounded-lg my-8 w-full" />;
+      return <img {...props} src={finalSrc as string} alt={alt} className="rounded-lg my-8 w-full" />;
     },
     Video: (props: any) => {
       const { type, slug } = getFileInfo();

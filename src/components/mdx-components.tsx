@@ -94,7 +94,7 @@ export const mdxComponents = {
   img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
      const isSvg = typeof src === 'string' && src.split('?')[0].toLowerCase().endsWith('.svg');
 
-     if (isSvg) {
+     if (isSvg && typeof src === 'string') {
        return (
          <object 
            data={src} 
@@ -111,7 +111,7 @@ export const mdxComponents = {
      return (
        // eslint-disable-next-line @next/next/no-img-element
        <img 
-         src={src} 
+         src={src as string} 
          alt={alt} 
          className="rounded-lg my-8 w-full" 
          {...props} 
