@@ -28,7 +28,7 @@ export default function UserMenu() {
   }, []);
 
   if (status === "loading") {
-    return <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />;
+    return <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />;
   }
 
   if (!session) {
