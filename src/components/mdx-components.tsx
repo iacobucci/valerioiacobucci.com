@@ -91,7 +91,7 @@ export const mdxComponents = {
       />
     );
   },
-  img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  img: ({ src, alt, className, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
      const isSvg = typeof src === 'string' && src.split('?')[0].toLowerCase().endsWith('.svg');
 
      if (isSvg && typeof src === 'string') {
@@ -99,7 +99,7 @@ export const mdxComponents = {
          <object 
            data={src} 
            type="image/svg+xml" 
-           className="rounded-lg my-8 w-full h-auto"
+           className={className || "mdx-img h-auto"}
            aria-label={alt}
            style={{ display: 'block' }}
          >
@@ -113,7 +113,7 @@ export const mdxComponents = {
        <img 
          src={src as string} 
          alt={alt} 
-         className="rounded-lg my-8 w-full" 
+         className={className || "mdx-img"} 
          {...props} 
        />
      );

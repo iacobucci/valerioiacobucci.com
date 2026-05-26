@@ -111,3 +111,7 @@ code {
 [data-rehype-pretty-code-title] {
   @apply px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-t-xl text-gray-700 dark:text-gray-300;
 }
+
+.mdx-img {
+  @apply rounded-lg my-8 w-full;
+}

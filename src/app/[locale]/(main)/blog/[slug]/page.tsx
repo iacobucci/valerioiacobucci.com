@@ -112,7 +112,7 @@ export default async function BlogPostPage({
       }
       return <ModelViewerWrapper {...props} url={url} />;
     },
-    img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+    img: ({ src, alt, className, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
       let finalSrc = src;
       let localPath = '';
 
@@ -132,7 +132,7 @@ export default async function BlogPostPage({
         const style = dimensions?.aspectRatio ? { aspectRatio: `${dimensions.aspectRatio}` } : {};
 
         return (
-          <span className="rounded-lg my-8 w-full overflow-hidden bg-gray-50 dark:bg-gray-900/50 block" style={style}>
+          <span className={className || "mdx-img overflow-hidden bg-gray-50 dark:bg-gray-900/50 block"} style={style}>
             <object 
               data={finalSrc} 
               type="image/svg+xml" 
@@ -146,7 +146,7 @@ export default async function BlogPostPage({
       }
 
       // eslint-disable-next-line @next/next/no-img-element
-      return <img {...props} src={finalSrc as string} alt={alt} className="rounded-lg my-8 w-full" />;
+      return <img src={finalSrc as string} alt={alt} className={className || "mdx-img"} {...props} />;
     },
     Video: (props: any) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />
   };
