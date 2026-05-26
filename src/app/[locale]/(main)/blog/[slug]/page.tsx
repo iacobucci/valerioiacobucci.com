@@ -16,6 +16,7 @@ import {serverMdxComponents} from '@/components/mdx-server-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
+import ImageSlideshowComponent from '@/components/mdx/ImageSlideshow';
 import ShareDraftButton from '@/components/ShareDraftButton';
 import * as path from 'path';
 import { getSvgDimensions } from '@/lib/image-utils-server';
@@ -148,7 +149,8 @@ export default async function BlogPostPage({
       // eslint-disable-next-line @next/next/no-img-element
       return <img src={finalSrc as string} alt={alt} className={className || "mdx-img"} {...props} />;
     },
-    Video: (props: any) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />
+    Video: (props: any) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
+    ImageSlideshow: (props: any) => <ImageSlideshowComponent {...props} />
   };
 
   return (
