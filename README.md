@@ -21,6 +21,7 @@ This is the source code for the personal website of Valerio Iacobucci, available
 - Projects page that regularly gets its updates from GitHub, shows stars and details and lets the user read project' READMEs directly fetching them from their client, and resolves images correctly and renders Mermaid diagrams.
 - Search bar for pages, blog posts and projects.
 - Fake interactive terminal, where REPL programs can be loaded.
+- **Dynamic TODO SVG**, a live-updating visualization of the project roadmap generated from `content/todo.txt`.
 
 ## Requirements
 
@@ -44,6 +45,13 @@ The project follows specific naming and color conventions to distinguish between
 - **Microblog Updates**: Referred to as "Latestst updates" (EN), "Ultimissimi aggiornamenti" (IT), or "Laatsteste updates" (NL).
 
 ## Technical Integrity
+
+### Dynamic TODO SVG
+
+The `/todo.svg` route dynamically generates an SVG representation of `content/todo.txt`. To optimize performance:
+1.  **In-memory Caching**: The content is cached in memory to reduce disk I/O.
+2.  **Auto-refresh**: The cache is automatically invalidated every 5 minutes.
+3.  **Instant Updates**: Any update to `todo.txt` via the online content editor triggers an immediate cache invalidation, ensuring the SVG is always up-to-date.
 
 ### Hybrid Data Loading Strategy
 

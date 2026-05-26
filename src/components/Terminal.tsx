@@ -5,6 +5,7 @@ import {useTranslations} from 'next-intl';
 import {useRouter} from '@/i18n/routing';
 import { motion } from 'framer-motion';
 import { Interpreter } from '@/lib/lispv/lang/interpreter';
+import { getTodoAction } from '@/lib/actions/todo';
 
 interface Program {
   name: string;
@@ -31,7 +32,7 @@ export function Terminal() {
   const terminalBodyRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const commandList = ['help', 'about', 'blog', 'projects', 'microblog', 'whoami', 'clear', 'lispv'];
+  const commandList = ['help', 'about', 'blog', 'projects', 'microblog', 'whoami', 'todo', 'clear', 'lispv'];
 
   const programs: Record<string, Program> = {
     lispv: {
@@ -193,6 +194,15 @@ export function Terminal() {
       case 'about':
         newHistory.push(t('about'));
         break;
+      case 'todo': {
+        getTodoAction().then(todo => {
+          setHistory(prev => [...prev, todo]);
+        });
+        // We don't push newHistory yet because getTodoAction is async and we want to preserve order
+        // but we already added the prompt in newHistory. 
+        // Let's refine this to avoid double prompt.
+        break;
+      }
       case 'lispv': {
         const program = programs.lispv;
         if (!args) {

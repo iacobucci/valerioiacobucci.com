@@ -11,6 +11,8 @@
 		"read_blog": "Read Blog",
 		"view_projects": "View Projects",
 		"connect": "Connect with me",
+		"roadmap_title": "What's coming next",
+		"roadmap_description": "A live look at what I'm working on and my future plans.",
 		"rss": {
 			"title": "Stay Updated",
 			"description": "Follow my RSS feed to stay up to date with my latest posts and projects."

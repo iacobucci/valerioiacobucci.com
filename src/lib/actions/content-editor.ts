@@ -7,6 +7,7 @@ import { execSync, spawnSync } from 'child_process';
 import { revalidatePath } from "next/cache";
 import sharp from 'sharp';
 import matter from 'gray-matter';
+import { invalidateTodoCache } from "../todo-cache";
 
 const CONTENT_PATH = path.join(process.cwd(), 'content');
 
@@ -105,6 +106,11 @@ export async function saveContentAction(relativeFilePath: string, content: strin
   const fullPath = resolveAndValidatePath(relativeFilePath);
 
   fs.writeFileSync(fullPath, content, 'utf8');
+  
+  if (relativeFilePath === 'todo.txt') {
+    invalidateTodoCache();
+  }
+
   revalidatePath("/", "layout");
   return { success: true };
 }
