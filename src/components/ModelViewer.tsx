@@ -40,8 +40,8 @@ export default function ModelViewer({ url, height = '500px', autoRotate = true }
   const isDark = theme === 'dark';
 
   return (
-    <div 
-      className="w-full border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900"
+    <span 
+      className="w-full border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 block"
       style={{ height }}
     >
       {mounted && (
@@ -56,7 +56,7 @@ export default function ModelViewer({ url, height = '500px', autoRotate = true }
           </Suspense>
         </Canvas>
       )}
-    </div>
+    </span>
   );
 }
 

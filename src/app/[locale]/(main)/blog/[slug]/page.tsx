@@ -132,7 +132,7 @@ export default async function BlogPostPage({
         const style = dimensions?.aspectRatio ? { aspectRatio: `${dimensions.aspectRatio}` } : {};
 
         return (
-          <div className="rounded-lg my-8 w-full overflow-hidden bg-gray-50 dark:bg-gray-900/50" style={style}>
+          <span className="rounded-lg my-8 w-full overflow-hidden bg-gray-50 dark:bg-gray-900/50 block" style={style}>
             <object 
               data={finalSrc} 
               type="image/svg+xml" 
@@ -141,7 +141,7 @@ export default async function BlogPostPage({
             >
               {alt}
             </object>
-          </div>
+          </span>
         );
       }
 

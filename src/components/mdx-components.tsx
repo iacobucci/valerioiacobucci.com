@@ -135,4 +135,14 @@ export const mdxComponents = {
   tr: (props: MDXProps) => (
     <tr className="even:bg-gray-50 dark:even:bg-gray-900/50" {...props} />
   ),
+  Label: ({ children }: { children: React.ReactNode }) => (
+    <span className="px-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black">
+      {children}
+    </span>
+  ),
+  L: ({ children }: { children: React.ReactNode }) => (
+    <span className="px-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black">
+      {children}
+    </span>
+  ),
 };
