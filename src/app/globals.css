@@ -76,12 +76,7 @@ code {
 }
 
 [data-rehype-pretty-code-figure] pre {
-  @apply rounded-xl border border-gray-100 dark:border-gray-800 p-0! my-8! shadow-xl overflow-hidden;
-  background-color: var(--shiki-light-bg) !important;
-}
-
-.dark [data-rehype-pretty-code-figure] pre {
-  background-color: var(--shiki-dark-bg) !important;
+  @apply rounded-xl border border-gray-100 dark:border-gray-800 p-0! my-8! overflow-hidden bg-bg-light dark:bg-bg-dark;
 }
 
 [data-rehype-pretty-code-figure] code {

@@ -105,25 +105,25 @@ WantedBy=default.target
 The node process exposes a server at TCP port 8080, but the access to valerioiacobucci.com is behind a nginx proxy, and the connection is secured with SSL:
 
 ```nginx
-   server {
-       server_name valerioiacobucci.com www.valerioiacobucci.com;
+server {
+	server_name valerioiacobucci.com www.valerioiacobucci.com;
 
-       location / {
-            proxy_pass http://127.0.0.1:8080;
+	location / {
+		proxy_pass http://127.0.0.1:8080;
 
-            proxy_set_header Host              $host;
-            proxy_set_header X-Real-IP         $remote_addr;
-            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_set_header X-Forwarded-Host  $host;
-       }
+		proxy_set_header Host              $host;
+		proxy_set_header X-Real-IP         $remote_addr;
+		proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto $scheme;
+		proxy_set_header X-Forwarded-Host  $host;
+	}
 
-       listen 443 ssl; # managed by Certbot
-       ssl_certificate /etc/letsencrypt/live/ip.valerioiacobucci.com/fullchain.pem; # managed by Certbot
-       ssl_certificate_key /etc/letsencrypt/live/ip.valerioiacobucci.com/privkey.pem; # managed by Certbot
-       include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-       ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-   }
+	listen 443 ssl; # managed by Certbot
+	ssl_certificate /etc/letsencrypt/live/ip.valerioiacobucci.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/ip.valerioiacobucci.com/privkey.pem; # managed by Certbot
+	include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+	ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
 ```
 
 ## Content

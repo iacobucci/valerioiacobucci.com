@@ -65,7 +65,7 @@ export const mdxComponents = {
     if (isMermaid) {
       return <>{props.children}</>;
     }
-    return <pre className="rounded-xl p-4 overflow-x-auto my-8 text-sm border border-gray-100 dark:border-gray-800 shadow-xl bg-gray-50 dark:bg-gray-900" {...props} />;
+    return <pre className="rounded-xl p-4 overflow-x-auto my-8 text-sm border border-gray-100 dark:border-gray-800 bg-bg-light dark:bg-bg-dark" {...props} />;
   },
   a: ({ href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     if (href?.startsWith('/')) {
