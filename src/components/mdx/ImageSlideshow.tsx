@@ -20,24 +20,25 @@ export default function ImageSlideshow({ children }: ImageSlideshowProps) {
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
     hideTimeoutRef.current = setTimeout(() => setShowControls(false), 2000);
   }, []);
-
-  // Flatten children to handle images wrapped in <p> tags by MDX
-  const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
-    return React.Children.toArray(children).reduce((acc: React.ReactNode[], child) => {
-      if (React.isValidElement(child)) {
-        if (child.type === 'p' || (child.props as any)?.mdxType === 'p') {
-          return [...acc, ...flattenChildren(child.props.children)];
-        }
-        if (typeof child.type === 'string' && (child.type === 'br' || child.type === 'span' && !(child.props as any).className?.includes('mdx-img'))) {
-          if (child.props.children) return [...acc, ...flattenChildren(child.props.children)];
-          return acc;
-        }
-        return [...acc, child];
+// Flatten children to handle images wrapped in <p> tags by MDX
+const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
+  return React.Children.toArray(children).reduce((acc: React.ReactNode[], child) => {
+    if (React.isValidElement(child)) {
+      const element = child as React.ReactElement<any>;
+      // If it's a paragraph, it might contain the images
+      if (element.type === 'p' || element.props?.mdxType === 'p') {
+        return [...acc, ...flattenChildren(element.props.children)];
       }
-      return acc;
-    }, []);
-  };
-
+      // Skip empty text or line breaks
+      if (typeof element.type === 'string' && (element.type === 'br' || (element.type === 'span' && !element.props.className?.includes('mdx-img')))) {
+        if (element.props.children) return [...acc, ...flattenChildren(element.props.children)];
+        return acc;
+      }
+      return [...acc, element];
+    }
+    return acc;
+  }, []);
+};
   const childrenArray = React.useMemo(() => {
     return flattenChildren(children).filter(child => {
       if (React.isValidElement(child)) {

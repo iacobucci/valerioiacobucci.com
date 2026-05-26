@@ -106,12 +106,12 @@ export default async function HomePage({
 								{t("home.roadmap_description")}
 							</p>
 						</div>
-						<div className="w-full overflow-x-auto no-scrollbar py-4">
+						<div className="w-full py-4">
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img 
 								src="/todo.svg" 
 								alt="Project Roadmap" 
-								className="mx-auto min-w-[800px] h-auto rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 bg-white/5"
+								className="w-full h-auto rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 bg-white/5"
 							/>
 						</div>
 					</div>
