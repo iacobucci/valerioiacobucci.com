@@ -130,7 +130,7 @@ export default function CVClient() {
 						<div className="w-2/3 text-left pl-3">
 							<h3 className="font-normal m-1 text-base">
 								{t('education.bachelor.desc_prefix')}{' '}
-								<a href="https://valerioiacobucci.com/pdf/tesi-triennale.pdf" className="text-blue-600 dark:text-blue-500 hover:underline">
+								<a href="https://valerioiacobucci.com/apps/downloads/pdf/tesi_triennale-iacobucci_valerio-0000976541.pdf" className="text-blue-600 dark:text-blue-500 hover:underline">
 									{t('education.bachelor.thesis_link_text')}
 								</a>.
 							</h3>
