@@ -105,9 +105,11 @@ export async function saveContentAction(relativeFilePath: string, content: strin
 
   const fullPath = resolveAndValidatePath(relativeFilePath);
 
+  console.log('saveContentAction:', relativeFilePath);
   fs.writeFileSync(fullPath, content, 'utf8');
   
   if (relativeFilePath === 'todo.txt') {
+    console.log('Invalidating TODO cache...');
     invalidateTodoCache();
   }
 

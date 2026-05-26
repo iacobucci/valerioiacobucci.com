@@ -3,9 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import { getCachedTodo, setCachedTodo } from '@/lib/todo-cache';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   const filePath = path.join(process.cwd(), 'content/todo.txt');
   let content = getCachedTodo();
+  
+  console.log('GET /todo.svg - Cache hit:', !!content);
 
   if (!content) {
     if (fs.existsSync(filePath)) {
