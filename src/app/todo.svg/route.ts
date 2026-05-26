@@ -19,7 +19,7 @@ export async function GET() {
   const lines = content.split('\n');
   const lineHeight = 32;
   const charWidth = 11.2;
-  const padding = 120; // Increased padding for technical borders
+  const padding = 100; // Increased padding for technical borders
   
   // Find the longest line to determine width
   const maxChars = lines.reduce((max, line) => Math.max(max, line.length), 0);
