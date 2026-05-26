@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getProjectsWithGitHubData } from '@/lib/projects';
 import ProjectList from '@/components/ProjectList';
 import { Metadata } from 'next';
+import { FaPaypal } from 'react-icons/fa';
 
 export async function generateMetadata({
 	params,
@@ -42,7 +43,7 @@ export default async function ProjectsPage({
 
 				<ProjectList projects={projectsWithData} />
 
-				<div className='mt-20 mb-10 text-center card-enter'>
+				<div className='mt-20 mb-10 flex flex-col sm:flex-row items-center justify-center gap-6 card-enter'>
 					<a 
 						href="https://www.buymeacoffee.com/iacobucci" 
 						target="_blank" 
@@ -56,6 +57,16 @@ export default async function ProjectsPage({
 							height="50"
 							className="mx-auto"
 						/>
+					</a>
+
+					<a 
+						href="https://paypal.me/iacobuccivalerio" 
+						target="_blank" 
+						rel="noopener noreferrer"
+						className="flex items-center gap-2 px-6 py-3 bg-[#0070ba] hover:bg-[#005ea6] text-white rounded-xl font-bold transition-all hover:scale-105 active:scale-95"
+					>
+						<FaPaypal size={20} />
+						<span>PayPal.me</span>
 					</a>
 				</div>
 			</main>

@@ -21,7 +21,10 @@ export async function GET() {
     }
   }
 
-  const lines = content.split('\n');
+  // Convert tabs to 4 spaces for consistent rendering
+  const normalizedContent = content.replace(/\t/g, '    ');
+
+  const lines = normalizedContent.split('\n');
   const lineHeight = 32;
   const charWidth = 11.2;
   const padding = 100; // Increased padding for technical borders

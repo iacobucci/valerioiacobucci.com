@@ -153,20 +153,20 @@ const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
           <>
             <button
               onClick={prev}
-              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white shadow-2xl backdrop-blur-md transition-all hover:bg-white dark:hover:bg-gray-700 active:scale-95 z-30 flex items-center justify-center border border-gray-200 dark:border-gray-700 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white transition-all hover:bg-white dark:hover:bg-gray-700 active:scale-95 z-30 flex items-center justify-center border border-gray-200 dark:border-gray-700 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Previous image"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={next}
-              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white shadow-2xl backdrop-blur-md transition-all hover:bg-white dark:hover:bg-gray-700 active:scale-95 z-30 flex items-center justify-center border border-gray-200 dark:border-gray-700 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 dark:bg-gray-800/90 text-gray-900 dark:text-white transition-all hover:bg-white dark:hover:bg-gray-700 active:scale-95 z-30 flex items-center justify-center border border-gray-200 dark:border-gray-700 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               aria-label="Next image"
             >
               <ChevronRight className="w-6 h-6" />
             </button>
 
-            <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md z-30 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 px-3 py-1.5 rounded-full bg-black/40 z-30 transition-opacity duration-500 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
               {childrenArray.map((_, idx) => (
                 <button
                   key={idx}
@@ -182,7 +182,7 @@ const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
         )}
       </div>
 
-      <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 min-h-[64px] flex items-center justify-center px-6 py-4">
+      <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 min-h-[64px] flex items-center justify-center px-6 py-4">
         <p
           className={`text-sm font-medium text-gray-700 dark:text-gray-300 text-center italic transition-all duration-300 transform ${captionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
         >
