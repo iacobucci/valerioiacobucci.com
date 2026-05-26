@@ -1,14 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface ImageItem {
-  src: string;
-  alt?: string;
-  caption?: string;
-}
 
 interface ImageSlideshowProps {
   children: React.ReactNode;
@@ -17,8 +10,10 @@ interface ImageSlideshowProps {
 export default function ImageSlideshow({ children }: ImageSlideshowProps) {
   const [currentIndex, setCurrentIndex] = React.useState(0);
   const [showControls, setShowControls] = React.useState(true);
+  const [captionVisible, setCaptionVisible] = React.useState(true);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const hideTimeoutRef = React.useRef<NodeJS.Timeout>(null);
+  const scrollTimeoutRef = React.useRef<NodeJS.Timeout>(null);
 
   const resetHideTimeout = React.useCallback(() => {
     setShowControls(true);
@@ -26,22 +21,13 @@ export default function ImageSlideshow({ children }: ImageSlideshowProps) {
     hideTimeoutRef.current = setTimeout(() => setShowControls(false), 2000);
   }, []);
 
-  React.useEffect(() => {
-    resetHideTimeout();
-    return () => {
-      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-    };
-  }, [resetHideTimeout]);
-
   // Flatten children to handle images wrapped in <p> tags by MDX
   const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
     return React.Children.toArray(children).reduce((acc: React.ReactNode[], child) => {
       if (React.isValidElement(child)) {
-        // If it's a paragraph, it might contain the images
         if (child.type === 'p' || (child.props as any)?.mdxType === 'p') {
           return [...acc, ...flattenChildren(child.props.children)];
         }
-        // Skip empty text or line breaks
         if (typeof child.type === 'string' && (child.type === 'br' || child.type === 'span' && !(child.props as any).className?.includes('mdx-img'))) {
           if (child.props.children) return [...acc, ...flattenChildren(child.props.children)];
           return acc;
@@ -52,58 +38,17 @@ export default function ImageSlideshow({ children }: ImageSlideshowProps) {
     }, []);
   };
 
-  const childrenArray = flattenChildren(children).filter(child => {
-     if (React.isValidElement(child)) {
+  const childrenArray = React.useMemo(() => {
+    return flattenChildren(children).filter(child => {
+      if (React.isValidElement(child)) {
         const isImg = child.type === 'img' || (child.props as any)?.mdxType === 'img';
         const isMdxImg = (child.props as any)?.className?.includes('mdx-img');
         return isImg || isMdxImg;
-     }
-     return false;
-  });
+      }
+      return false;
+    });
+  }, [children]);
 
-  const next = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    resetHideTimeout();
-    const nextIdx = (currentIndex + 1) % childrenArray.length;
-    setCurrentIndex(nextIdx);
-    containerRef.current?.scrollTo({ left: containerRef.current.clientWidth * nextIdx, behavior: 'smooth' });
-  };
-
-  const prev = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    resetHideTimeout();
-    const prevIdx = (currentIndex - 1 + childrenArray.length) % childrenArray.length;
-    setCurrentIndex(prevIdx);
-    containerRef.current?.scrollTo({ left: containerRef.current.clientWidth * prevIdx, behavior: 'smooth' });
-  };
-
-  const goTo = (idx: number) => {
-    resetHideTimeout();
-    setCurrentIndex(idx);
-    containerRef.current?.scrollTo({ left: containerRef.current.clientWidth * idx, behavior: 'smooth' });
-  };
-
-  // Synchronize currentIndex on scroll
-  const handleScroll = () => {
-    resetHideTimeout();
-    if (containerRef.current) {
-      const index = Math.round(containerRef.current.scrollLeft / containerRef.current.clientWidth);
-      if (index !== currentIndex) setCurrentIndex(index);
-    }
-  };
-
-  if (childrenArray.length === 0) {
-    return (
-      <div className="my-8 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
-        <p className="font-bold">Slideshow: No content found</p>
-        <p className="text-sm">Please provide images as children of the component.</p>
-      </div>
-    );
-  }
-
-  // Try to extract caption from the child (alt text if it's an image)
-  const currentChild = childrenArray[currentIndex] as React.ReactElement;
-  
   const getAltText = (element: any): string | undefined => {
     if (!element) return undefined;
     if (element.props?.alt) return element.props.alt;
@@ -120,7 +65,67 @@ export default function ImageSlideshow({ children }: ImageSlideshowProps) {
     return undefined;
   };
 
-  const caption = getAltText(currentChild);
+  const currentCaption = childrenArray[currentIndex] ? getAltText(childrenArray[currentIndex]) : '';
+
+  const goTo = (idx: number) => {
+    resetHideTimeout();
+    if (idx === currentIndex) return;
+    
+    setCaptionVisible(false);
+    setTimeout(() => {
+      setCurrentIndex(idx);
+      setCaptionVisible(true);
+      containerRef.current?.scrollTo({ 
+        left: containerRef.current.clientWidth * idx, 
+        behavior: 'smooth' 
+      });
+    }, 150);
+  };
+
+  const next = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    goTo((currentIndex + 1) % childrenArray.length);
+  };
+
+  const prev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    goTo((currentIndex - 1 + childrenArray.length) % childrenArray.length);
+  };
+
+  const handleScroll = () => {
+    resetHideTimeout();
+    
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (containerRef.current) {
+        const index = Math.round(containerRef.current.scrollLeft / containerRef.current.clientWidth);
+        if (index !== currentIndex) {
+          setCaptionVisible(false);
+          setTimeout(() => {
+            setCurrentIndex(index);
+            setCaptionVisible(true);
+          }, 150);
+        }
+      }
+    }, 50);
+  };
+
+  React.useEffect(() => {
+    resetHideTimeout();
+    return () => {
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, [resetHideTimeout]);
+
+  if (childrenArray.length === 0) {
+    return (
+      <div className="my-8 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
+        <p className="font-bold">Slideshow: No content found</p>
+        <p className="text-sm">Please provide images as children of the component.</p>
+      </div>
+    );
+  }
 
   return (
     <div 
@@ -128,7 +133,6 @@ export default function ImageSlideshow({ children }: ImageSlideshowProps) {
       onMouseMove={resetHideTimeout}
       onTouchStart={resetHideTimeout}
     >
-      {/* Media Area: Contains the images and the floating controls */}
       <div className="relative">
         <div 
           ref={containerRef}
@@ -177,14 +181,13 @@ export default function ImageSlideshow({ children }: ImageSlideshowProps) {
         )}
       </div>
 
-      {/* Caption Area: Positioned below the media area in the flow */}
-      {caption && (
-        <div className="px-6 py-4 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 text-center italic">
-            {caption}
-          </p>
-        </div>
-      )}
+      <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 min-h-[64px] flex items-center justify-center px-6 py-4">
+        <p
+          className={`text-sm font-medium text-gray-700 dark:text-gray-300 text-center italic transition-all duration-300 transform ${captionVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+        >
+          {currentCaption || ' '}
+        </p>
+      </div>
     </div>
   );
 }
