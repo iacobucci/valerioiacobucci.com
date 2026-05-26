@@ -109,7 +109,7 @@ export default async function HomePage({
 						<div className="w-full py-4">
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img 
-								src="/todo.svg" 
+								src={`/todo.svg?t=${Date.now()}`} 
 								alt="Project Roadmap" 
 								className="w-full h-auto rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 bg-white/5"
 							/>
