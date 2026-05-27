@@ -34,7 +34,7 @@ export async function GET() {
   
   // Calculate SVG dimensions
   const svgHeight = Math.max(400, (lines.length * lineHeight) + padding * 2);
-  const svgWidth = Math.max(800, (maxChars * charWidth) + padding * 2);
+  const svgWidth = Math.max(400, (maxChars * charWidth) + padding * 2);
 
   const tspans = lines.map((line, index) => {
     const escapedLine = line
