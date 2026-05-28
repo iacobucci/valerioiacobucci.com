@@ -25,16 +25,21 @@ const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
   return React.Children.toArray(children).reduce((acc: React.ReactNode[], child) => {
     if (React.isValidElement(child)) {
       const element = child as React.ReactElement<any>;
-      // If it's a paragraph, it might contain the images
-      if (element.type === 'p' || element.props?.mdxType === 'p') {
+      
+      // If it looks like an image, keep it
+      const isImg = typeof element.type === 'string' && element.type === 'img';
+      const isMdxImg = element.props?.className?.includes('mdx-img');
+      const hasSrc = !!element.props?.src;
+      const hasData = !!element.props?.data; // For <object> tags used for SVGs
+      
+      if (isImg || isMdxImg || ((hasSrc || hasData) && !element.props.children)) {
+         return [...acc, element];
+      }
+
+      // If it's a structural element (p, span, div) or a custom component that might wrap images, recurse
+      if (element.props?.children) {
         return [...acc, ...flattenChildren(element.props.children)];
       }
-      // Skip empty text or line breaks
-      if (typeof element.type === 'string' && (element.type === 'br' || (element.type === 'span' && !element.props.className?.includes('mdx-img')))) {
-        if (element.props.children) return [...acc, ...flattenChildren(element.props.children)];
-        return acc;
-      }
-      return [...acc, element];
     }
     return acc;
   }, []);
@@ -42,9 +47,12 @@ const flattenChildren = (children: React.ReactNode): React.ReactNode[] => {
   const childrenArray = React.useMemo(() => {
     return flattenChildren(children).filter(child => {
       if (React.isValidElement(child)) {
-        const isImg = child.type === 'img' || (child.props as any)?.mdxType === 'img';
-        const isMdxImg = (child.props as any)?.className?.includes('mdx-img');
-        return isImg || isMdxImg;
+        const element = child as React.ReactElement<any>;
+        const isImg = element.type === 'img' || (element.props as any)?.mdxType === 'img';
+        const isMdxImg = element.props?.className?.includes('mdx-img');
+        const hasSrc = !!element.props?.src;
+        const hasData = !!element.props?.data; // For <object> tags
+        return isImg || isMdxImg || hasSrc || hasData;
       }
       return false;
     });

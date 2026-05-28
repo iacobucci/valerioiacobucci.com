@@ -150,7 +150,6 @@ export default async function BlogPostPage({
       return <img src={finalSrc as string} alt={alt} className={className || "mdx-img"} {...props} />;
     },
     Video: (props: any) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
-    ImageSlideshow: (props: any) => <ImageSlideshowComponent {...props} />
   };
 
   return (

@@ -6,6 +6,7 @@ import ProjectCard from './ProjectCard';
 import MicroblogPostCard from './MicroblogPostCard';
 import BlogPostCard from './BlogPostCard';
 import { mdxComponents as coreMdxComponents } from './mdx-components';
+import ImageSlideshow from './mdx/ImageSlideshow';
 
 export const serverMdxComponents = {
   ...coreMdxComponents,
@@ -45,4 +46,6 @@ export const serverMdxComponents = {
       </div>
     );
   },
+
+  ImageSlideshow: (props: any) => <ImageSlideshow {...props} />,
 };
