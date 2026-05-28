@@ -21,19 +21,26 @@ export default function HomeRoadmapBackground() {
 	const patternHeight = 540 * scale;
 	const gridStep = 90 * scale;
 
+	const containerStyle = {
+		clipPath: `inset(0 0 calc(100% - round(down, 100%, ${gridStep}px)) 0)`,
+		WebkitClipPath: `inset(0 0 calc(100% - round(down, 100%, ${gridStep}px)) 0)`,
+	} as React.CSSProperties;
+
 	const bgStyle = {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		width: `calc(100% + ${patternWidth}px)`,
+		height: '100%',
 		maskImage: 'url("/assets/background.svg")',
 		WebkitMaskImage: 'url("/assets/background.svg")',
 		maskRepeat: 'repeat',
 		WebkitMaskRepeat: 'repeat',
 		maskSize: `${patternWidth}px ${patternHeight}px`,
 		WebkitMaskSize: `${patternWidth}px ${patternHeight}px`,
-		maskPosition: 'center top',
-		WebkitMaskPosition: 'center top',
-		// Clip the container to the nearest grid increment from the top
-		clipPath: `inset(0 0 calc(100% - round(down, 100%, ${gridStep}px)) 0)`,
-		WebkitClipPath: `inset(0 0 calc(100% - round(down, 100%, ${gridStep}px)) 0)`,
-		// Continuous horizontal scroll
+		maskPosition: 'left top',
+		WebkitMaskPosition: 'left top',
+		willChange: 'transform',
 		animation: `roadmap-scroll 60s linear infinite`,
 	} as React.CSSProperties;
 
@@ -41,11 +48,12 @@ export default function HomeRoadmapBackground() {
 		<div 
 			className={`absolute inset-0 pointer-events-none overflow-hidden transition-opacity duration-1000 ${mounted ? 'opacity-100' : 'opacity-0'}`}
 			aria-hidden="true"
+			style={containerStyle}
 		>
 			<style>{`
 				@keyframes roadmap-scroll {
-					from { mask-position: 0px top; -webkit-mask-position: 0px top; }
-					to { mask-position: -${patternWidth}px top; -webkit-mask-position: -${patternWidth}px top; }
+					from { transform: translate3d(0, 0, 0); }
+					to { transform: translate3d(-${patternWidth}px, 0, 0); }
 				}
 			`}</style>
 			<div 
