@@ -6,7 +6,7 @@ export default async function HomeRoadmap({ locale }: { locale: string }) {
 	const t = await getTranslations();
 
 	return (
-		<section className="w-full snap-section relative overflow-visible">
+		<section className="w-full snap-section relative overflow-visible pb-[180px]">
 			<HomeRoadmapBackground />
 			<div className="max-w-7xl mx-auto px-6 sm:px-12 relative z-10">
 				<div className="flex flex-col items-center gap-12 w-full md:w-[80%] lg:w-[66%] mx-auto">

@@ -49,7 +49,7 @@ export default function HomeRoadmapBackground() {
 				}
 			`}</style>
 			<div 
-				className="absolute inset-0 bg-gray-900 dark:bg-white opacity-[0.03] dark:opacity-[0.05]"
+				className="absolute inset-0 bg-gray-900 dark:bg-white opacity-[0.08] dark:opacity-[0.05]"
 				style={bgStyle}
 			/>
 		</div>
