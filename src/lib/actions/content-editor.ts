@@ -513,7 +513,8 @@ export async function getGitStatusAction() {
   try {
     const status = execSync('git -C content status --short', { encoding: 'utf8' });
     const diff = execSync('git -C content diff --stat', { encoding: 'utf8' });
-    return { success: true, status, diff };
+    const hash = execSync('git -C content rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    return { success: true, status, diff, hash };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
@@ -612,6 +613,19 @@ export async function gitResetAction() {
   try {
     // Hard reset to the last committed state to recover from messy states
     spawnSync('git', ['-C', 'content', 'reset', '--hard'], { stdio: 'inherit' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function restartServiceAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    execSync('systemctl --user restart valerioiacobucci.com');
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };

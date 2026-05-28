@@ -29,6 +29,7 @@ import {
   getTagsAction,
   duplicateAction,
   translateContentAction,
+  restartServiceAction,
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
 import { MDXRemote } from 'next-mdx-remote';
@@ -69,7 +70,7 @@ function EditorInternal() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'stash' | 'pop' | 'reset' | 'deploy'>('none');
-  const [gitStatus, setGitStatus] = useState<{ status: string; diff: string }>({ status: '', diff: '' });
+  const [gitStatus, setGitStatus] = useState<{ status: string; diff: string; hash?: string }>({ status: '', diff: '' });
   const [deployStatus, setDeployStatus] = useState<{ isActive: boolean; status: string; logs: string }>({ isActive: false, status: '', logs: '' });
   const [sidebarTab, setSidebarTab] = useState<'files' | 'git'>('files');
   const [previewMode, setPreviewMode] = useState<'split' | 'edit' | 'preview' | 'visual'>('split');
@@ -135,7 +136,11 @@ function EditorInternal() {
   const loadGitStatus = useCallback(async () => {
     try {
       const result = await getGitStatusAction();
-      if (result.success) setGitStatus({ status: result.status || 'Clean', diff: result.diff || '' });
+      if (result.success) setGitStatus({ 
+        status: result.status || 'Clean', 
+        diff: result.diff || '',
+        hash: result.hash
+      });
     } catch (error) {}
   }, []);
 
@@ -546,6 +551,34 @@ function EditorInternal() {
           toast.error("Deployment trigger failed");
         } finally {
           setGitOperation('none');
+        }
+      },
+      onCancel: () => setConfirmModal(null)
+    });
+  };
+
+  const handleRestartService = async () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Restart Website Service",
+      message: "This will immediately restart the web server process. Any active sessions might be briefly interrupted. Continue?",
+      confirmLabel: "Restart Now",
+      confirmVariant: "danger",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setGitOperation('deploy'); // Reusing deploy state for loading UI
+        try {
+          const result = await restartServiceAction();
+          if (result.success) {
+            toast.success("Service restart triggered successfully");
+          } else {
+            toast.error("Failed to restart service: " + result.error);
+          }
+        } catch (error: any) {
+          toast.error("Restart failed: " + error.message);
+        } finally {
+          setGitOperation('none');
+          loadDeployStatus();
         }
       },
       onCancel: () => setConfirmModal(null)
@@ -1330,20 +1363,36 @@ function EditorInternal() {
                         <span className="text-[10px] font-bold">Deploy</span>
                         <span className="text-[8px] text-purple-400 text-center leading-tight">Rebuild & Restart</span>
                       </button>
+                      <button
+                        onClick={handleRestartService}
+                        disabled={gitOperation !== 'none'}
+                        className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800 hover:border-orange-500 transition-all group disabled:opacity-50"
+                      >
+                        <RotateCw className="w-5 h-5 text-orange-500 group-hover:rotate-180 transition-transform duration-500" />
+                        <span className="text-[10px] font-bold">Restart</span>
+                        <span className="text-[8px] text-orange-400 text-center leading-tight">Live Service</span>
+                      </button>
                       </div>
                       </div>
                   {/* Git Status */}
                   <div className="space-y-3">
-                    <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Git Status</h4>
-                    <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] border border-gray-200 dark:border-gray-800 leading-relaxed overflow-x-auto whitespace-pre">
-                      {gitStatus.status === 'Clean' ? (
+                    <div className="flex items-center justify-between px-1">
+                      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Git Status & Version</h4>
+                      {gitStatus.hash && (
+                        <span className="text-[10px] font-mono font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full border border-blue-100 dark:border-blue-800/50 tracking-wider">
+                          {gitStatus.hash}
+                        </span>
+                      )}
+                    </div>
+                    
+                    {gitStatus.status === 'Clean' && !gitStatus.diff && (
+                      <div className="bg-gray-100 dark:bg-gray-800/80 rounded-xl p-3 font-mono text-[10px] border border-gray-200 dark:border-gray-800 leading-relaxed">
                         <div className="flex items-center gap-2 text-green-600">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Working directory clean
                         </div>
-                      ) : (
-                        <span className="text-orange-600 dark:text-orange-400">{gitStatus.status}</span>
-                      )}
-                    </div>
+                      </div>
+                    )}
+
                     {gitStatus.diff && (
                       <div className="bg-gray-900 rounded-xl p-3 font-mono text-[9px] border border-gray-800 leading-tight overflow-x-auto whitespace-pre text-gray-300">
                         {gitStatus.diff}
