@@ -9,9 +9,10 @@ interface CommentsProps {
   category: string;
   categoryId: string;
   lang: string;
+  term?: string;
 }
 
-export default function Comments({ repo, repoId, category, categoryId, lang }: CommentsProps) {
+export default function Comments({ repo, repoId, category, categoryId, lang, term }: CommentsProps) {
   const theme = useTheme();
 
   return (
@@ -22,7 +23,8 @@ export default function Comments({ repo, repoId, category, categoryId, lang }: C
         repoId={repoId}
         category={category}
         categoryId={categoryId}
-        mapping="pathname"
+        mapping={term ? "specific" : "pathname"}
+        term={term}
         strict="0"
         reactionsEnabled="1"
         emitMetadata="0"

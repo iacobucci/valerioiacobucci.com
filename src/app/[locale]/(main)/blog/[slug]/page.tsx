@@ -274,6 +274,7 @@ export default async function BlogPostPage({
           category={process.env.NEXT_PUBLIC_GISCUS_CATEGORY || ''}
           categoryId={process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID || ''}
           lang={locale}
+          term={slug}
         />
       )}
     </div>
