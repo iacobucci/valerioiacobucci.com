@@ -19,10 +19,21 @@ export async function getLinkPreviewAction(url: string): Promise<LinkPreviewData
       return null;
     }
 
+    // Defensive image extraction due to complex types in open-graph-scraper
+    let imageUrl: string | undefined;
+    const ogImage = result.ogImage;
+    if (Array.isArray(ogImage) && ogImage.length > 0) {
+      const firstImage = ogImage[0] as unknown as { url: string };
+      imageUrl = firstImage?.url;
+    } else if (ogImage && typeof ogImage === 'object') {
+      const imageObj = ogImage as unknown as { url: string };
+      imageUrl = imageObj.url;
+    }
+
     return {
       title: result.ogTitle || result.twitterTitle,
       description: result.ogDescription || result.twitterDescription,
-      image: Array.isArray(result.ogImage) ? result.ogImage[0]?.url : result.ogImage?.url,
+      image: imageUrl,
       url: result.ogUrl || url,
       siteName: result.ogSiteName,
     };
