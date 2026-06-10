@@ -82,6 +82,7 @@
 		"image_too_large": "Immagine troppo grande (max 20MB)",
 		"thread": "Connetti al post precedente",
 		"toggle_preview": "Mostra anteprima link",
+		"go_to_next": "Vai al prossimo nel thread",
 		"back_to_microblog": "Torna al Microblog"
 	},
 	"footer": {

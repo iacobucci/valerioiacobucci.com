@@ -6,11 +6,12 @@ import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useSession } from 'next-auth/react';
 import { toggleReactionAction, updatePostAction, deletePostAction } from '@/lib/actions/microblog';
-import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert, MdLink, MdOutlineWeb } from 'react-icons/md';
+import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert, MdLink, MdOutlineWeb, MdArrowDownward } from 'react-icons/md';
 import { Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/lib/toast';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/routing';
 
 import Linkify from 'linkify-react';
 import LinkPreview from './LinkPreview';
@@ -19,6 +20,7 @@ interface MicroblogPostCardProps {
 	post: MicroblogPostSerializable;
 	locale: string;
 	onMenuToggle?: (isOpen: boolean) => void;
+	isIndividualPage?: boolean;
 }
 
 const linkifyOptions = {
@@ -27,7 +29,7 @@ const linkifyOptions = {
 	rel: 'noopener noreferrer'
 };
 
-export default function MicroblogPostCard({ post, locale, onMenuToggle }: MicroblogPostCardProps) {
+export default function MicroblogPostCard({ post, locale, onMenuToggle, isIndividualPage }: MicroblogPostCardProps) {
 	const t = useTranslations('microblog');
 	const { data: session } = useSession();
 	const [isPending, startTransition] = useTransition();
@@ -142,16 +144,32 @@ export default function MicroblogPostCard({ post, locale, onMenuToggle }: Microb
 	return (
 		<div className="relative group/card">
 			{post.is_thread && (
-				<div className="absolute -bottom-8 left-9 w-4 h-8 overflow-hidden pointer-events-none opacity-40 dark:opacity-20 group-hover/card:opacity-100 transition-opacity">
-					<svg width="16" height="32" viewBox="0 0 16 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-gray-400 dark:text-gray-500 group-hover/card:text-blue-500 transition-colors">
-						<path 
-							d="M8 0C8 4 14 4 14 8C14 12 2 12 2 16C2 20 14 20 14 24C14 28 8 28 8 32" 
-							stroke="currentColor" 
-							strokeWidth="2" 
-							strokeLinecap="round"
-						/>
-					</svg>
-				</div>
+				<>
+					<div className={`absolute ${isIndividualPage ? '-bottom-16' : '-bottom-8'} left-9 w-4 ${isIndividualPage ? 'h-16' : 'h-8'} overflow-visible pointer-events-none opacity-40 dark:opacity-20 group-hover/card:opacity-100 transition-opacity flex flex-col items-center`}>
+						<svg width="16" height={isIndividualPage ? 64 : 32} viewBox={isIndividualPage ? "0 0 16 64" : "0 0 16 32"} fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-gray-400 dark:text-gray-500 group-hover/card:text-blue-500 transition-colors">
+							<path 
+								d={isIndividualPage 
+									? "M8 0C8 4 14 4 14 8C14 12 2 12 2 16C2 20 14 20 14 24C14 28 8 28 8 32C8 36 14 36 14 40C14 44 2 44 2 48C2 52 14 52 14 56C14 60 8 60 8 64"
+									: "M8 0C8 4 14 4 14 8C14 12 2 12 2 16C2 20 14 20 14 24C14 28 8 28 8 32"} 
+								stroke="currentColor" 
+								strokeWidth="2" 
+								strokeLinecap="round"
+							/>
+						</svg>
+					</div>
+
+					{isIndividualPage && (
+						<div className="absolute -bottom-16 left-9 w-4 h-16 flex flex-col items-center justify-end pointer-events-none">
+							<Link
+								href={`/microblog/${post.id - 2}`}
+								className="pointer-events-auto flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-full shadow-sm hover:shadow-md hover:border-blue-500/50 transition-all text-xs font-bold text-gray-500 hover:text-blue-600 whitespace-nowrap group/btn z-20"
+							>
+								{t('go_to_next')}
+								<MdArrowDownward className="w-4 h-4 group-hover/btn:translate-y-0.5 transition-transform" />
+							</Link>
+						</div>
+					)}
+				</>
 			)}
 			<div 
 				id={`post-${post.id - 1}`}

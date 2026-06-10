@@ -67,7 +67,7 @@ export default async function MicroblogPostPage({
         </header>
 
         <div className="card-enter">
-          <MicroblogPostCard post={post} locale={locale} />
+          <MicroblogPostCard post={post} locale={locale} isIndividualPage />
         </div>
       </main>
     </div>

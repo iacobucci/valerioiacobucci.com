@@ -82,6 +82,7 @@
 		"image_too_large": "Afbeelding te groot (max 20MB)",
 		"thread": "Verbind met vorig bericht",
 		"toggle_preview": "Link-voorbeeld tonen",
+		"go_to_next": "Ga naar volgende in thread",
 		"back_to_microblog": "Terug naar Microblog"
 	},
 	"footer": {

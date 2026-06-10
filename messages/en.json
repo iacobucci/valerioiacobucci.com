@@ -60,6 +60,7 @@
 		"image_too_large": "Image too large (max 20MB)",
 		"thread": "Connect to previous post",
 		"toggle_preview": "Show link preview",
+		"go_to_next": "Go to next in thread",
 		"back_to_microblog": "Back to Microblog"
 	},
 	"projects": {
