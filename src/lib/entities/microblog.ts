@@ -14,6 +14,9 @@ export class MicroblogPost {
   @CreateDateColumn({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at!: Date;
 
+  @Column({ default: false })
+  is_thread!: boolean;
+
   @OneToMany(() => MicroblogReaction, (reaction) => reaction.post)
   reactions!: MicroblogReaction[];
 }

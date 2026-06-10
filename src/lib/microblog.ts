@@ -21,6 +21,7 @@ export async function getMicroblogPosts(limit = 20, offset = 0): Promise<Microbl
     content: post.content,
     image_data: post.image_data ? post.image_data.toString('base64') : null,
     created_at: post.created_at.toISOString(),
+    is_thread: post.is_thread,
     reactions: post.reactions?.map(r => ({
       id: r.id,
       userId: r.userId,
@@ -31,7 +32,7 @@ export async function getMicroblogPosts(limit = 20, offset = 0): Promise<Microbl
   }));
 }
 
-export async function addMicroblogPost(content: string, imageData?: Buffer | null): Promise<number> {
+export async function addMicroblogPost(content: string, imageData?: Buffer | null, isThread: boolean = false): Promise<number> {
   await getDataSource();
   const repository = AppDataSource.getRepository(MicroblogPost);
   
@@ -47,6 +48,7 @@ export async function addMicroblogPost(content: string, imageData?: Buffer | nul
   post.id = nextId;
   post.content = content;
   post.image_data = imageData || null;
+  post.is_thread = isThread;
   
   const savedPost = await repository.save(post);
   return savedPost.id;
@@ -68,6 +70,7 @@ export async function getMicroblogPost(id: number): Promise<MicroblogPostSeriali
     content: post.content,
     image_data: post.image_data ? post.image_data.toString('base64') : null,
     created_at: post.created_at.toISOString(),
+    is_thread: post.is_thread,
     reactions: post.reactions?.map(r => ({
       id: r.id,
       userId: r.userId,
@@ -115,8 +118,12 @@ export async function deleteMicroblogPost(id: number): Promise<void> {
   await repository.delete(id);
 }
 
-export async function updateMicroblogPost(id: number, content: string): Promise<void> {
+export async function updateMicroblogPost(id: number, content: string, isThread?: boolean): Promise<void> {
   await getDataSource();
   const repository = AppDataSource.getRepository(MicroblogPost);
-  await repository.update(id, { content });
+  const updateData: Partial<MicroblogPost> = { content };
+  if (isThread !== undefined) {
+    updateData.is_thread = isThread;
+  }
+  await repository.update(id, updateData);
 }

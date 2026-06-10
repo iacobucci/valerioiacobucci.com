@@ -4,7 +4,7 @@ import { auth, isAuthorized } from "@/auth";
 import { addMicroblogPost, toggleMicroblogReaction, deleteMicroblogPost, updateMicroblogPost } from "@/lib/microblog";
 import { revalidatePath } from "next/cache";
 
-export async function createPostAction(content: string, imageBase64?: string | null) {
+export async function createPostAction(content: string, imageBase64?: string | null, isThread: boolean = false) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
   }
@@ -15,18 +15,18 @@ export async function createPostAction(content: string, imageBase64?: string | n
     imageBuffer = Buffer.from(base64Data, 'base64');
   }
 
-  await addMicroblogPost(content, imageBuffer);
+  await addMicroblogPost(content, imageBuffer, isThread);
   
   revalidatePath("/[locale]/microblog", "page");
   return { success: true };
 }
 
-export async function updatePostAction(id: number, content: string) {
+export async function updatePostAction(id: number, content: string, isThread?: boolean) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
   }
 
-  await updateMicroblogPost(id, content);
+  await updateMicroblogPost(id, content, isThread);
   
   revalidatePath("/[locale]/microblog", "page");
   return { success: true };

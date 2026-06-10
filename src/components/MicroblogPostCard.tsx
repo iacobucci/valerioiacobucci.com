@@ -6,10 +6,11 @@ import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useSession } from 'next-auth/react';
 import { toggleReactionAction, updatePostAction, deletePostAction } from '@/lib/actions/microblog';
-import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert } from 'react-icons/md';
+import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert, MdLink } from 'react-icons/md';
 import { Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/lib/toast';
+import { useTranslations } from 'next-intl';
 
 import Linkify from 'linkify-react';
 
@@ -25,10 +26,12 @@ const linkifyOptions = {
 };
 
 export default function MicroblogPostCard({ post, locale }: MicroblogPostCardProps) {
+	const t = useTranslations('microblog');
 	const { data: session } = useSession();
 	const [isPending, startTransition] = useTransition();
 	const [isEditing, setIsEditing] = useState(false);
 	const [editContent, setEditContent] = useState(post.content);
+	const [editIsThread, setEditIsThread] = useState(post.is_thread);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	
@@ -68,14 +71,14 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	};
 
 	const handleUpdate = () => {
-		if (editContent === post.content) {
+		if (editContent === post.content && editIsThread === post.is_thread) {
 			setIsEditing(false);
 			return;
 		}
 
 		startTransition(async () => {
 			try {
-				const result = await updatePostAction(post.id, editContent);
+				const result = await updatePostAction(post.id, editContent, editIsThread);
 				if (result.success) {
 					setIsEditing(false);
 					toast.success('Post updated successfully!');
@@ -121,22 +124,41 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	};
 
 	return (
-		<div 
-			id={`post-${post.id - 1}`}
-			suppressHydrationWarning
-			className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-shadow text-left group scroll-mt-24"
-		>
+		<div className="relative group/card">
+			{post.is_thread && (
+				<div className="absolute -bottom-8 left-9 w-4 h-8 overflow-hidden pointer-events-none opacity-40 dark:opacity-20 group-hover/card:opacity-100 transition-opacity">
+					<svg width="16" height="32" viewBox="0 0 16 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-gray-400 dark:text-gray-500 group-hover/card:text-blue-500 transition-colors">
+						<path 
+							d="M8 0C8 4 14 4 14 8C14 12 2 12 2 16C2 20 14 20 14 24C14 28 8 28 8 32" 
+							stroke="currentColor" 
+							strokeWidth="2" 
+							strokeLinecap="round"
+						/>
+					</svg>
+				</div>
+			)}
+			<div 
+				id={`post-${post.id - 1}`}
+				suppressHydrationWarning
+				className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-all text-left group scroll-mt-24 relative"
+			>
 			<div className="flex flex-col gap-4">
 				<div className="flex justify-between items-start text-xs text-gray-500 dark:text-gray-400">
 					<div className="flex items-center gap-2">
 						<div className="font-mono opacity-50">#{post.id - 1}</div>
+						{post.is_thread && (
+							<div className="flex items-center gap-1 text-gray-400 dark:text-gray-500 font-medium">
+								<MdLink className="w-3 h-3 rotate-45" />
+								<span>Thread</span>
+							</div>
+						)}
 					</div>
 					<div className="flex items-center gap-3">
 						<FormattedDate date={post.created_at} locale={locale} />
 						
 						{!isEditing && (
 							<div 
-								className={`relative'}`} 
+								className="relative" 
 								ref={menuRef}
 							>
 								<button 
@@ -176,6 +198,25 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 														Edit
 													</button>
 													<button
+														onClick={() => {
+															const newThreadState = !post.is_thread;
+															startTransition(async () => {
+																try {
+																	await updatePostAction(post.id, post.content, newThreadState);
+																	toast.success(newThreadState ? 'Post threaded!' : 'Post unthreaded!');
+																} catch (error) {
+																	console.error('Failed to update thread status:', error);
+																	toast.error('Failed to update thread status');
+																}
+															});
+															setIsMenuOpen(false);
+														}}
+														className="flex items-center w-full gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+													>
+														<MdLink className={`w-4 h-4 ${post.is_thread ? 'rotate-45 text-blue-500' : ''}`} />
+														{post.is_thread ? 'Unthread' : 'Thread'}
+													</button>
+													<button
 														onClick={handleDelete}
 														className="flex items-center w-full gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 													>
@@ -205,23 +246,38 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 								{140 - editContent.length}
 							</div>
 						</div>
-						<div className="flex justify-end gap-2">
+						<div className="flex justify-between items-center">
 							<button
-								onClick={() => {
-									setIsEditing(false);
-									setEditContent(post.content);
-								}}
-								className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+								type="button"
+								onClick={() => setEditIsThread(!editIsThread)}
+								className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-sm font-medium ${editIsThread
+									? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+									: 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+									}`}
+								title={t('thread')}
 							>
-								<MdClose className="w-5 h-5" />
+								<MdLink className={`w-4 h-4 ${editIsThread ? 'rotate-45' : ''}`} />
+								<span className="hidden sm:inline">{t('thread')}</span>
 							</button>
-							<button
-								onClick={handleUpdate}
-								disabled={isPending || editContent.length > 140 || !editContent.trim()}
-								className="p-2 bg-blue-600 text-white hover:bg-blue-700 rounded-full transition-colors disabled:opacity-50"
-							>
-								<MdCheck className="w-5 h-5" />
-							</button>
+							<div className="flex gap-2">
+								<button
+									onClick={() => {
+										setIsEditing(false);
+										setEditContent(post.content);
+										setEditIsThread(post.is_thread);
+									}}
+									className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+								>
+									<MdClose className="w-5 h-5" />
+								</button>
+								<button
+									onClick={handleUpdate}
+									disabled={isPending || editContent.length > 140 || !editContent.trim()}
+									className="p-2 bg-blue-600 text-white hover:bg-blue-700 rounded-full transition-colors disabled:opacity-50"
+								>
+									<MdCheck className="w-5 h-5" />
+								</button>
+							</div>
 						</div>
 					</div>
 				) : (
@@ -293,5 +349,6 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 				</div>
 			</div>
 		</div>
+	</div>
 	);
 }

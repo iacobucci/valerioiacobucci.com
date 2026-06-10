@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { createPostAction } from '@/lib/actions/microblog';
-import { MdImage, MdSend, MdClose } from 'react-icons/md';
+import { MdImage, MdSend, MdClose, MdLink } from 'react-icons/md';
 import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 import { compressImage } from '@/lib/image-utils';
@@ -12,6 +12,7 @@ export default function MicroblogEditor() {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [isThread, setIsThread] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -45,10 +46,11 @@ export default function MicroblogEditor() {
 
     setIsSubmitting(true);
     try {
-      const result = await createPostAction(content, imagePreview);
+      const result = await createPostAction(content, imagePreview, isThread);
       if (result.success) {
         setContent('');
         setImagePreview(null);
+        setIsThread(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
         toast.success('Post published!');
       }
@@ -96,7 +98,7 @@ export default function MicroblogEditor() {
         )}
 
         <div className="flex justify-between items-center pt-2 border-t border-gray-50 dark:border-gray-800">
-          <div className="flex gap-2">
+          <div className="flex gap-4 items-center">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -113,6 +115,19 @@ export default function MicroblogEditor() {
               accept="image/*"
               className="hidden"
             />
+
+            <button
+              type="button"
+              onClick={() => setIsThread(!isThread)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-sm font-medium ${isThread
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                : 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              title={t('thread')}
+            >
+              <MdLink className={`w-4 h-4 ${isThread ? 'rotate-45' : ''}`} />
+              <span className="hidden sm:inline">{t('thread')}</span>
+            </button>
           </div>
 
           <button

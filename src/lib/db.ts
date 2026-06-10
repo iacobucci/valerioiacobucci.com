@@ -50,6 +50,7 @@ export interface MicroblogPostSerializable {
   content: string;
   image_data: string | null;
   created_at: string;
+  is_thread: boolean;
   reactions?: MicroblogReactionSerializable[];
 }
 
