@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useSession } from 'next-auth/react';
 import { toggleReactionAction, updatePostAction, deletePostAction } from '@/lib/actions/microblog';
-import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert, MdLink } from 'react-icons/md';
+import { MdEdit, MdDelete, MdCheck, MdClose, MdMoreVert, MdLink, MdOutlineWeb } from 'react-icons/md';
 import { Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from '@/lib/toast';
@@ -18,6 +18,7 @@ import LinkPreview from './LinkPreview';
 interface MicroblogPostCardProps {
 	post: MicroblogPostSerializable;
 	locale: string;
+	onMenuToggle?: (isOpen: boolean) => void;
 }
 
 const linkifyOptions = {
@@ -26,15 +27,20 @@ const linkifyOptions = {
 	rel: 'noopener noreferrer'
 };
 
-export default function MicroblogPostCard({ post, locale }: MicroblogPostCardProps) {
+export default function MicroblogPostCard({ post, locale, onMenuToggle }: MicroblogPostCardProps) {
 	const t = useTranslations('microblog');
 	const { data: session } = useSession();
 	const [isPending, startTransition] = useTransition();
 	const [isEditing, setIsEditing] = useState(false);
 	const [editContent, setEditContent] = useState(post.content);
 	const [editIsThread, setEditIsThread] = useState(post.is_thread);
+	const [editShowPreview, setEditShowPreview] = useState(post.show_link_preview);
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		onMenuToggle?.(isMenuOpen);
+	}, [isMenuOpen, onMenuToggle]);
 	
 	const user = session?.user as { id?: string; username?: string; name?: string | null; email?: string | null } | undefined;
 	const username = user?.username || user?.name || null;
@@ -72,14 +78,14 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	};
 
 	const handleUpdate = () => {
-		if (editContent === post.content && editIsThread === post.is_thread) {
+		if (editContent === post.content && editIsThread === post.is_thread && editShowPreview === post.show_link_preview) {
 			setIsEditing(false);
 			return;
 		}
 
 		startTransition(async () => {
 			try {
-				const result = await updatePostAction(post.id, editContent, editIsThread);
+				const result = await updatePostAction(post.id, editContent, editIsThread, editShowPreview);
 				if (result.success) {
 					setIsEditing(false);
 					toast.success('Post updated successfully!');
@@ -107,12 +113,17 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 	};
 
 	const handleShare = () => {
-		const publicId = post.id - 1;
-		const url = `${window.location.origin}/${locale}/microblog/${publicId}`;
+		const url = post.hash 
+			? `${window.location.origin}/${locale}/microblog/${post.hash}`
+			: `${window.location.origin}/${locale}/microblog/${post.id - 1}`;
+		
+		const title = post.hash
+			? `Valerio Iacobucci - Microblog Post`
+			: `Valerio Iacobucci - Microblog Post #${post.id - 1}`;
 		
 		if (navigator.share) {
 			navigator.share({
-				title: `Valerio Iacobucci - Microblog Post #${publicId}`,
+				title: title,
 				text: post.content.substring(0, 100) + '...',
 				url: url,
 			}).catch(console.error);
@@ -180,7 +191,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 											animate={{ opacity: 1, y: 0, scale: 1 }}
 											exit={{ opacity: 0, y: 5, scale: 0.95 }}
 											transition={{ duration: 0.1 }}
-											className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-20"
+											className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 py-1.5 z-50 overflow-hidden"
 										>
 											<button
 												onClick={handleShare}
@@ -220,6 +231,25 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 													>
 														<MdLink className={`w-4 h-4 ${post.is_thread ? 'rotate-45 text-blue-500' : ''}`} />
 														{post.is_thread ? 'Unthread' : 'Thread'}
+													</button>
+													<button
+														onClick={() => {
+															const newShowPreview = !post.show_link_preview;
+															startTransition(async () => {
+																try {
+																	await updatePostAction(post.id, post.content, post.is_thread, newShowPreview);
+																	toast.success(newShowPreview ? 'Preview enabled!' : 'Preview disabled!');
+																} catch (error) {
+																	console.error('Failed to update preview status:', error);
+																	toast.error('Failed to update preview status');
+																}
+															});
+															setIsMenuOpen(false);
+														}}
+														className="flex items-center w-full gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+													>
+														<MdOutlineWeb className={`w-4 h-4 ${post.show_link_preview ? 'text-blue-500' : ''}`} />
+														{post.show_link_preview ? 'Hide Preview' : 'Show Preview'}
 													</button>
 													<button
 														onClick={handleDelete}
@@ -264,12 +294,25 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 								<MdLink className={`w-4 h-4 ${editIsThread ? 'rotate-45' : ''}`} />
 								<span className="hidden sm:inline">{t('thread')}</span>
 							</button>
+							<button
+								type="button"
+								onClick={() => setEditShowPreview(!editShowPreview)}
+								className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-sm font-medium ${editShowPreview
+									? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+									: 'bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+									}`}
+								title={t('toggle_preview')}
+							>
+								<MdOutlineWeb className="w-4 h-4" />
+								<span className="hidden sm:inline">{t('toggle_preview')}</span>
+							</button>
 							<div className="flex gap-2">
 								<button
 									onClick={() => {
 										setIsEditing(false);
 										setEditContent(post.content);
 										setEditIsThread(post.is_thread);
+										setEditShowPreview(post.show_link_preview);
 									}}
 									className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
 								>
@@ -290,7 +333,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 						<Linkify options={linkifyOptions}>
 							{post.content}
 						</Linkify>
-						{firstUrl && <LinkPreview url={firstUrl} />}
+						{firstUrl && post.show_link_preview && <LinkPreview url={firstUrl} />}
 					</div>
 				)}
 

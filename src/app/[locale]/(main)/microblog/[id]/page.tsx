@@ -1,12 +1,26 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { getMicroblogPost } from '@/lib/microblog';
+import { getMicroblogPost, getMicroblogPostByHash } from '@/lib/microblog';
 import MicroblogPostCard from '@/components/MicroblogPostCard';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { MdArrowBack } from 'react-icons/md';
 import { Metadata } from 'next';
+import { MicroblogPostSerializable } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
+
+async function fetchPost(param: string): Promise<{ post: MicroblogPostSerializable | null; displayId: string }> {
+  // Check if param is a numeric ID
+  if (/^\d+$/.test(param)) {
+    const dbId = parseInt(param) + 1;
+    const post = await getMicroblogPost(dbId);
+    return { post, displayId: `#${param}` };
+  }
+  
+  // Otherwise treat as hash
+  const post = await getMicroblogPostByHash(param);
+  return { post, displayId: '' };
+}
 
 export async function generateMetadata({
   params,
@@ -14,15 +28,12 @@ export async function generateMetadata({
   params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const dbId = parseInt(id) + 1;
+  const { post, displayId } = await fetchPost(id);
   
-  if (isNaN(dbId)) return {};
-
-  const post = await getMicroblogPost(dbId);
   if (!post) return {};
 
   return {
-    title: `Microblog Post #${id}`,
+    title: `Microblog Post ${displayId}`.trim(),
     description: post.content.slice(0, 160),
   };
 }
@@ -36,11 +47,7 @@ export default async function MicroblogPostPage({
   setRequestLocale(locale);
   const t = await getTranslations('microblog');
 
-  // Convert 0-indexed URL ID to 1-indexed DB ID
-  const dbId = parseInt(id) + 1;
-  if (isNaN(dbId)) notFound();
-
-  const post = await getMicroblogPost(dbId);
+  const { post, displayId } = await fetchPost(id);
   if (!post) notFound();
 
   return (
@@ -55,7 +62,7 @@ export default async function MicroblogPostPage({
             {t('back_to_microblog')}
           </Link>
           <h1 className="text-3xl font-bold text-fg-light dark:text-fg-dark">
-            Post #{id}
+            Post {displayId}
           </h1>
         </header>
 

@@ -17,6 +17,12 @@ export class MicroblogPost {
   @Column({ default: false })
   is_thread!: boolean;
 
+  @Column({ type: 'varchar', length: 64, unique: true, nullable: true })
+  hash?: string | null;
+
+  @Column({ default: true })
+  show_link_preview!: boolean;
+
   @OneToMany(() => MicroblogReaction, (reaction) => reaction.post)
   reactions!: MicroblogReaction[];
 }

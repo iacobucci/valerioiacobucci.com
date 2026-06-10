@@ -59,6 +59,7 @@
 		"add_image": "Add image",
 		"image_too_large": "Image too large (max 20MB)",
 		"thread": "Connect to previous post",
+		"toggle_preview": "Show link preview",
 		"back_to_microblog": "Back to Microblog"
 	},
 	"projects": {

@@ -39,6 +39,7 @@ export default function MicroblogList({ posts: initialPosts, locale, noPostsMess
 	const [hasMore, setHasMore] = useState(initialPosts.length >= 20);
 	const [isLoading, setIsLoading] = useState(false);
 	const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+	const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
 	const [isMounted, setIsMounted] = useState(false);
 
 	const listRef = useRef<HTMLDivElement>(null);
@@ -163,7 +164,7 @@ export default function MicroblogList({ posts: initialPosts, locale, noPostsMess
 	}
 
 	return (
-		<div className="flex flex-col gap-6">
+		<div className="flex flex-col gap-6 isolate">
 			<motion.div
 				className="space-y-6"
 				ref={listRef}
@@ -185,10 +186,14 @@ export default function MicroblogList({ posts: initialPosts, locale, noPostsMess
 						className={`card-enter transition-all duration-200 rounded-2xl ${index === focusedIndex
 								? 'ring-2 ring-blue-500 ring-offset-4 dark:ring-offset-bg-dark shadow-lg scale-[1.02]'
 								: ''
-							}`}
+							} ${openMenuIndex === index ? 'z-50 relative' : 'z-0 relative'}`}
 					>
 
-						<MicroblogPostCard post={post} locale={locale} />
+						<MicroblogPostCard 
+							post={post} 
+							locale={locale} 
+							onMenuToggle={(isOpen) => setOpenMenuIndex(isOpen ? index : null)}
+						/>
 					</div>
 				))}
 			</motion.div>

@@ -11,6 +11,7 @@ interface HomeMicroblogProps {
 }
 
 export default function HomeMicroblog({ initialPosts, locale }: HomeMicroblogProps) {
+	const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 	// Use cached posts if available, otherwise use initialPosts from server
 	const [posts, setPosts] = useState<MicroblogPostSerializable[]>(() => {
 		if (cachedMicroblogPosts) {
@@ -27,11 +28,15 @@ export default function HomeMicroblog({ initialPosts, locale }: HomeMicroblogPro
 	}, [initialPosts]);
 
 	return (
-		<div className="space-y-8 relative">
+		<div className="space-y-8 relative isolate">
 			<div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gray-200 dark:via-gray-800 to-transparent hidden sm:block" />
 			{posts.map((post) => (
-				<div key={post.id} className="relative z-10">
-					<MicroblogPostCard post={post} locale={locale} />
+				<div key={post.id} className={`relative ${openMenuId === post.id ? 'z-50' : 'z-0'}`}>
+					<MicroblogPostCard 
+						post={post} 
+						locale={locale} 
+						onMenuToggle={(isOpen) => setOpenMenuId(isOpen ? post.id : null)}
+					/>
 				</div>
 			))}
 		</div>

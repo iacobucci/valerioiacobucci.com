@@ -81,6 +81,7 @@
 		"add_image": "Afbeelding toevoegen",
 		"image_too_large": "Afbeelding te groot (max 20MB)",
 		"thread": "Verbind met vorig bericht",
+		"toggle_preview": "Link-voorbeeld tonen",
 		"back_to_microblog": "Terug naar Microblog"
 	},
 	"footer": {

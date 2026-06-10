@@ -1,5 +1,13 @@
 import { AppDataSource, getDataSource, MicroblogPostSerializable } from './db';
 import { MicroblogPost, MicroblogReaction } from './entities/microblog';
+import { createHash } from 'crypto';
+
+function generateHash(content: string, timestamp: string | number | Date): string {
+  return createHash('sha256')
+    .update(`${content}-${timestamp}-${Math.random()}`)
+    .digest('hex')
+    .substring(0, 12);
+}
 
 export async function getMicroblogPosts(limit = 20, offset = 0): Promise<MicroblogPostSerializable[]> {
   await getDataSource();
@@ -22,6 +30,8 @@ export async function getMicroblogPosts(limit = 20, offset = 0): Promise<Microbl
     image_data: post.image_data ? post.image_data.toString('base64') : null,
     created_at: post.created_at.toISOString(),
     is_thread: post.is_thread,
+    hash: post.hash || null,
+    show_link_preview: post.show_link_preview,
     reactions: post.reactions?.map(r => ({
       id: r.id,
       userId: r.userId,
@@ -32,7 +42,7 @@ export async function getMicroblogPosts(limit = 20, offset = 0): Promise<Microbl
   }));
 }
 
-export async function addMicroblogPost(content: string, imageData?: Buffer | null, isThread: boolean = false): Promise<number> {
+export async function addMicroblogPost(content: string, imageData?: Buffer | null, isThread: boolean = false, showLinkPreview: boolean = true): Promise<number> {
   await getDataSource();
   const repository = AppDataSource.getRepository(MicroblogPost);
   
@@ -49,6 +59,8 @@ export async function addMicroblogPost(content: string, imageData?: Buffer | nul
   post.content = content;
   post.image_data = imageData || null;
   post.is_thread = isThread;
+  post.hash = generateHash(content, new Date());
+  post.show_link_preview = showLinkPreview;
   
   const savedPost = await repository.save(post);
   return savedPost.id;
@@ -71,6 +83,37 @@ export async function getMicroblogPost(id: number): Promise<MicroblogPostSeriali
     image_data: post.image_data ? post.image_data.toString('base64') : null,
     created_at: post.created_at.toISOString(),
     is_thread: post.is_thread,
+    hash: post.hash || null,
+    show_link_preview: post.show_link_preview,
+    reactions: post.reactions?.map(r => ({
+      id: r.id,
+      userId: r.userId,
+      username: r.username,
+      userImage: r.userImage || null,
+      emoji: r.emoji
+    }))
+  };
+}
+
+export async function getMicroblogPostByHash(hash: string): Promise<MicroblogPostSerializable | null> {
+  await getDataSource();
+  const repository = AppDataSource.getRepository(MicroblogPost);
+  
+  const post = await repository.findOne({
+    where: { hash },
+    relations: ['reactions']
+  });
+  
+  if (!post) return null;
+  
+  return {
+    id: post.id,
+    content: post.content,
+    image_data: post.image_data ? post.image_data.toString('base64') : null,
+    created_at: post.created_at.toISOString(),
+    is_thread: post.is_thread,
+    hash: post.hash || null,
+    show_link_preview: post.show_link_preview,
     reactions: post.reactions?.map(r => ({
       id: r.id,
       userId: r.userId,
@@ -118,12 +161,15 @@ export async function deleteMicroblogPost(id: number): Promise<void> {
   await repository.delete(id);
 }
 
-export async function updateMicroblogPost(id: number, content: string, isThread?: boolean): Promise<void> {
+export async function updateMicroblogPost(id: number, content: string, isThread?: boolean, showLinkPreview?: boolean): Promise<void> {
   await getDataSource();
   const repository = AppDataSource.getRepository(MicroblogPost);
   const updateData: Partial<MicroblogPost> = { content };
   if (isThread !== undefined) {
     updateData.is_thread = isThread;
+  }
+  if (showLinkPreview !== undefined) {
+    updateData.show_link_preview = showLinkPreview;
   }
   await repository.update(id, updateData);
 }

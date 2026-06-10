@@ -51,6 +51,8 @@ export interface MicroblogPostSerializable {
   image_data: string | null;
   created_at: string;
   is_thread: boolean;
+  hash: string | null;
+  show_link_preview: boolean;
   reactions?: MicroblogReactionSerializable[];
 }
 

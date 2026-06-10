@@ -81,6 +81,7 @@
 		"add_image": "Aggiungi immagine",
 		"image_too_large": "Immagine troppo grande (max 20MB)",
 		"thread": "Connetti al post precedente",
+		"toggle_preview": "Mostra anteprima link",
 		"back_to_microblog": "Torna al Microblog"
 	},
 	"footer": {
