@@ -15,7 +15,44 @@ export async function createPostAction(content: string, imageBase64?: string | n
     imageBuffer = Buffer.from(base64Data, 'base64');
   }
 
-  await addMicroblogPost(content, imageBuffer, isThread, showLinkPreview);
+  // Splitting logic
+  const MAX_LENGTH = 140;
+  const chunks: string[] = [];
+  let remaining = content.trim();
+
+  if (remaining.length <= MAX_LENGTH) {
+    chunks.push(remaining);
+  } else {
+    while (remaining.length > MAX_LENGTH) {
+      let splitIndex = remaining.lastIndexOf('\n', MAX_LENGTH);
+      if (splitIndex === -1 || splitIndex < MAX_LENGTH * 0.5) {
+        splitIndex = remaining.lastIndexOf(' ', MAX_LENGTH);
+      }
+      
+      if (splitIndex === -1) {
+        splitIndex = MAX_LENGTH;
+      }
+
+      chunks.push(remaining.substring(0, splitIndex).trim());
+      remaining = remaining.substring(splitIndex).trim();
+    }
+    if (remaining.length > 0) {
+      chunks.push(remaining);
+    }
+  }
+
+  // Save chunks sequentially
+  for (let i = 0; i < chunks.length; i++) {
+    const isFirst = i === 0;
+    const chunkContent = chunks[i];
+    
+    // First chunk gets the user-selected isThread state and the image
+    // Subsequent chunks are ALWAYS threaded to the previous one
+    const currentIsThread = isFirst ? isThread : true;
+    const currentImage = isFirst ? imageBuffer : null;
+    
+    await addMicroblogPost(chunkContent, currentImage, currentIsThread, showLinkPreview);
+  }
   
   revalidatePath("/[locale]/microblog", "page");
   return { success: true };

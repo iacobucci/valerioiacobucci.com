@@ -43,7 +43,6 @@ export default function MicroblogEditor() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim() && !imagePreview) return;
-    if (content.length > MAX_CHARS) return;
 
     setIsSubmitting(true);
     try {
@@ -64,7 +63,7 @@ export default function MicroblogEditor() {
     }
   };
 
-  const charsLeft = MAX_CHARS - content.length;
+  const numPosts = Math.ceil(content.length / MAX_CHARS) || 1;
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 shadow-sm mb-12">
@@ -77,8 +76,10 @@ export default function MicroblogEditor() {
             className="w-full min-h-[100px] p-3 bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-200 resize-none text-lg"
             disabled={isSubmitting}
           />
-          <div className={`absolute bottom-0 right-2 text-xs font-mono ${charsLeft < 0 ? 'text-red-500' : 'text-gray-400'}`}>
-            {charsLeft}
+          <div className="absolute bottom-0 right-2 text-[10px] font-mono text-gray-400">
+            {content.length > MAX_CHARS 
+              ? `${content.length} ch / ${numPosts} posts` 
+              : `${MAX_CHARS - content.length} left`}
           </div>
         </div>
 
@@ -147,7 +148,7 @@ export default function MicroblogEditor() {
 
           <button
             type="submit"
-            disabled={isSubmitting || isCompressing || (!content.trim() && !imagePreview) || charsLeft < 0}
+            disabled={isSubmitting || isCompressing || (!content.trim() && !imagePreview)}
             className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 text-white font-bold rounded-full transition-all"
           >
             {isSubmitting || isCompressing ? (
