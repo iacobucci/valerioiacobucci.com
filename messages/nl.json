@@ -100,10 +100,7 @@
 		"help": "Beschikbare commando's: ",
 		"whoami": "Valerio - Software Engineer",
 		"about": "Ik ben een full-stack ontwikkelaar met een passie voor het bouwen von moderne webapplicaties.",
-		"redirecting_blog": "Doorsturen naar blog...",
-		"redirecting_projects": "Doorsturen naar projecten...",
-		"redirecting_microblog": "Doorsturen naar microblog...",
-		"redirecting": "Doorsturen...",
+		"redirecting": "Doorsturen naar {target}...",
 		"not_found": "Commando niet gevonden: {cmd}. Typ \"help\" voor een lijst met commando's."
 	},
 	"cv": {

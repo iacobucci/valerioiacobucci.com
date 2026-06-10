@@ -292,6 +292,9 @@ export default function MicroblogPostCard({ post, locale, onMenuToggle, isIndivi
 							<textarea
 								value={editContent}
 								onChange={(e) => setEditContent(e.target.value)}
+								autoCapitalize="none"
+								autoCorrect="off"
+								spellCheck="true"
 								className="w-full p-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none min-h-[100px]"
 								autoFocus
 							/>

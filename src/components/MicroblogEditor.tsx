@@ -73,6 +73,9 @@ export default function MicroblogEditor() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('editor_placeholder')}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="true"
             className="w-full min-h-[100px] p-3 bg-transparent border-none focus:ring-0 text-gray-800 dark:text-gray-200 resize-none text-lg"
             disabled={isSubmitting}
           />

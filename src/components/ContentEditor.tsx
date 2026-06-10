@@ -1476,6 +1476,9 @@ function EditorInternal() {
                             onKeyDown={handleEditorKeyDown}
                             onTouchStart={handleTouchStart}
                             onTouchEnd={handleTouchEnd}
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            spellCheck="true"
                             className="flex-1 p-4 sm:p-6 font-mono text-base sm:text-sm resize-none focus:outline-none bg-transparent text-gray-800 dark:text-gray-200 leading-relaxed overflow-y-auto"
                             placeholder="Start writing..."
                           />

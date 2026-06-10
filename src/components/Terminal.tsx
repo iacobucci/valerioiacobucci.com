@@ -32,7 +32,7 @@ export function Terminal() {
   const terminalBodyRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const commandList = ['help', 'about', 'blog', 'projects', 'microblog', 'whoami', 'todo', 'clear', 'lispv'];
+  const commandList = ['help', 'about', 'blog', 'projects', 'microblog', 'cv', 'whoami', 'todo', 'clear', 'lispv'];
 
   const programs: Record<string, Program> = {
     lispv: {
@@ -52,8 +52,9 @@ export function Terminal() {
           const interpreter = new Interpreter(input, false);
           const result = interpreter.run();
           setHistory(prev => [...prev, result.toString()]);
-        } catch (err: any) {
-          setHistory(prev => [...prev, `Error: ${err.message}`]);
+        } catch (err: unknown) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          setHistory(prev => [...prev, `Error: ${errorMessage}`]);
         }
       }
     }
@@ -174,16 +175,20 @@ export function Terminal() {
         setInput('');
         return;
       case 'blog':
-        newHistory.push(t('redirecting_blog'));
+        newHistory.push(t('redirecting', { target: 'blog' }));
         setTimeout(() => router.push('/blog'), 500);
         break;
       case 'projects':
-        newHistory.push(t('redirecting_projects'));
+        newHistory.push(t('redirecting', { target: 'projects' }));
         setTimeout(() => router.push('/projects'), 500);
         break;
       case 'microblog':
-        newHistory.push(t('redirecting_microblog'));
+        newHistory.push(t('redirecting', { target: 'microblog' }));
         setTimeout(() => router.push('/microblog'), 500);
+        break;
+      case 'cv':
+        newHistory.push(t('redirecting', { target: 'cv' }));
+        setTimeout(() => router.push('/cv'), 500);
         break;
       case 'help':
         newHistory.push(`${t('help')}${commandList.join(', ')}`);

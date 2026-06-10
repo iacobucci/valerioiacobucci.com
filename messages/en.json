@@ -100,9 +100,7 @@
 		"help": "Available commands: ",
 		"whoami": "Valerio - Software engineer",
 		"about": "I am a full-stack developer passionate about building modern web applications.",
-		"redirecting_blog": "Redirecting to blog...",
-		"redirecting_projects": "Redirecting to projects...",
-		"redirecting": "Redirecting...",
+		"redirecting": "Redirecting to {target}...",
 		"not_found": "Command not found: {cmd}. Type \"help\" for a list of commands."
 	},
 	"cv": {
