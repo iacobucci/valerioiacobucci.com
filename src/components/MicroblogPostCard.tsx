@@ -13,6 +13,7 @@ import { toast } from '@/lib/toast';
 import { useTranslations } from 'next-intl';
 
 import Linkify from 'linkify-react';
+import LinkPreview from './LinkPreview';
 
 interface MicroblogPostCardProps {
 	post: MicroblogPostSerializable;
@@ -122,6 +123,10 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 		}
 		setIsMenuOpen(false);
 	};
+
+	// URL extraction for LinkPreview
+	const urlRegex = /(https?:\/\/[^\s]+)/g;
+	const firstUrl = post.content.match(urlRegex)?.[0];
 
 	return (
 		<div className="relative group/card">
@@ -285,6 +290,7 @@ export default function MicroblogPostCard({ post, locale }: MicroblogPostCardPro
 						<Linkify options={linkifyOptions}>
 							{post.content}
 						</Linkify>
+						{firstUrl && <LinkPreview url={firstUrl} />}
 					</div>
 				)}
 

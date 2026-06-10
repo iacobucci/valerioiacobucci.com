@@ -33,6 +33,7 @@
     "next-auth": "5.0.0-beta.31",
     "next-intl": "^4.9.1",
     "next-mdx-remote": "^6.0.0",
+    "open-graph-scraper": "^6.11.0",
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dnd": "^16.0.1",
