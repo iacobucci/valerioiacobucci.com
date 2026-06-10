@@ -85,16 +85,21 @@ async function fetchGitHubData(repo: string): Promise<Partial<ProjectGitHubData>
 
 		const data = await res.json();
 
-		return {
+		const result: Partial<ProjectGitHubData> = {
 			title: data.name,
 			description: data.description ?? '',
 			stars: data.stargazers_count,
 			forks: data.forks_count,
 			github_url: data.html_url,
-			website_url: data.homepage || undefined,
 			language: data.language,
 			last_commit: data.pushed_at
 		};
+
+		if (data.homepage) {
+			result.website_url = data.homepage;
+		}
+
+		return result;
 	} catch (error) {
 		console.error(`Error fetching GitHub data for ${repo}:`, error);
 		return {
@@ -134,18 +139,24 @@ export async function getProjectByRepo(repo: string): Promise<ProjectGitHubData 
 	if (githubData.error && !existingProject) return null;
 
 	return {
-		title: existingProject?.title ?? githubData.title ?? repo.split('/').pop() ?? repo,
-		github_repo: repo,
-		tech: existingProject?.tech ?? (githubData.language ? [githubData.language] : []),
-		website_url: existingProject?.website_url ?? githubData.website_url,
-		selected: existingProject?.selected ?? false,
+		// Defaults
+		description: '',
+		stars: 0,
+		forks: 0,
+		commits: 0,
+		last_commit: '',
+		github_url: `https://github.com/${repo}`,
+		
+		// GitHub Data
 		...githubData,
-		description: githubData.description ?? '',
-		stars: githubData.stars ?? 0,
-		forks: githubData.forks ?? 0,
-		commits: githubData.commits ?? 0,
-		last_commit: githubData.last_commit ?? '',
-		github_url: githubData.github_url ?? `https://github.com/${repo}`
+		
+		// Local config overrides
+		...(existingProject || {}),
+		
+		// Computed / Fallback logic for complex fields
+		title: existingProject?.title ?? githubData.title ?? repo.split('/').pop() ?? repo,
+		tech: existingProject?.tech ?? (githubData.language ? [githubData.language] : []),
+		github_repo: repo,
 	} as ProjectGitHubData;
 }
 
@@ -158,8 +169,10 @@ export async function getProjectsWithGitHubData(): Promise<ProjectGitHubData[]> 
 		projects.map(async (project) => {
 			const githubData = await getGitHubData(project.github_repo);
 			return {
-				...project,
+				// GitHub Data
 				...githubData,
+				// Local config overrides
+				...project,
 				// Ensure required fields from ProjectGitHubData are present
 				description: githubData.description ?? '',
 				stars: githubData.stars ?? 0,
@@ -185,8 +198,10 @@ export async function getSelectedProjects(): Promise<ProjectGitHubData[]> {
 		selectedProjects.map(async (project) => {
 			const githubData = await getGitHubData(project.github_repo);
 			return {
-				...project,
+				// GitHub Data
 				...githubData,
+				// Local config overrides
+				...project,
 				description: githubData.description ?? '',
 				stars: githubData.stars ?? 0,
 				forks: githubData.forks ?? 0,
