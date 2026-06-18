@@ -68,10 +68,10 @@ export default function DraggableFile({
     <div key={node.path} className="select-none">
       <div 
         ref={ref}
-        className={`flex items-center group px-2 py-1.5 rounded-lg text-sm transition-colors cursor-pointer relative ${
+        className={`flex items-center group px-2 py-1.5 rounded-lg text-sm transition-colors cursor-pointer relative text-gray-600 dark:text-gray-400 ${
           isSelected 
-            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium' 
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ? 'bg-blue-50 dark:bg-blue-900/20 font-medium' 
+            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
         } ${isDragging ? 'opacity-50' : ''} ${isOver ? 'bg-blue-100 dark:bg-blue-800/40' : ''}`}
         onClick={() => {
           if (node.type === 'directory') toggleExpand(node.path);
@@ -83,7 +83,7 @@ export default function DraggableFile({
             isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />
           )}
         </div>
-        <Icon className={`w-4 h-4 mr-2 shrink-0 ${node.isDraft ? 'text-blue-500' : isSelected ? 'text-blue-600 font-bold' : 'text-gray-400'}`} />
+        <Icon className={`w-4 h-4 mr-2 shrink-0 ${node.isDraft ? 'text-blue-500' : 'text-gray-400'}`} />
         <span className="truncate flex-1">
           {node.name}
         </span>
