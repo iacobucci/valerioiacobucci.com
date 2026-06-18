@@ -16,6 +16,7 @@ export async function generateMetadata({
   params: Promise<{locale: string}>;
 }): Promise<Metadata> {
   const {locale} = await params;
+  const baseUrl = process.env.AUTH_URL || 'https://valerioiacobucci.com';
   
   return {
     title: {
@@ -25,6 +26,28 @@ export async function generateMetadata({
     description: 'Valerio Iacobucci - Software Engineer',
     icons: {
       icon: '/favicon.ico',
+    },
+    openGraph: {
+      title: 'Valerio Iacobucci',
+      description: 'Valerio Iacobucci - Software Engineer',
+      url: `${baseUrl}/${locale}`,
+      siteName: 'Valerio Iacobucci',
+      locale: locale,
+      type: 'website',
+      images: [
+        {
+          url: `${baseUrl}/drawing.png`,
+          width: 640,
+          height: 640,
+          alt: 'Valerio Iacobucci',
+        }
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Valerio Iacobucci',
+      description: 'Valerio Iacobucci - Software Engineer',
+      images: [`${baseUrl}/drawing.png`],
     },
   };
 }

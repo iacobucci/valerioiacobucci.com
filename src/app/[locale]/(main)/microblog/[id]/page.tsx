@@ -27,14 +27,36 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string; id: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale } = await params;
   const { post, displayId } = await fetchPost(id);
   
   if (!post) return {};
 
+  const baseUrl = process.env.AUTH_URL || 'https://valerioiacobucci.com';
+  const url = `${baseUrl}/${locale}/microblog/${id}`;
+  const title = `Microblog Post ${displayId}`.trim();
+  const description = post.content.slice(0, 160);
+  
+  const ogImage = post.image_data ? `${baseUrl}/api/microblog/${id}/image` : undefined;
+
   return {
-    title: `Microblog Post ${displayId}`.trim(),
-    description: post.content.slice(0, 160),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      publishedTime: post.created_at,
+      locale: locale,
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+    },
+    twitter: {
+      card: ogImage ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    }
   };
 }
 
