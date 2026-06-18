@@ -41,15 +41,21 @@ export async function createPostAction(content: string, imageBase64?: string | n
     }
   }
 
-  // Save chunks sequentially
-  for (let i = 0; i < chunks.length; i++) {
-    const isFirst = i === 0;
+  // Save chunks sequentially, but in reverse order so that the first part 
+  // ends up at the top of the feed (which is ordered by date DESC)
+  for (let i = chunks.length - 1; i >= 0; i--) {
+    const isLogicalFirst = i === 0;
+    const isLogicalLast = i === chunks.length - 1;
     const chunkContent = chunks[i];
     
-    // First chunk gets the user-selected isThread state and the image
-    // Subsequent chunks are ALWAYS threaded to the previous one
-    const currentIsThread = isFirst ? isThread : true;
-    const currentImage = isFirst ? imageBuffer : null;
+    // The logically first chunk gets the image
+    const currentImage = isLogicalFirst ? imageBuffer : null;
+
+    // Threading logic:
+    // - If it's the logically last chunk, use the user-selected isThread state 
+    //   to potentially connect to older existing posts.
+    // - All other chunks are set to isThread=true to connect to the next part of the same post.
+    const currentIsThread = isLogicalLast ? isThread : true;
     
     await addMicroblogPost(chunkContent, currentImage, currentIsThread, showLinkPreview);
   }
