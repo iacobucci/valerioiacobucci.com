@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   listContentAction, 
@@ -114,6 +114,34 @@ function EditorInternal() {
   const isJs = !!selectedNode?.name.endsWith('.js');
   const isImage = !!selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
   const hasVisualEditor = selectedNode?.name === 'projects.json';
+
+  const articleStats = useMemo(() => {
+    let total = 0;
+    let published = 0;
+    let totalTranslations = 0;
+    let publishedTranslations = 0;
+
+    tree.forEach(node => {
+      if (node.type === 'directory' && node.name !== 'apps') {
+        const mdxFiles = node.children?.filter(child => child.type === 'file' && child.name.endsWith('.mdx')) || [];
+        if (mdxFiles.length > 0) {
+          total++;
+          const hasPublished = mdxFiles.some(child => !child.isDraft);
+          if (hasPublished) {
+            published++;
+          }
+          mdxFiles.forEach(file => {
+            totalTranslations++;
+            if (!file.isDraft) {
+              publishedTranslations++;
+            }
+          });
+        }
+      }
+    });
+
+    return { total, published, totalTranslations, publishedTranslations };
+  }, [tree]);
 
   const loadTree = useCallback(async () => {
     try {
@@ -1207,9 +1235,18 @@ function EditorInternal() {
                   <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex flex-col gap-2">
                     <button 
                       onClick={() => setShowCreateModal(true)}
-                      className="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all"
+                      className="w-full flex items-center justify-between p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-all"
                     >
-                      <PenSquare className="w-4 h-4" /> New Article
+                      <div className="flex items-center gap-2">
+                        <PenSquare className="w-4 h-4" />
+                        <span>New Article</span>
+                      </div>
+                      <span 
+                        className="text-[10px] bg-white/20 px-2 py-0.5 rounded-md font-mono"
+                        title={`${articleStats.publishedTranslations}/${articleStats.totalTranslations} translations published`}
+                      >
+                        {articleStats.published}/{articleStats.total}
+                      </span>
                     </button>
                     <div className="flex gap-2">
                       <button onClick={handleCreateFile} className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-all">
