@@ -133,3 +133,47 @@ code {
 .animate-caption-in {
   animation: captionFadeIn 0.3s ease-out forwards;
 }
+
+/* Custom nested list styles for MDX content within .prose */
+.prose ol {
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 1.25rem !important;
+}
+
+.prose ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.25rem !important;
+}
+
+.prose ol ol {
+  list-style-type: lower-roman !important;
+}
+
+.prose ol ol ol {
+  list-style-type: lower-alpha !important;
+}
+
+.prose ol ol ol ol {
+  list-style-type: decimal !important;
+}
+
+.prose ul ul {
+  list-style-type: circle !important;
+}
+
+.prose ul ul ul {
+  list-style-type: square !important;
+}
+
+/* Reset individual margin alignment inside prose to avoid conflicts with outside positioning */
+.prose li {
+  margin-left: 0 !important;
+}
+
+/* Ensure the Tailwind Typography pseudo-elements don't conflict or duplicate markers */
+.prose ol > li::before,
+.prose ul > li::before {
+  content: none !important;
+}
