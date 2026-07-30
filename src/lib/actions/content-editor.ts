@@ -520,6 +520,124 @@ export async function getGitStatusAction() {
   }
 }
 
+export async function getGitRemoteAction() {
+  if (!(await isAuthorized())) {
+    return { success: false, error: "Non autorizzato" };
+  }
+
+  try {
+    let rootOriginUrl = '';
+    try {
+      rootOriginUrl = execSync('git remote get-url origin', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    } catch (e: any) {
+      return { 
+        success: false, 
+        error: `Errore nel recupero remote 'origin': ${e.message || 'Remote origin non trovato'}` 
+      };
+    }
+
+    if (!rootOriginUrl) {
+      return { success: false, error: "Remote 'origin' non impostato." };
+    }
+
+    let rockUrl = '';
+    try {
+      rockUrl = execSync('git remote get-url rock', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    } catch {}
+
+    let githubUrl = '';
+    try {
+      githubUrl = execSync('git remote get-url github', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+    } catch {}
+
+    let currentRemote = 'unknown';
+    if (rockUrl && rootOriginUrl === rockUrl) {
+      currentRemote = 'rock';
+    } else if (githubUrl && rootOriginUrl === githubUrl) {
+      currentRemote = 'github';
+    } else if (rootOriginUrl.includes('github.com') || rootOriginUrl.includes('github')) {
+      currentRemote = 'github';
+    } else if (rootOriginUrl.includes('rock')) {
+      currentRemote = 'rock';
+    } else {
+      currentRemote = rootOriginUrl;
+    }
+
+    return { 
+      success: true, 
+      remote: currentRemote, 
+      originUrl: rootOriginUrl,
+      githubUrl,
+      rockUrl 
+    };
+  } catch (error: any) {
+    return { success: false, error: `Errore durante il recupero dei remote git: ${error.message}` };
+  }
+}
+
+export async function gitSwitchRemoteAction() {
+  if (!(await isAuthorized())) {
+    return { success: false, error: "Non autorizzato" };
+  }
+
+  try {
+    const outputs: string[] = [];
+    const pathEnv = process.env.PATH ? `${process.env.PATH}:/home/valerio/script` : '/home/valerio/script:/usr/local/bin:/usr/bin:/bin';
+
+    // Switch remote on root repository
+    const rootResult = spawnSync('switch', [], { 
+      cwd: process.cwd(), 
+      encoding: 'utf8',
+      env: { ...process.env, PATH: pathEnv }
+    });
+
+    if (rootResult.status !== 0) {
+      const err = rootResult.stderr?.trim() || rootResult.stdout?.trim() || `Codice di uscita ${rootResult.status}`;
+      return { success: false, error: `Errore switch repository principale: ${err}` };
+    }
+    if (rootResult.stdout) {
+      outputs.push(`Root: ${rootResult.stdout.trim()}`);
+    }
+
+    // Switch remote on content repository if present
+    const contentDir = path.join(process.cwd(), 'content');
+    if (fs.existsSync(path.join(contentDir, '.git'))) {
+      const contentResult = spawnSync('switch', [], { 
+        cwd: contentDir, 
+        encoding: 'utf8',
+        env: { ...process.env, PATH: pathEnv }
+      });
+
+      if (contentResult.status !== 0) {
+        const err = contentResult.stderr?.trim() || contentResult.stdout?.trim() || `Codice di uscita ${contentResult.status}`;
+        return { success: false, error: `Errore switch repository content: ${err}` };
+      }
+      if (contentResult.stdout) {
+        outputs.push(`Content: ${contentResult.stdout.trim()}`);
+      }
+    }
+
+    const remoteResult = await getGitRemoteAction();
+    if (!remoteResult.success) {
+      return { 
+        success: false, 
+        error: `Switch completato ma fallita la verifica del remote: ${remoteResult.error}`,
+        output: outputs.join(' | ') 
+      };
+    }
+
+    return { 
+      success: true, 
+      remote: remoteResult.remote, 
+      originUrl: remoteResult.originUrl,
+      output: outputs.join(' | ') 
+    };
+  } catch (error: any) {
+    return { success: false, error: `Errore imprevisto durante lo switch: ${error.message}` };
+  }
+}
+
+
 export async function gitCommitAction(message: string) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");

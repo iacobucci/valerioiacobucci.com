@@ -22,6 +22,8 @@ import {
   gitStashAction,
   gitStashPopAction,
   gitResetAction,
+  getGitRemoteAction,
+  gitSwitchRemoteAction,
   createFileAction,
   FileNode,
   downloadDirectoryAction,
@@ -41,7 +43,7 @@ import {
   GitCommit, GitPullRequest, Rocket, 
   RefreshCw, Terminal as TerminalIcon, CheckCircle2,
   RotateCw, Archive, ArchiveRestore, RotateCcw, Zap, ZapOff,
-  Undo2, Redo2, ArrowRight
+  Undo2, Redo2, ArrowRight, ArrowLeftRight, Server, AlertCircle
 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import matter from 'gray-matter';
@@ -69,8 +71,11 @@ function EditorInternal() {
   const [mdxSource, setMdxSource] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'stash' | 'pop' | 'reset' | 'deploy'>('none');
+  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'stash' | 'pop' | 'reset' | 'deploy' | 'switch'>('none');
   const [gitStatus, setGitStatus] = useState<{ status: string; diff: string; hash?: string }>({ status: '', diff: '' });
+  const [gitRemote, setGitRemote] = useState<string>('github');
+  const [gitRemoteError, setGitRemoteError] = useState<string | null>(null);
+  const [gitRemoteLoading, setGitRemoteLoading] = useState<boolean>(false);
   const [deployStatus, setDeployStatus] = useState<{ isActive: boolean; status: string; logs: string }>({ isActive: false, status: '', logs: '' });
   const [sidebarTab, setSidebarTab] = useState<'files' | 'git'>('files');
   const [previewMode, setPreviewMode] = useState<'split' | 'edit' | 'preview' | 'visual'>('split');
@@ -161,6 +166,23 @@ function EditorInternal() {
     } catch {}
   }, []);
 
+  const loadGitRemote = useCallback(async () => {
+    setGitRemoteLoading(true);
+    try {
+      const result = await getGitRemoteAction();
+      if (result.success && result.remote) {
+        setGitRemote(result.remote);
+        setGitRemoteError(null);
+      } else {
+        setGitRemoteError(result.error || "Impossibile recuperare il remote corrente.");
+      }
+    } catch (err: any) {
+      setGitRemoteError(err.message || "Errore durante il recupero del remote.");
+    } finally {
+      setGitRemoteLoading(false);
+    }
+  }, []);
+
   const loadGitStatus = useCallback(async () => {
     try {
       const result = await getGitStatusAction();
@@ -170,7 +192,8 @@ function EditorInternal() {
         hash: result.hash
       });
     } catch (error) {}
-  }, []);
+    loadGitRemote();
+  }, [loadGitRemote]);
 
   const loadDeployStatus = useCallback(async () => {
     try {
@@ -189,8 +212,9 @@ function EditorInternal() {
   useEffect(() => {
     loadTree();
     loadGitStatus();
+    loadGitRemote();
     loadTags();
-  }, [loadTree, loadGitStatus, loadTags]);
+  }, [loadTree, loadGitStatus, loadGitRemote, loadTags]);
 
   // Update preview version when tree changes to bust cache
   useEffect(() => {
@@ -229,14 +253,15 @@ function EditorInternal() {
     }
   }, [initialPath, tree]);
 
-  // Selective polling: only for deployment status when tab is active
+  // Selective polling: deployment status and git remote when tab is active
   useEffect(() => {
     if (sidebarTab === 'git') {
+      loadGitRemote();
       loadDeployStatus();
       const interval = setInterval(loadDeployStatus, 5000);
       return () => clearInterval(interval);
     }
-  }, [sidebarTab, loadDeployStatus]);
+  }, [sidebarTab, loadDeployStatus, loadGitRemote]);
 
   useEffect(() => {
     async function loadFileContent() {
@@ -611,6 +636,29 @@ function EditorInternal() {
       },
       onCancel: () => setConfirmModal(null)
     });
+  };
+
+  const handleGitSwitch = async () => {
+    setGitOperation('switch');
+    setGitRemoteError(null);
+    try {
+      const result = await gitSwitchRemoteAction();
+      if (result.success && result.remote) {
+        setGitRemote(result.remote);
+        toast.success(`Remote scambiato con successo a ${result.remote.toUpperCase()}`);
+        loadGitStatus();
+      } else {
+        const errMsg = result.error || "Errore durante lo switch del remote.";
+        setGitRemoteError(errMsg);
+        toast.error(errMsg);
+      }
+    } catch (err: any) {
+      const errMsg = err.message || "Errore durante lo switch del remote.";
+      setGitRemoteError(errMsg);
+      toast.error(errMsg);
+    } finally {
+      setGitOperation('none');
+    }
   };
 
   async function handleDelete(path: string, name: string) {
@@ -1333,11 +1381,63 @@ function EditorInternal() {
                 </>
               ) : (
                 <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  {/* Active Remote Indicator & Banner */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between px-1">
+                      <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Remote</h4>
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${
+                        gitRemote === 'rock' 
+                          ? 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800' 
+                          : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                      }`}>
+                        {gitRemoteLoading ? 'Loading...' : gitRemote}
+                      </span>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-3 border border-gray-200 dark:border-gray-800 flex items-center justify-between gap-3 shadow-sm">
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <div className={`p-2 rounded-lg ${
+                          gitRemote === 'rock' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400' : 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400'
+                        }`}>
+                          {gitRemote === 'rock' ? <Server className="w-4 h-4" /> : <GitBranch className="w-4 h-4" />}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-bold text-gray-700 dark:text-gray-200 capitalize truncate">
+                            {gitRemote === 'rock' ? 'Rock Server' : 'GitHub Repository'}
+                          </span>
+                          <span className="text-[9px] text-gray-400 font-mono truncate">
+                            {gitRemote === 'rock' ? 'ssh://rockbp' : 'github.com'}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleGitSwitch}
+                        disabled={gitOperation !== 'none'}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-200 dark:border-gray-600 text-xs font-bold transition-all disabled:opacity-50 flex-shrink-0"
+                        title="Switch remote between github and rock"
+                      >
+                        {gitOperation === 'switch' ? (
+                          <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin" />
+                        ) : (
+                          <ArrowLeftRight className="w-3.5 h-3.5 text-blue-500" />
+                        )}
+                        <span>Switch</span>
+                      </button>
+                    </div>
+
+                    {gitRemoteError && (
+                      <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2.5 rounded-xl text-xs border border-red-200 dark:border-red-800/50 flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-red-500" />
+                        <div className="flex-1 break-words text-[10px] leading-relaxed">{gitRemoteError}</div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Git Operations */}
                   <div className="space-y-3">
                     <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Repository Control</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <button 
+					<button 
                         onClick={handleGitCommit}
                         disabled={gitOperation !== 'none' || gitStatus.status === 'Clean'}
                         className="flex flex-col items-center justify-center gap-1 p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-800 hover:border-blue-500 transition-all group disabled:opacity-50"
