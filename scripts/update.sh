@@ -64,6 +64,7 @@ function --job {
 		if [ -d "content/.git" ]; then
 			git -C content pull
 		else
+			# TODO generalize remote
 			git clone ssh://valerio@rockbp:/git/content.git content
 		fi
 	else
