@@ -189,7 +189,7 @@ export default function DraggableFile({
                 expandedPaths={expandedPaths}
                 toggleExpand={toggleExpand}
               />
-              {child.name === 'apps' && child.path.split('/').length === 1 && (
+              {(child.name === 'public' || child.name === 'apps') && child.path.split('/').length === 1 && (
                 <div className="my-2 border-t border-gray-100 dark:border-gray-800/50 mx-2" />
               )}
             </div>

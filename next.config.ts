@@ -34,12 +34,20 @@ const nextConfig: NextConfig = {
 	async rewrites() {
 		return [
 			{
+				source: '/public/:app',
+				destination: '/public/:app/index.html',
+			},
+			{
+				source: '/public/:app/',
+				destination: '/public/:app/index.html',
+			},
+			{
 				source: '/apps/:app',
-				destination: '/apps/:app/index.html',
+				destination: '/public/:app/index.html',
 			},
 			{
 				source: '/apps/:app/',
-				destination: '/apps/:app/index.html',
+				destination: '/public/:app/index.html',
 			},
 		];
 	},

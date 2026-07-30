@@ -64,7 +64,7 @@ export async function GET(
       'Content-Type': contentType,
       'Content-Length': stats.size.toString(),
       'Accept-Ranges': 'bytes',
-      'Cache-Control': 'no-cache, no-store, must-revalidate', // No cache for apps updated via editor
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
       'ETag': etag,
       'Last-Modified': stats.mtime.toUTCString(),
     },

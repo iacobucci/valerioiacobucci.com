@@ -127,7 +127,7 @@ function EditorInternal() {
     let publishedTranslations = 0;
 
     tree.forEach(node => {
-      if (node.type === 'directory' && node.name !== 'apps') {
+      if (node.type === 'directory' && node.name !== 'apps' && node.name !== 'public') {
         const mdxFiles = node.children?.filter(child => child.type === 'file' && child.name.endsWith('.mdx')) || [];
         if (mdxFiles.length > 0) {
           total++;
@@ -1339,7 +1339,7 @@ function EditorInternal() {
                               expandedPaths={expandedPaths}
                               toggleExpand={toggleExpand}
                             />
-                            {node.name === 'apps' && node.path.split('/').length === 1 && (
+                            {(node.name === 'public' || node.name === 'apps') && node.path.split('/').length === 1 && (
                               <div className="my-2 border-t border-gray-100 dark:border-gray-800/50 mx-2" />
                             )}
                           </div>

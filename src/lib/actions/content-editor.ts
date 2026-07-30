@@ -75,9 +75,9 @@ export async function listContentAction(): Promise<FileNode[]> {
         }
       })
       .sort((a, b) => {
-        // 'apps' directory always first
-        if (a.name === 'apps' && a.type === 'directory') return -1;
-        if (b.name === 'apps' && b.type === 'directory') return 1;
+        // 'public' directory always first
+        if ((a.name === 'public' || a.name === 'apps') && a.type === 'directory') return -1;
+        if ((b.name === 'public' || b.name === 'apps') && b.type === 'directory') return 1;
 
         if (a.type === b.type) return a.name.localeCompare(b.name);
         return a.type === 'directory' ? -1 : 1;
