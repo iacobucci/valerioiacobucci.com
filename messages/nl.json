@@ -45,7 +45,9 @@
 		"fallback_badge": "ALLEEN ENGELS",
 		"draft_badge": "ONTWERP",
 		"coming_soon": "Binnenkort!",
-		"fallback_warning": "Dit bericht is niet beschikbaar in uw taal. De Engelse versie wordt in plaats daarvan weergegeven."
+		"fallback_warning": "Dit bericht is niet beschikbaar in uw taal. De Engelse versie wordt in plaats daarvan weergegeven.",
+		"count_public": "{count, plural, =1 {1 artikel} other {# artikelen}}",
+		"count_admin": "{total, plural, =1 {1 artikel} other {# artikelen}} ({published, plural, =1 {1 gepubliceerd} other {# gepubliceerd}}, {drafts, plural, =1 {1 ontwerp} other {# ontwerpen}})"
 	},
 	"projects": {
 		"title": "Projecten",

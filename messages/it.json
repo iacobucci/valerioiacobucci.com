@@ -45,7 +45,9 @@
 		"fallback_badge": "SOLO IN INGLESE",
 		"draft_badge": "BOZZA",
 		"coming_soon": "Prossimamente!",
-		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese."
+		"fallback_warning": "Questo post non è disponibile nella tua lingua. Viene visualizzata la versione in inglese.",
+		"count_public": "{count, plural, =1 {1 articolo} other {# articoli}}",
+		"count_admin": "{total, plural, =1 {1 articolo} other {# articoli}} ({published, plural, =1 {1 pubblicato} other {# pubblicati}}, {drafts, plural, =1 {1 bozza} other {# bozze}})"
 	},
 	"projects": {
 		"title": "Progetti",

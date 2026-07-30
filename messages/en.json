@@ -45,7 +45,9 @@
 		"fallback_badge": "EN ONLY",
 		"draft_badge": "DRAFT",
 		"coming_soon": "Coming soon!",
-		"fallback_warning": "This post is not available in your language. Showing the English version instead."
+		"fallback_warning": "This post is not available in your language. Showing the English version instead.",
+		"count_public": "{count, plural, =1 {1 article} other {# articles}}",
+		"count_admin": "{total, plural, =1 {1 article} other {# articles}} ({published, plural, =1 {1 published} other {# published}}, {drafts, plural, =1 {1 draft} other {# drafts}})"
 	},
 	"microblog": {
 		"title": "Microblog",
