@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
-import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit } from 'react-icons/md';
+import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
@@ -20,7 +20,7 @@ interface ContentListProps {
 export default function ContentList({ items, type, locale, isAuthorized }: ContentListProps) {
   const router = useRouter();
   const t = useTranslations('blog');
-  const { showDrafts } = useDrafts();
+  const { showDrafts, setShowDrafts } = useDrafts();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [visibleCount, setVisibleCount] = useState(6);
@@ -181,6 +181,37 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
             })}
           </div>
         )}
+
+        {isAuthorized && (
+          <div className="flex items-center gap-2 sm:ml-auto">
+            <button
+              onClick={() => setShowDrafts(!showDrafts)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                showDrafts
+                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                  : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+              }`}
+              title={showDrafts ? "Switch to Visitor View (hide drafts)" : "Switch to Admin View (show drafts)"}
+            >
+              {showDrafts ? (
+                <>
+                  <MdVisibility className="w-3.5 h-3.5 text-blue-500" />
+                  <span>Admin View</span>
+                  {items.some(i => i.draft) && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 font-bold">
+                      {items.filter(i => i.draft).length} {items.filter(i => i.draft).length === 1 ? 'draft' : 'drafts'}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <MdVisibilityOff className="w-3.5 h-3.5 text-gray-400" />
+                  <span>Visitor View</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* List */}
@@ -301,7 +332,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                 </div>
               </Link>
 
-              {isAuthorized && (
+              {isAuthorized && showDrafts && (
                 <div className="absolute top-8 right-8 z-20">
                   <Link
                     href={`/admin/editor?path=${item.slug}/${item.language}.mdx`}

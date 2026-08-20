@@ -3,7 +3,7 @@ import { getPosts } from '@/lib/content';
 import ContentList from '@/components/ContentList';
 import { Metadata } from 'next';
 import { isAuthorized } from '@/auth';
-import { FileText } from 'lucide-react';
+import BlogHeaderBadge from '@/components/BlogHeaderBadge';
 
 export async function generateMetadata({
   params,
@@ -46,19 +46,12 @@ export default async function BlogIndexPage({
             {t('description')}
           </p>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700/80 shadow-sm">
-            <FileText className="w-3.5 h-3.5 text-blue-500" />
-            <span>
-              {authorized
-                ? t('count_admin', { total: totalCount, published: publishedCount, drafts: draftCount })
-                : t('count_public', { count: publishedCount })}
-            </span>
-            {authorized && (
-              <span className="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
-                Admin
-              </span>
-            )}
-          </div>
+          <BlogHeaderBadge 
+            totalCount={totalCount} 
+            publishedCount={publishedCount} 
+            draftCount={draftCount} 
+            isAuthorized={authorized} 
+          />
         </header>
         
         <div className="max-w-4xl mx-auto">

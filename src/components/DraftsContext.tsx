@@ -21,7 +21,7 @@ export function DraftsProvider({ children }: { children: React.ReactNode }) {
       user?.username === "iacobucci"
     );
 
-  const showDrafts = userOverride !== null ? userOverride : isAuthorized;
+  const showDrafts = userOverride !== null ? userOverride : false;
 
   const handleSetShowDrafts = (show: boolean) => {
     setUserOverride(show);
