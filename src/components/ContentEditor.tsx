@@ -59,6 +59,7 @@ import TranslateModal from './editor/TranslateModal';
 import FrontmatterModal from './editor/FrontmatterModal';
 import DraggableFile from './editor/DraggableFile';
 import ProjectsVisualEditor from './editor/ProjectsVisualEditor';
+import LinksVisualEditor from './editor/LinksVisualEditor';
 import Video from '@/components/mdx/Video';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 
@@ -118,7 +119,7 @@ function EditorInternal() {
   const isCss = !!selectedNode?.name.endsWith('.css');
   const isJs = !!selectedNode?.name.endsWith('.js');
   const isImage = !!selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
-  const hasVisualEditor = selectedNode?.name === 'projects.json';
+  const hasVisualEditor = selectedNode?.name === 'projects.json' || selectedNode?.name === 'links.json';
 
   const articleStats = useMemo(() => {
     let total = 0;
@@ -287,7 +288,7 @@ function EditorInternal() {
         setContent(fileContent);
         setIsDirty(false);
         
-        if (selectedNode.name === 'projects.json') {
+        if (selectedNode.name === 'projects.json' || selectedNode.name === 'links.json') {
           setPreviewMode('visual');
         } else if (selectedNode.name.endsWith('.mdx')) {
           setPreviewMode(window.innerWidth < 1024 ? 'edit' : 'split');
@@ -1118,6 +1119,11 @@ function EditorInternal() {
     setIsDirty(true);
   };
 
+  const handleLinksVisualChange = (newData: Record<string, string>) => {
+    setContent(JSON.stringify(newData, null, 2));
+    setIsDirty(true);
+  };
+
   const handleJsonRemoveProject = (index: number) => {
     setConfirmModal({
       isOpen: true,
@@ -1580,11 +1586,17 @@ function EditorInternal() {
                         <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/10">
                           {(() => {
                             try {
-                              const jsonData = JSON.parse(content);
-                              if (Array.isArray(jsonData)) {
-                                return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} onRemoveRequest={handleJsonRemoveProject} setInputConfig={setInputConfig} availableTags={availableTags} />;
+                              const jsonData = JSON.parse(content || '{}');
+                              if (selectedNode?.name === 'projects.json') {
+                                if (Array.isArray(jsonData)) {
+                                  return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} onRemoveRequest={handleJsonRemoveProject} setInputConfig={setInputConfig} availableTags={availableTags} />;
+                                }
+                                return <div className="p-12 text-center text-gray-500">Visual editor only supports array-based JSON for projects.json.</div>;
+                              } else if (selectedNode?.name === 'links.json') {
+                                const linksData = (typeof jsonData === 'object' && jsonData !== null && !Array.isArray(jsonData)) ? jsonData : {};
+                                return <LinksVisualEditor data={linksData} onChange={handleLinksVisualChange} setConfirmModal={setConfirmModal} />;
                               }
-                              return <div className="p-12 text-center text-gray-500">Visual editor only supports array-based JSON for now.</div>;
+                              return <div className="p-12 text-center text-gray-500">Visual editor is not available for this JSON file.</div>;
                             } catch (e) {
                               return <div className="p-12 text-center text-red-500 font-mono text-sm">Invalid JSON syntax. Please fix in Source mode.</div>;
                             }

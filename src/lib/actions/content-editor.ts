@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import sharp from 'sharp';
 import matter from 'gray-matter';
 import { invalidateTodoCache } from "../todo-cache";
+import { invalidateLinksCache } from "../links";
 
 const CONTENT_PATH = path.join(process.cwd(), 'content');
 
@@ -112,6 +113,12 @@ export async function saveContentAction(relativeFilePath: string, content: strin
   if (fullPath === todoPath || relativeFilePath === 'todo.txt' || relativeFilePath === '/todo.txt') {
     console.log('Invalidating TODO cache...');
     invalidateTodoCache();
+  }
+
+  const linksPath = path.join(process.cwd(), 'content/links.json');
+  if (fullPath === linksPath || relativeFilePath === 'links.json' || relativeFilePath === '/links.json') {
+    console.log('Invalidating Links cache...');
+    invalidateLinksCache();
   }
 
   revalidatePath("/", "layout");

@@ -53,6 +53,13 @@ The `/todo.svg` route dynamically generates an SVG representation of `content/to
 2.  **Auto-refresh**: The cache is automatically invalidated every 5 minutes.
 3.  **Instant Updates**: Any update to `todo.txt` via the online content editor triggers an immediate cache invalidation, ensuring the SVG is always up-to-date.
 
+### Link Shortener & Caching
+
+The `/url/[alias]` route provides URL shortening mapped from `content/links.json`.
+1. **In-memory Caching**: `getLinks()` loads from `links.json` and caches the parsed map in memory.
+2. **mtime Validation & Invalidation**: It validates against the file's modification time (`mtimeMs`) and is explicitly invalidated by `invalidateLinksCache()` on editor saves.
+3. **Hex 32-bit Generator**: Automatically creates 8-character hex words (e.g., `abcdef01`) for pasted URLs in the visual editor.
+
 ### Hybrid Data Loading Strategy
 
 To balance developer experience (DX) and production flexibility, we use a hybrid approach for loading structured data (e.g., `projects.json`):
