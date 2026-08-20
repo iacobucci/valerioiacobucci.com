@@ -512,15 +512,29 @@ export async function checkTranslationFilesAction(relativePath: string) {
   return results;
 }
 
+function getGitEnv() {
+  const env = { ...process.env };
+  delete env.GITHUB_TOKEN;
+  delete env.GH_TOKEN;
+  const scriptPath = '/home/valerio/script';
+  if (!env.PATH) {
+    env.PATH = `${scriptPath}:/usr/local/bin:/usr/bin:/bin`;
+  } else if (!env.PATH.includes(scriptPath)) {
+    env.PATH = `${env.PATH}:${scriptPath}`;
+  }
+  return env;
+}
+
 export async function getGitStatusAction() {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
   }
 
   try {
-    const status = execSync('git -C content status --short', { encoding: 'utf8' });
-    const diff = execSync('git -C content diff --stat', { encoding: 'utf8' });
-    const hash = execSync('git -C content rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    const gitEnv = getGitEnv();
+    const status = execSync('git -C content status --short', { encoding: 'utf8', env: gitEnv });
+    const diff = execSync('git -C content diff --stat', { encoding: 'utf8', env: gitEnv });
+    const hash = execSync('git -C content rev-parse --short HEAD', { encoding: 'utf8', env: gitEnv }).trim();
     return { success: true, status, diff, hash };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -533,9 +547,10 @@ export async function getGitRemoteAction() {
   }
 
   try {
+    const gitEnv = getGitEnv();
     let rootOriginUrl = '';
     try {
-      rootOriginUrl = execSync('git remote get-url origin', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+      rootOriginUrl = execSync('git remote get-url origin', { encoding: 'utf8', env: gitEnv, stdio: ['pipe', 'pipe', 'ignore'] }).trim();
     } catch (e: any) {
       return { 
         success: false, 
@@ -549,12 +564,12 @@ export async function getGitRemoteAction() {
 
     let rockUrl = '';
     try {
-      rockUrl = execSync('git remote get-url rock', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+      rockUrl = execSync('git remote get-url rock', { encoding: 'utf8', env: gitEnv, stdio: ['pipe', 'pipe', 'ignore'] }).trim();
     } catch {}
 
     let githubUrl = '';
     try {
-      githubUrl = execSync('git remote get-url github', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
+      githubUrl = execSync('git remote get-url github', { encoding: 'utf8', env: gitEnv, stdio: ['pipe', 'pipe', 'ignore'] }).trim();
     } catch {}
 
     let currentRemote = 'unknown';
@@ -589,13 +604,13 @@ export async function gitSwitchRemoteAction() {
 
   try {
     const outputs: string[] = [];
-    const pathEnv = process.env.PATH ? `${process.env.PATH}:/home/valerio/script` : '/home/valerio/script:/usr/local/bin:/usr/bin:/bin';
+    const gitEnv = getGitEnv();
 
     // Switch remote on root repository
     const rootResult = spawnSync('switch', [], { 
       cwd: process.cwd(), 
       encoding: 'utf8',
-      env: { ...process.env, PATH: pathEnv }
+      env: gitEnv
     });
 
     if (rootResult.status !== 0) {
@@ -612,7 +627,7 @@ export async function gitSwitchRemoteAction() {
       const contentResult = spawnSync('switch', [], { 
         cwd: contentDir, 
         encoding: 'utf8',
-        env: { ...process.env, PATH: pathEnv }
+        env: gitEnv
       });
 
       if (contentResult.status !== 0) {
@@ -644,18 +659,22 @@ export async function gitSwitchRemoteAction() {
   }
 }
 
-
 export async function gitCommitAction(message: string) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
   }
 
   try {
-    spawnSync('git', ['-C', 'content', 'add', '.'], { stdio: 'inherit' });
-    const result = spawnSync('git', ['-C', 'content', 'commit', '-m', message], { stdio: 'inherit' });
+    const gitEnv = getGitEnv();
+    spawnSync('git', ['-C', 'content', 'add', '.'], { stdio: 'inherit', env: gitEnv });
+    const result = spawnSync('git', ['-C', 'content', 'commit', '-m', message], { 
+      encoding: 'utf8',
+      env: gitEnv 
+    });
     
     if (result.status !== 0) {
-      throw new Error(`Git commit failed with status ${result.status}`);
+      const err = result.stderr?.trim() || result.stdout?.trim() || `Exit status ${result.status}`;
+      throw new Error(`Git commit failed: ${err}`);
     }
     
     return { success: true };
@@ -670,9 +689,14 @@ export async function gitPushAction() {
   }
 
   try {
-    const result = spawnSync('git', ['-C', 'content', 'push'], { stdio: 'inherit' });
+    const gitEnv = getGitEnv();
+    const result = spawnSync('git', ['-C', 'content', 'push'], { 
+      encoding: 'utf8',
+      env: gitEnv 
+    });
     if (result.status !== 0) {
-       throw new Error(`Git push failed with status ${result.status}`);
+      const err = result.stderr?.trim() || result.stdout?.trim() || `Exit status ${result.status}`;
+      return { success: false, error: `Git push failed: ${err}` };
     }
     return { success: true };
   } catch (error: any) {
@@ -686,10 +710,19 @@ export async function gitPullAction() {
   }
 
   try {
+    const gitEnv = getGitEnv();
     // Using rebase for a cleaner history in a single-user workflow
-    const result = spawnSync('git', ['-C', 'content', 'pull', '--rebase'], { stdio: 'inherit' });
+    const result = spawnSync('git', ['-C', 'content', 'pull', '--rebase'], { 
+      encoding: 'utf8',
+      env: gitEnv 
+    });
     if (result.status !== 0) {
-       throw new Error(`Git pull failed with status ${result.status}`);
+      const err = result.stderr?.trim() || result.stdout?.trim() || `Exit status ${result.status}`;
+      return { 
+        success: false, 
+        error: "Pull failed. You might have local conflicts or changes that need stashing.",
+        details: err 
+      };
     }
     return { success: true };
   } catch (error: any) {
@@ -707,7 +740,8 @@ export async function gitStashAction() {
   }
 
   try {
-    spawnSync('git', ['-C', 'content', 'stash'], { stdio: 'inherit' });
+    const gitEnv = getGitEnv();
+    spawnSync('git', ['-C', 'content', 'stash'], { stdio: 'inherit', env: gitEnv });
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -720,9 +754,14 @@ export async function gitStashPopAction() {
   }
 
   try {
-    const result = spawnSync('git', ['-C', 'content', 'stash', 'pop'], { stdio: 'inherit' });
+    const gitEnv = getGitEnv();
+    const result = spawnSync('git', ['-C', 'content', 'stash', 'pop'], { 
+      encoding: 'utf8',
+      env: gitEnv 
+    });
     if (result.status !== 0) {
-       throw new Error("Stash pop failed. You might have conflicts with your current changes.");
+      const err = result.stderr?.trim() || result.stdout?.trim() || `Exit status ${result.status}`;
+      return { success: false, error: `Stash pop failed: ${err}` };
     }
     return { success: true };
   } catch (error: any) {
@@ -736,8 +775,9 @@ export async function gitResetAction() {
   }
 
   try {
+    const gitEnv = getGitEnv();
     // Hard reset to the last committed state to recover from messy states
-    spawnSync('git', ['-C', 'content', 'reset', '--hard'], { stdio: 'inherit' });
+    spawnSync('git', ['-C', 'content', 'reset', '--hard'], { stdio: 'inherit', env: gitEnv });
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
