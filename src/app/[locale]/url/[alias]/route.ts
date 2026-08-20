@@ -6,10 +6,9 @@ export const revalidate = 0;
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ alias: string[] }> }
+  { params }: { params: Promise<{ locale: string; alias: string }> }
 ) {
-  const { alias: aliasSegments } = await params;
-  const alias = Array.isArray(aliasSegments) ? aliasSegments.join('/') : aliasSegments;
+  const { alias } = await params;
 
   if (!alias) {
     return new NextResponse('Short link not found', { status: 404 });
@@ -21,7 +20,7 @@ export async function GET(
     return new NextResponse('Short link not found', { status: 404 });
   }
 
-  // Normalize destination URL (support absolute URLs, protocol-relative, and relative paths)
+  // Normalize destination URL
   let destination = targetUrl.trim();
   if (!destination.startsWith('http://') && !destination.startsWith('https://') && !destination.startsWith('/')) {
     destination = `https://${destination}`;
