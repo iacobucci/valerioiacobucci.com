@@ -412,6 +412,75 @@ Write your content here...
   return { success: true, path: `${slug}/en.mdx` };
 }
 
+async function generateTranslationWithGemini(prompt: string, apiKey: string): Promise<string> {
+  const candidateModels = [
+    process.env.GEMINI_MODEL,
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash-lite',
+    'gemini-3.8-flash',
+    'gemini-flash-latest',
+  ].filter(Boolean) as string[];
+
+  // Deduplicate while preserving priority order
+  const modelsToTry = Array.from(new Set(candidateModels));
+  let lastError: Error | null = null;
+
+  for (const model of modelsToTry) {
+    const maxAttempts = 2;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.1,
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage =
+            errorData.error?.message || `HTTP ${response.status} ${response.statusText}`;
+          lastError = new Error(`[${model}] ${errorMessage}`);
+
+          // For transient rate limit (429) or high demand / temporary unavailability (503), retry
+          if ((response.status === 429 || response.status === 503) && attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, 800 * attempt));
+            continue;
+          }
+
+          // Move to next candidate model in fallback chain
+          break;
+        }
+
+        const result = await response.json();
+        const translatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!translatedText) {
+          lastError = new Error(`[${model}] Translation failed: Empty response`);
+          break;
+        }
+
+        return translatedText;
+      } catch (err: unknown) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 800 * attempt));
+          continue;
+        }
+        break;
+      }
+    }
+  }
+
+  throw lastError || new Error('All translation models failed');
+}
+
 export async function translateContentAction(relativePath: string, targetLocale: string) {
   if (!(await isAuthorized())) {
     throw new Error("Unauthorized");
@@ -450,29 +519,13 @@ description: ${data.description || ''}
 ${content}`;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.1,
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || "Gemini API error");
-    }
-
-    const result = await response.json();
-    let translatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!translatedText) throw new Error("Translation failed: Empty response");
+    let translatedText = await generateTranslationWithGemini(prompt, apiKey);
 
     // Clean markdown blocks if Gemini wrapped them
-    translatedText = translatedText.replace(/^```markdown\n/, '').replace(/^```\n/, '').replace(/\n```$/, '');
+    translatedText = translatedText
+      .trim()
+      .replace(/^```(?:markdown)?\r?\n/, '')
+      .replace(/\r?\n```\s*$/, '');
 
     // Merge translated frontmatter with original fields (tags, date, cover, etc.)
     const { data: translatedData, content: translatedBody } = matter(translatedText);
