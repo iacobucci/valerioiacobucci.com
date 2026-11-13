@@ -52,17 +52,18 @@ function --setup {
 }
 
 function --job {
+	set -e
 	export NODE_OPTIONS=--max-old-space-size=1536
 
 	cd /home/valerio/source/web/valerioiacobucci.com
 	
 	echo "Pulling latest changes from main repository..."
-	git pull
+	git pull --autostash --rebase
 
 	if [ "$1" != "--no-content" ]; then
 		echo "Updating content repository..."
 		if [ -d "content/.git" ]; then
-			git -C content pull
+			git -C content pull --autostash --rebase
 		else
 			# TODO generalize remote
 			git clone ssh://valerio@rockbp:/git/content.git content
