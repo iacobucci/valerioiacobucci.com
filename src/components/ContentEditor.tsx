@@ -149,24 +149,30 @@ function EditorInternal() {
     let totalTranslations = 0;
     let publishedTranslations = 0;
 
-    tree.forEach(node => {
-      if (node.type === 'directory' && node.name !== 'apps' && node.name !== 'public') {
-        const mdxFiles = node.children?.filter(child => child.type === 'file' && child.name.endsWith('.mdx')) || [];
-        if (mdxFiles.length > 0) {
-          total++;
-          const hasPublished = mdxFiles.some(child => !child.isDraft);
-          if (hasPublished) {
-            published++;
-          }
-          mdxFiles.forEach(file => {
-            totalTranslations++;
-            if (!file.isDraft) {
-              publishedTranslations++;
+    const countArticles = (nodes: FileNode[]) => {
+      nodes.forEach(node => {
+        if (node.type === 'directory' && node.name !== 'apps' && node.name !== 'public') {
+          const mdxFiles = node.children?.filter(child => child.type === 'file' && child.name.endsWith('.mdx')) || [];
+          if (mdxFiles.length > 0) {
+            total++;
+            const hasPublished = mdxFiles.some(child => !child.isDraft);
+            if (hasPublished) {
+              published++;
             }
-          });
+            mdxFiles.forEach(file => {
+              totalTranslations++;
+              if (!file.isDraft) {
+                publishedTranslations++;
+              }
+            });
+          } else if (node.children && node.children.length > 0) {
+            countArticles(node.children);
+          }
         }
-      }
-    });
+      });
+    };
+
+    countArticles(tree);
 
     return { total, published, totalTranslations, publishedTranslations };
   }, [tree]);
