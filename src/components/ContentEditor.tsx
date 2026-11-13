@@ -1359,7 +1359,7 @@ function EditorInternal() {
     }
   };
 
-  const handleJsonVisualChange = (newData: any[]) => {
+  const handleJsonVisualChange = (newData: any) => {
     setContent(JSON.stringify(newData, null, 2));
     setIsDirty(true);
   };
@@ -1975,10 +1975,20 @@ function EditorInternal() {
                             try {
                               const jsonData = JSON.parse(content || '{}');
                               if (selectedNode?.name === 'projects.json') {
-                                if (Array.isArray(jsonData)) {
-                                  return <ProjectsVisualEditor data={jsonData} onChange={handleJsonVisualChange} onRemoveRequest={handleJsonRemoveProject} setInputConfig={setInputConfig} availableTags={availableTags} />;
+                                const isValid = Array.isArray(jsonData) || (typeof jsonData === 'object' && jsonData !== null);
+                                if (isValid) {
+                                  return (
+                                    <ProjectsVisualEditor 
+                                      data={jsonData} 
+                                      onChange={handleJsonVisualChange} 
+                                      onRemoveRequest={handleJsonRemoveProject}
+                                      setConfirmModal={setConfirmModal}
+                                      setInputConfig={setInputConfig} 
+                                      availableTags={availableTags} 
+                                    />
+                                  );
                                 }
-                                return <div className="p-12 text-center text-gray-500">Visual editor only supports array-based JSON for projects.json.</div>;
+                                return <div className="p-12 text-center text-gray-500">Visual editor is not available for this JSON file.</div>;
                               } else if (selectedNode?.name === 'links.json') {
                                 const linksData = (typeof jsonData === 'object' && jsonData !== null && !Array.isArray(jsonData)) ? jsonData : {};
                                 return <LinksVisualEditor data={linksData} onChange={handleLinksVisualChange} setConfirmModal={setConfirmModal} />;

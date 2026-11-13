@@ -6,7 +6,8 @@ import {
   Trash2, Box, Plus 
 } from 'lucide-react';
 import { FaGithub } from 'react-icons/fa6';
-import { Project, InputDialogProps } from './types';
+import { Project, InputDialogProps, ConfirmModalProps } from './types';
+import { toast } from '@/lib/toast';
 
 interface ProjectCardEditorProps {
   project: Project;
@@ -29,7 +30,7 @@ export function ProjectCardEditor({
         <button
           onClick={() => onMove(index, 'up')}
           disabled={index === 0}
-          className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 disabled:opacity-30 disabled:hover:text-gray-400 disabled:hover:border-gray-200 transition-all shadow-sm"
+          className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 disabled:opacity-30 disabled:hover:text-gray-400 disabled:hover:border-gray-200 transition-all"
           title="Move Up"
         >
           <ArrowUp className="w-5 h-5" />
@@ -37,7 +38,7 @@ export function ProjectCardEditor({
         <button
           onClick={() => onMove(index, 'down')}
           disabled={index === total - 1}
-          className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 disabled:opacity-30 disabled:hover:text-gray-400 disabled:hover:border-gray-200 transition-all shadow-sm"
+          className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-400 hover:text-blue-500 hover:border-blue-200 dark:hover:border-blue-800 disabled:opacity-30 disabled:hover:text-gray-400 disabled:hover:border-gray-200 transition-all"
           title="Move Down"
         >
           <ArrowDown className="w-5 h-5" />
@@ -156,12 +157,20 @@ export function ProjectCardEditor({
 interface ProjectsVisualEditorProps {
   data: any;
   onChange: (newData: any) => void;
-  onRemoveRequest: (index: number) => void;
+  onRemoveRequest?: (index: number) => void;
+  setConfirmModal?: (config: ConfirmModalProps | null) => void;
   setInputConfig: (config: InputDialogProps | null) => void;
   availableTags: string[];
 }
 
-export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, setInputConfig, availableTags }: ProjectsVisualEditorProps) {
+export default function ProjectsVisualEditor({ 
+  data, 
+  onChange, 
+  onRemoveRequest, 
+  setConfirmModal, 
+  setInputConfig, 
+  availableTags 
+}: ProjectsVisualEditorProps) {
   const isStructured = Boolean(data && typeof data === 'object' && !Array.isArray(data));
   const [activeTab, setActiveTab] = useState<'sources' | 'forks'>('sources');
 
@@ -188,6 +197,8 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
   const updateList = useCallback((newList: Project[]) => {
     if (isStructured) {
       onChange({
+        sources: Array.isArray(data?.sources) ? data.sources : [],
+        forks: Array.isArray(data?.forks) ? data.forks : [],
         ...data,
         [activeTab]: newList
       });
@@ -195,6 +206,34 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
       onChange(newList);
     }
   }, [data, isStructured, activeTab, onChange]);
+
+  const handleRemove = useCallback((index: number) => {
+    const doRemove = () => {
+      const newList = [...currentList];
+      newList.splice(index, 1);
+      updateList(newList);
+      toast.success("Project removed from list");
+    };
+
+    if (setConfirmModal) {
+      setConfirmModal({
+        isOpen: true,
+        title: "Remove Project",
+        message: "Are you sure you want to remove this project from the list?",
+        confirmLabel: "Remove",
+        confirmVariant: "danger",
+        onConfirm: () => {
+          setConfirmModal(null);
+          doRemove();
+        },
+        onCancel: () => setConfirmModal(null)
+      });
+    } else if (onRemoveRequest) {
+      onRemoveRequest(index);
+    } else {
+      doRemove();
+    }
+  }, [currentList, updateList, setConfirmModal, onRemoveRequest]);
 
   const moveProject = useCallback((index: number, direction: 'up' | 'down') => {
     const newList = [...currentList];
@@ -235,7 +274,7 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
                 onClick={() => setActiveTab('sources')}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'sources'
-                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
@@ -245,7 +284,7 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
                 onClick={() => setActiveTab('forks')}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === 'forks'
-                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
@@ -272,7 +311,7 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
             total={currentList.length}
             allTechTags={unifiedTags}
             onUpdate={updateItem}
-            onRemove={onRemoveRequest}
+            onRemove={handleRemove}
             onMove={moveProject}
             setInputConfig={setInputConfig}
           />
