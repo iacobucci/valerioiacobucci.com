@@ -103,7 +103,7 @@ export default function LanguageSwitcher() {
         aria-expanded={isOpen}
         title="Select language"
       >
-        <span className="font-mono uppercase text-xs font-bold">{currentLang.code}</span>
+        <span className="font-mono uppercase text-xs font-bold translate-y-[1px]">{currentLang.code}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
