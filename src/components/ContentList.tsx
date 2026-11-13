@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit, MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Loader2, Folder } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useTranslations } from 'next-intl';
@@ -79,7 +79,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
       const dateB = b.date ? new Date(b.date).getTime() : 0;
       return dateB - dateA;
     });
-  }, [items, selectedTag, showDrafts, isAuthorized]);
+  }, [items, selectedCategory, selectedTag, showDrafts, isAuthorized]);
 
   const visibleItems = useMemo(() => {
     return filteredItems.slice(0, visibleCount);
@@ -164,66 +164,68 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
     <div className="space-y-8">
       {/* Controls */}
       <div className="space-y-3">
-        {allCategories.length > 0 && (
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
-              <Folder className="w-3.5 h-3.5" /> Category:
-            </span>
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedCategory === null
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800'
-                  : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`}
-            >
-              All
-            </button>
-            {allCategories.map(cat => {
-              const active = selectedCategory === cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(active ? null : cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                    active
-                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800'
-                      : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }`}
-                >
-                  📁 {cat}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {allTags.length > 0 && (
+          {(allCategories.length > 0 || allTags.length > 0) && (
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
                 <MdTag className="w-3.5 h-3.5" /> Filter:
               </span>
               <button
-                onClick={() => setSelectedTag(null)}
+                onClick={() => {
+                  setSelectedTag(null);
+                  setSelectedCategory(null);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  selectedTag === null
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                  selectedTag === null && selectedCategory === null
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800 font-bold'
                     : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 All
               </button>
-              {allTags.map(tag => {
-                const active = selectedTag?.toLowerCase() === tag.toLowerCase();
-                
+
+              {/* Categories at the beginning: without # and in green, without folder icon */}
+              {allCategories.map(cat => {
+                const active = selectedCategory === cat;
                 return (
                   <button
-                    key={tag}
-                    onClick={() => setSelectedTag(active ? null : tag)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                    key={`cat-${cat}`}
+                    onClick={() => {
+                      if (active) {
+                        setSelectedCategory(null);
+                      } else {
+                        setSelectedCategory(cat);
+                        setSelectedTag(null);
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center ${
                       active
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 ring-1 ring-emerald-300 dark:ring-emerald-700 font-bold'
+                        : 'bg-emerald-50/70 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/40 border border-emerald-200/50 dark:border-emerald-800/40'
+                    }`}
+                  >
+                    {cat.toUpperCase()}
+                  </button>
+                );
+              })}
+
+              {/* Tags next: with # and in blue */}
+              {allTags.map(tag => {
+                const active = selectedTag?.toLowerCase() === tag.toLowerCase();
+                return (
+                  <button
+                    key={`tag-${tag}`}
+                    onClick={() => {
+                      if (active) {
+                        setSelectedTag(null);
+                      } else {
+                        setSelectedTag(tag);
+                        setSelectedCategory(null);
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center ${
+                      active
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800 font-bold'
                         : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                   >
@@ -328,8 +330,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                     )}
 
                     {item.category && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800">
-                        <Folder className="w-3 h-3" />
+                      <span className="flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800">
                         {item.category}
                       </span>
                     )}

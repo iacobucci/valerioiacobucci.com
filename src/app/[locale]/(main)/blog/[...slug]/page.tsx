@@ -2,7 +2,7 @@ import {getPost, getPosts} from '@/lib/content';
 import {notFound} from 'next/navigation';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Link} from '@/i18n/routing';
-import {ArrowLeft, Folder} from 'lucide-react';
+import {ArrowLeft} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
 import {MdLanguage, MdEdit} from 'react-icons/md';
 import { Metadata } from 'next';
@@ -251,8 +251,7 @@ export default async function BlogPostPage({
           )}
 
           {post.category && (
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-3 uppercase tracking-wider">
-              <Folder className="w-3.5 h-3.5" />
+            <div className="flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-3 uppercase tracking-wider">
               <span>{post.category}</span>
             </div>
           )}

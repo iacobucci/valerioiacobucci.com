@@ -98,12 +98,11 @@ export default function LanguageSwitcher() {
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all focus:outline-none"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all focus:outline-none"
         aria-haspopup="true"
         aria-expanded={isOpen}
         title="Select language"
       >
-        <currentLang.Flag className="w-[26px] h-[17.5px] rounded-xs shrink-0 border border-black/15 dark:border-white/15 shadow-xs" />
         <span className="font-mono uppercase text-xs font-bold">{currentLang.code}</span>
         <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -134,7 +133,7 @@ export default function LanguageSwitcher() {
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
-                    <FlagComponent className="w-[26px] h-[17.5px] rounded-xs shrink-0 border border-black/15 dark:border-white/15 shadow-xs" />
+                    <FlagComponent className="w-[26px] h-[17.5px] rounded-xs shrink-0 border border-black/15 dark:border-white/15" />
                     <span>{lang.nativeName}</span>
                   </div>
                   {isSelected && <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />}
