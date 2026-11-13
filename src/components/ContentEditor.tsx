@@ -287,6 +287,35 @@ function EditorInternal() {
     return sortNodes(tree, sortBy);
   }, [tree, sortBy, sortNodes]);
 
+  // Partition top-level nodes into:
+  // 1. Public assets/apps
+  // 2. Categories (directories without .mdx in their first level)
+  // 3. Articles without categories (directories with .mdx in their first level)
+  // 4. Root content files (links.json, projects.json, etc.)
+  const { publicSection, categoriesSection, articlesSection, rootFilesSection } = useMemo(() => {
+    const publicSection: FileNode[] = [];
+    const categoriesSection: FileNode[] = [];
+    const articlesSection: FileNode[] = [];
+    const rootFilesSection: FileNode[] = [];
+
+    sortedTree.forEach(node => {
+      if (node.type === 'file') {
+        rootFilesSection.push(node);
+      } else if (node.name === 'public' || node.name === 'apps') {
+        publicSection.push(node);
+      } else {
+        const hasMdxAtFirstLevel = Boolean(node.children?.some(child => child.name.endsWith('.mdx')));
+        if (hasMdxAtFirstLevel) {
+          articlesSection.push(node);
+        } else {
+          categoriesSection.push(node);
+        }
+      }
+    });
+
+    return { publicSection, categoriesSection, articlesSection, rootFilesSection };
+  }, [sortedTree]);
+
   const loadTree = useCallback(async () => {
     try {
       const data = await listContentAction();
@@ -1410,6 +1439,27 @@ function EditorInternal() {
     dropToRoot(el);
   };
 
+  const renderNode = (node: FileNode) => (
+    <div key={node.path}>
+      <DraggableFile 
+        node={node} 
+        onSelect={setSelectedNode} 
+        onDelete={handleDelete}
+        onRename={handleRename}
+        onMove={handleMove}
+        onCompress={handleCompress}
+        onDuplicate={handleDuplicate}
+        onTranslate={(path) => setTranslateConfig({ isOpen: true, path })}
+        onEditFrontmatter={handleEditFrontmatter}
+        onDownloadDir={handleDownloadDir}
+        selectedPath={selectedNode?.path || null}
+        expandedPaths={expandedPaths}
+        toggleExpand={toggleExpand}
+        conflictedPaths={new Set(gitStatus.conflictedFiles || [])}
+      />
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-900">
         {confirmConfig && <ConfirmModal {...confirmConfig} />}
@@ -1570,26 +1620,6 @@ function EditorInternal() {
                         <Archive className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <div className="flex items-center justify-between px-1 py-1 text-xs text-gray-500 bg-gray-50/80 dark:bg-gray-800/40 rounded-lg border border-gray-200/60 dark:border-gray-700/60">
-                      <div className="flex items-center gap-1.5 pl-1.5">
-                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
-                        <span className="font-semibold text-[11px] text-gray-500 dark:text-gray-400">Sort:</span>
-                      </div>
-                      <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="bg-transparent text-[11px] font-medium text-gray-700 dark:text-gray-300 focus:outline-none cursor-pointer py-1 pr-2"
-                      >
-                        <option value="name-asc" className="dark:bg-gray-900">Name (A-Z)</option>
-                        <option value="name-desc" className="dark:bg-gray-900">Name (Z-A)</option>
-                        <option value="date-desc" className="dark:bg-gray-900">Date (Newest)</option>
-                        <option value="date-asc" className="dark:bg-gray-900">Date (Oldest)</option>
-                        <option value="mtime-desc" className="dark:bg-gray-900">Last Edit (Newest)</option>
-                        <option value="mtime-asc" className="dark:bg-gray-900">Last Edit (Oldest)</option>
-                        <option value="status-draft" className="dark:bg-gray-900">Status (Drafts first)</option>
-                        <option value="status-published" className="dark:bg-gray-900">Status (Published first)</option>
-                      </select>
-                    </div>
                     <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleUpload} />
                     <input type="file" ref={zipInputRef} accept=".zip" className="hidden" onChange={handleUploadZip} />
                   </div>
@@ -1601,30 +1631,59 @@ function EditorInternal() {
                     {loading && tree.length === 0 ? (
                       <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
                     ) : (
-                      <div className="space-y-0.5">
-                        {sortedTree.map(node => (
-                          <div key={node.path}>
-                            <DraggableFile 
-                              node={node} 
-                              onSelect={setSelectedNode} 
-                              onDelete={handleDelete}
-                              onRename={handleRename}
-                              onMove={handleMove}
-                              onCompress={handleCompress}
-                              onDuplicate={handleDuplicate}
-                              onTranslate={(path) => setTranslateConfig({ isOpen: true, path })}
-                              onEditFrontmatter={handleEditFrontmatter}
-                              onDownloadDir={handleDownloadDir}
-                              selectedPath={selectedNode?.path || null}
-                              expandedPaths={expandedPaths}
-                              toggleExpand={toggleExpand}
-                              conflictedPaths={new Set(gitStatus.conflictedFiles || [])}
-                            />
-                            {(node.name === 'public' || node.name === 'apps') && node.path.split('/').length === 1 && (
-                              <div className="my-2 border-t border-gray-100 dark:border-gray-800/50 mx-2" />
-                            )}
+                      <div className="space-y-4">
+                        {/* 1. Public */}
+                        {publicSection.length > 0 && (
+                          <div className="space-y-1">
+                            <div className="px-2 pt-1 pb-1 flex items-center justify-between text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest select-none">
+                              <span>Public</span>
+                              <span className="text-[9px] font-mono opacity-70 font-semibold">{publicSection.length}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {publicSection.map(renderNode)}
+                            </div>
                           </div>
-                        ))}
+                        )}
+
+                        {/* 2. Categories */}
+                        {categoriesSection.length > 0 && (
+                          <div className="space-y-1">
+                            <div className="px-2 pt-1 pb-1 flex items-center justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest select-none">
+                              <span>Categories</span>
+                              <span className="text-[9px] font-mono opacity-70 font-semibold">{categoriesSection.length}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {categoriesSection.map(renderNode)}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 3. Articles without categories */}
+                        {articlesSection.length > 0 && (
+                          <div className="space-y-1">
+                            <div className="px-2 pt-1 pb-1 flex items-center justify-between text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest select-none">
+                              <span>Articles</span>
+                              <span className="text-[9px] font-mono opacity-70 font-semibold">{articlesSection.length}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {articlesSection.map(renderNode)}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 4. Top-level files */}
+                        {rootFilesSection.length > 0 && (
+                          <div className="space-y-1">
+                            <div className="px-2 pt-1 pb-1 flex items-center justify-between text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest select-none">
+                              <span>Files</span>
+                              <span className="text-[9px] font-mono opacity-70 font-semibold">{rootFilesSection.length}</span>
+                            </div>
+                            <div className="space-y-0.5">
+                              {rootFilesSection.map(renderNode)}
+                            </div>
+                          </div>
+                        )}
+
                         {tree.length === 0 && !loading && (
                           <div className="text-center p-8 text-gray-400 text-xs italic">
                             Empty directory
@@ -1634,12 +1693,12 @@ function EditorInternal() {
                     )}
                   </div>
 
-                  <div className="p-3 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-gray-50/50 dark:bg-gray-900/50">
+                  <div className="p-3 border-t border-gray-200 dark:border-gray-800 flex items-center gap-2 bg-gray-50/50 dark:bg-gray-900/50">
                     <button 
                       onClick={handleUndo}
                       disabled={undoStack.length === 0}
                       title="Undo"
-                      className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-xs font-bold text-gray-600 dark:text-gray-400"
+                      className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-xs font-bold text-gray-600 dark:text-gray-400"
                     >
                       <Undo2 className="w-3.5 h-3.5" /> Undo
                     </button>
@@ -1647,10 +1706,37 @@ function EditorInternal() {
                       onClick={handleRedo}
                       disabled={redoStack.length === 0}
                       title="Redo"
-                      className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-xs font-bold text-gray-600 dark:text-gray-400"
+                      className="flex-1 flex items-center justify-center gap-1.5 p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-xs font-bold text-gray-600 dark:text-gray-400"
                     >
                       <Redo2 className="w-3.5 h-3.5" /> Redo
                     </button>
+
+                    <div className="relative">
+                      <button 
+                        type="button"
+                        title="Sort files"
+                        className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all text-gray-600 dark:text-gray-400 flex items-center justify-center cursor-pointer"
+                      >
+                        <ArrowUpDown className="w-3.5 h-3.5" />
+                      </button>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                        title="Sort files"
+                        aria-label="Sort files"
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      >
+                        <option value="name-asc" className="dark:bg-gray-900">Name (A-Z)</option>
+                        <option value="name-desc" className="dark:bg-gray-900">Name (Z-A)</option>
+                        <option value="date-desc" className="dark:bg-gray-900">Date (Newest)</option>
+                        <option value="date-asc" className="dark:bg-gray-900">Date (Oldest)</option>
+                        <option value="mtime-desc" className="dark:bg-gray-900">Last Edit (Newest)</option>
+                        <option value="mtime-asc" className="dark:bg-gray-900">Last Edit (Oldest)</option>
+                        <option value="status-draft" className="dark:bg-gray-900">Status (Drafts first)</option>
+                        <option value="status-published" className="dark:bg-gray-900">Status (Published first)</option>
+                      </select>
+                    </div>
+
                     <button 
                       onClick={() => { loadTree(); loadGitStatus(); }}
                       title="Refresh"
