@@ -8,6 +8,8 @@ export interface ContentMetadata {
   slug: string;
   type: string;
   title: string;
+  category?: string;
+  categories?: string[];
   date?: string;
   updated?: string;
   readingTime?: number;
@@ -22,6 +24,8 @@ export interface ContentMetadata {
   preview?: boolean;
   preview_passcode?: string;
   selected?: boolean;
+  song?: any;
+  music?: any;
   [key: string]: unknown;
 }
 
@@ -97,13 +101,19 @@ export async function getPost(type: string, locale: string, slug: string): Promi
     const fileContents = fs.readFileSync(filePath, 'utf8');
     const { data, content } = matter(fileContents);
 
+    const parts = slug.split('/');
+    const category = parts.length > 1 ? parts.slice(0, -1).join('/') : undefined;
+    const categories = parts.length > 1 ? parts.slice(0, -1).map((_, i) => parts.slice(0, i + 1).join('/')) : undefined;
+
     const postData: ContentMetadata = {
       ...data,
       slug,
       type,
+      category,
+      categories,
       isFallback: actualLocale !== locale,
       language: actualLocale,
-      title: data.title || slug,
+      title: data.title || parts[parts.length - 1],
       date: data.date ? (data.date instanceof Date ? data.date.toISOString() : data.date) : undefined,
       updated: data.updated ? (data.updated instanceof Date ? data.updated.toISOString() : data.updated) : undefined,
       readingTime: calculateReadingTime(content),
@@ -123,6 +133,25 @@ export async function getPost(type: string, locale: string, slug: string): Promi
   }
 }
 
+function findArticleSlugs(baseDir: string, currentDir = baseDir): string[] {
+  if (!fs.existsSync(currentDir)) return [];
+  const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+
+  // If currentDir (other than baseDir) contains any .mdx file, treat currentDir as an article
+  if (currentDir !== baseDir && entries.some(e => !e.isDirectory() && e.name.endsWith(`.${extension}`))) {
+    return [path.relative(baseDir, currentDir)];
+  }
+
+  const slugs: string[] = [];
+  for (const entry of entries) {
+    if (entry.isDirectory() && entry.name !== '.git' && entry.name !== 'node_modules' && entry.name !== 'public' && entry.name !== 'apps') {
+      const subPath = path.join(currentDir, entry.name);
+      slugs.push(...findArticleSlugs(baseDir, subPath));
+    }
+  }
+  return slugs;
+}
+
 export async function getPosts(type: string, locale: string, includeDrafts = false): Promise<ContentMetadata[]> {
   const contentDir = type === 'blog'
     ? path.join(process.cwd(), 'content')
@@ -132,18 +161,12 @@ export async function getPosts(type: string, locale: string, includeDrafts = fal
     return [];
   }
 
-  const slugs = fs.readdirSync(contentDir).filter(file => {
-    const fullPath = path.join(contentDir, file);
-    if (fs.statSync(fullPath).isDirectory()) {
-      if (type === 'blog') {
-        // Only include directories that have at least one .mdx file
-        const entries = fs.readdirSync(fullPath);
-        return entries.some(f => f.endsWith(`.${extension}`));
-      }
-      return true;
-    }
-    return false;
-  });
+  const slugs = type === 'blog'
+    ? findArticleSlugs(contentDir)
+    : fs.readdirSync(contentDir).filter(file => {
+        const fullPath = path.join(contentDir, file);
+        return fs.statSync(fullPath).isDirectory();
+      });
 
   const allContent = await Promise.all(slugs.map(async (slug) => {
     return await getPost(type, locale, slug);

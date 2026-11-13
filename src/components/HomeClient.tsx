@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Terminal } from '@/components/Terminal';
 import Image from 'next/image';
-import { FaGithub, FaYoutube, FaRss } from 'react-icons/fa6';
+import { FaGithub, FaLinkedin, FaYoutube, FaRss } from 'react-icons/fa6';
 import { MdEmail, MdKeyboardDoubleArrowDown } from 'react-icons/md';
 import { Link } from '@/i18n/routing';
 
@@ -24,6 +24,12 @@ export function HomeClient({ t, projectsTitle, locale }: HomeClientProps) {
       icon: FaGithub,
       label: 'GitHub',
       color: 'hover:text-[#8E00F7] dark:hover:text-[#8B46A8]'
+    },
+    {
+      href: 'https://www.linkedin.com/in/valerioiacobucci/',
+      icon: FaLinkedin,
+      label: 'LinkedIn',
+      color: 'hover:text-[#0A66C2]'
     },
     {
       href: 'https://youtube.com/@valerioiacobucci',

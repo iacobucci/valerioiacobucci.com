@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useRouter } from '@/i18n/routing';
 import { ContentMetadata } from '@/lib/content';
 import { MdCalendarToday, MdTag, MdStar, MdEditCalendar, MdLanguage, MdEdit, MdVisibility, MdVisibilityOff } from 'react-icons/md';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Folder } from 'lucide-react';
 import Image from 'next/image';
 import { FormattedDate } from './FormattedDate';
 import { useTranslations } from 'next-intl';
@@ -22,10 +22,21 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   const t = useTranslations('blog');
   const { showDrafts, setShowDrafts } = useDrafts();
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [visibleCount, setVisibleCount] = useState(6);
   const listRef = useRef<HTMLDivElement>(null);
   const loaderRef = useRef<HTMLDivElement>(null);
+
+  // Extract all unique categories
+  const allCategories = useMemo(() => {
+    const cats = new Set<string>();
+    items.forEach(item => {
+      if (item.category) cats.add(item.category);
+      item.categories?.forEach(cat => cats.add(cat));
+    });
+    return Array.from(cats).sort((a, b) => a.localeCompare(b));
+  }, [items]);
 
   // Extract all unique tags
   const allTags = useMemo(() => {
@@ -48,6 +59,12 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
     
     if (shouldHideDrafts) {
       filtered = filtered.filter(item => !item.draft);
+    }
+
+    if (selectedCategory) {
+      filtered = filtered.filter(item => 
+        item.category === selectedCategory || item.categories?.includes(selectedCategory)
+      );
     }
 
     if (selectedTag) {
@@ -129,7 +146,7 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   useEffect(() => {
     setFocusedIndex(-1);
     setVisibleCount(6);
-  }, [selectedTag, showDrafts]);
+  }, [selectedTag, selectedCategory, showDrafts]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   // Scroll focused item into view
@@ -146,72 +163,108 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
   return (
     <div className="space-y-8">
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {allTags.length > 0 && (
+      <div className="space-y-3">
+        {allCategories.length > 0 && (
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
-              <MdTag className="w-3.5 h-3.5" /> Filter:
+              <Folder className="w-3.5 h-3.5" /> Category:
             </span>
             <button
-              onClick={() => setSelectedTag(null)}
+              onClick={() => setSelectedCategory(null)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                selectedTag === null
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                selectedCategory === null
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800'
                   : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               All
             </button>
-            {allTags.map(tag => {
-              const active = selectedTag?.toLowerCase() === tag.toLowerCase();
-              
+            {allCategories.map(cat => {
+              const active = selectedCategory === cat;
               return (
                 <button
-                  key={tag}
-                  onClick={() => setSelectedTag(active ? null : tag)}
+                  key={cat}
+                  onClick={() => setSelectedCategory(active ? null : cat)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                     active
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800'
                       : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
                   }`}
                 >
-                  #{tag.toUpperCase()}
+                  📁 {cat}
                 </button>
               );
             })}
           </div>
         )}
 
-        {isAuthorized && (
-          <div className="flex items-center gap-2 sm:ml-auto">
-            <button
-              onClick={() => setShowDrafts(!showDrafts)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                showDrafts
-                  ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800'
-                  : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-              title={showDrafts ? "Switch to Visitor View (hide drafts)" : "Switch to Admin View (show drafts)"}
-            >
-              {showDrafts ? (
-                <>
-                  <MdVisibility className="w-3.5 h-3.5 text-blue-500" />
-                  <span>Admin View</span>
-                  {items.some(i => i.draft) && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 font-bold">
-                      {items.filter(i => i.draft).length} {items.filter(i => i.draft).length === 1 ? 'draft' : 'drafts'}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <>
-                  <MdVisibilityOff className="w-3.5 h-3.5 text-gray-400" />
-                  <span>Visitor View</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 mr-2">
+                <MdTag className="w-3.5 h-3.5" /> Filter:
+              </span>
+              <button
+                onClick={() => setSelectedTag(null)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  selectedTag === null
+                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                    : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                All
+              </button>
+              {allTags.map(tag => {
+                const active = selectedTag?.toLowerCase() === tag.toLowerCase();
+                
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => setSelectedTag(active ? null : tag)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                      active
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
+                        : 'bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    #{tag.toUpperCase()}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {isAuthorized && (
+            <div className="flex items-center gap-2 sm:ml-auto">
+              <button
+                onClick={() => setShowDrafts(!showDrafts)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  showDrafts
+                    ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800'
+                    : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+                title={showDrafts ? "Switch to Visitor View (hide drafts)" : "Switch to Admin View (show drafts)"}
+              >
+                {showDrafts ? (
+                  <>
+                    <MdVisibility className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Admin View</span>
+                    {items.some(i => i.draft) && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 font-bold">
+                        {items.filter(i => i.draft).length} {items.filter(i => i.draft).length === 1 ? 'draft' : 'drafts'}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <MdVisibilityOff className="w-3.5 h-3.5 text-gray-400" />
+                    <span>Visitor View</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* List */}
@@ -271,6 +324,13 @@ export default function ContentList({ items, type, locale, isAuthorized }: Conte
                       }`}>
                         {type === 'blog' ? <MdStar className="text-yellow-500" /> : <MdStar className="text-blue-500" />}
                         {type === 'blog' ? t('favorites_title') : 'Featured Project'}
+                      </span>
+                    )}
+
+                    {item.category && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-800">
+                        <Folder className="w-3 h-3" />
+                        {item.category}
                       </span>
                     )}
 

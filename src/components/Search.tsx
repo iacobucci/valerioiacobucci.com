@@ -115,12 +115,14 @@ export default function Search() {
 		<>
 			<button
 				onClick={handleOpen}
-				className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700 group"
+				className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-gray-500 dark:text-gray-400 bg-gray-50/80 dark:bg-gray-900/40 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-all border border-gray-200/70 dark:border-gray-800 w-full group"
 				aria-label={tSearch('button_label')}
 			>
-				<MdSearch className="h-5 w-5 group-hover:scale-110 transition-transform" />
-				<span className="hidden lg:inline text-xs font-medium opacity-60">{tSearch('button_label')}</span>
-				<kbd className="hidden lg:flex items-center gap-1 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-[10px] font-bold opacity-60">
+				<div className="flex items-center gap-2">
+					<MdSearch className="h-4 w-4 group-hover:scale-110 transition-transform text-gray-400 dark:text-gray-500" />
+					<span className="text-xs font-medium text-gray-500 dark:text-gray-400">{tSearch('button_label')}</span>
+				</div>
+				<kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-[10px] font-bold text-gray-400 dark:text-gray-500">
 					<Command size={10} /> K
 				</kbd>
 			</button>

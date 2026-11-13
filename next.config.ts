@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
 	allowedDevOrigins: ['msi', 'valerioiacobucci.com'],
 	experimental: {
 		serverActions: {
-			bodySizeLimit: '10mb',
+			bodySizeLimit: '50mb',
 		},
 	},
 	images: {

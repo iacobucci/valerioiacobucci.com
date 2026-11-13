@@ -36,9 +36,9 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 	const isHome = pathname === '/';
 
 	return (
-		<nav className="bg-bg-light dark:bg-bg-dark border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50">
+		<nav className="bg-bg-light dark:bg-bg-dark border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 before:content-[''] before:absolute before:bottom-full before:inset-x-0 before:h-[100vh] before:bg-bg-light dark:before:bg-bg-dark before:pointer-events-none">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex justify-between h-16">
+				<div className="relative flex justify-between h-16">
 
 					<div className="flex items-center md:hidden">
 						<AnimatePresence>
@@ -67,8 +67,8 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 						</AnimatePresence>
 					</div>
 
-					<div className="flex">
-						<div className="hidden md:flex md:space-x-8">
+					<div className="flex relative z-10">
+						<div className="hidden md:flex md:space-x-4 lg:space-x-8">
 							<Link
 								href="/"
 								className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150 ease-in-out ${pathname === '/'
@@ -111,30 +111,39 @@ export default function Navbar({ initialTheme }: { initialTheme: 'light' | 'dark
 								</div>
 							</Link>
 
-							{navLinks.slice(1).map((link) => (
-								<Link
-									key={link.href}
-									href={link.href}
-									onMouseEnter={() => router.prefetch(link.href)}
-									className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150 ease-in-out ${pathname === link.href
-											? 'border-gray-800 dark:border-fg-dark text-fg-light dark:text-fg-dark'
-											: 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-fg-dark hover:border-gray-300'
-										}`}
-								>
-									{link.label}
-								</Link>
-							))}
+							{navLinks.slice(1).map((link) => {
+								const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href + '/'));
+								return (
+									<Link
+										key={link.href}
+										href={link.href}
+										onMouseEnter={() => router.prefetch(link.href)}
+										className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150 ease-in-out ${isActive
+												? 'border-gray-800 dark:border-fg-dark text-fg-light dark:text-fg-dark'
+												: 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-fg-dark hover:border-gray-300'
+											}`}
+									>
+										{link.label}
+									</Link>
+								);
+							})}
 						</div>
 					</div>
 
-					<div className="hidden md:ml-6 md:flex md:items-center gap-2">
-						<Search />
+					{/* Truly centered search bar in desktop mode */}
+					<div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
+						<div className="w-56 lg:w-72 max-w-xs pointer-events-auto px-2">
+							<Search />
+						</div>
+					</div>
+
+					<div className="hidden md:flex md:items-center gap-2 relative z-10">
 						<LanguageSwitcher />
 						<ColorModeToggle initialTheme={initialTheme} />
 						<UserMenu />
 					</div>
 
-					<div className="-mr-2 flex items-center md:hidden gap-1">
+					<div className="-mr-2 flex items-center md:hidden gap-1 relative z-10">
 						<Search />
 						<LanguageSwitcher />
 						<ColorModeToggle initialTheme={initialTheme} />

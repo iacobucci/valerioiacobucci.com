@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { 
   ArrowUp, ArrowDown, ExternalLink, X, 
   Trash2, Box, Plus 
@@ -58,100 +58,93 @@ export function ProjectCardEditor({
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">GitHub Repo</label>
             <div className="relative">
-              <FaGithub className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input 
                 type="text" 
                 value={project.github_repo}
                 onChange={(e) => onUpdate(index, 'github_repo', e.target.value)}
                 placeholder="user/repo"
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-mono text-sm"
+                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
               />
+              <FaGithub className="absolute left-3 top-3 text-gray-400" />
             </div>
           </div>
           <div>
             <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Website URL (Optional)</label>
             <div className="relative">
-              <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input 
                 type="text" 
                 value={project.website_url || ''}
                 onChange={(e) => onUpdate(index, 'website_url', e.target.value)}
                 placeholder="https://..."
-                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white font-mono text-sm"
+                className="w-full pl-10 pr-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white"
               />
+              <ExternalLink className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 flex flex-col justify-between">
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center justify-between">
-              <span>Technologies</span>
-            </label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {project.tech.map((t: string) => (
-                <span key={t} className="px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold flex items-center gap-1.5 uppercase">
+            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Technologies</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {(project.tech || []).map((t, tIdx) => (
+                <span 
+                  key={tIdx} 
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700"
+                >
                   {t}
-                  <button onClick={() => onUpdate(index, 'tech', project.tech.filter((x: string) => x !== t))}>
-                    <X className="w-3 h-3 hover:text-red-500" />
+                  <button 
+                    onClick={() => {
+                      const newTech = project.tech.filter((_, i) => i !== tIdx);
+                      onUpdate(index, 'tech', newTech);
+                    }}
+                    className="hover:text-red-500"
+                  >
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </span>
               ))}
-            </div>
-            <div className="flex gap-2">
-              <select 
-                className="flex-1 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs uppercase"
-                onChange={(e) => {
-                  const val = e.target.value.toLowerCase();
-                  if (val && !project.tech.includes(val)) {
-                    onUpdate(index, 'tech', [...project.tech, val]);
-                    e.target.value = '';
-                  }
-                }}
-                value=""
-              >
-                <option value="" className="normal-case">Add existing...</option>
-                {allTechTags.filter(t => !project.tech.includes(t)).map(t => (
-                  <option key={t} value={t}>{t.toUpperCase()}</option>
-                ))}
-              </select>
-              <button 
+              
+              <button
                 onClick={() => {
                   setInputConfig({
                     isOpen: true,
-                    title: "New Tech Tag",
-                    placeholder: "e.g. Next.js, Rust...",
+                    title: "Add Technology Tag",
+                    placeholder: "Choose or type tag name...",
+                    defaultValue: "",
                     confirmLabel: "Add Tag",
-                    onConfirm: (t) => {
-                      setInputConfig(null);
-                      const val = t.trim().toLowerCase();
-                      if (val && !project.tech.includes(val)) onUpdate(index, 'tech', [...project.tech, val]);
+                    onConfirm: (val) => {
+                      const tag = val.trim();
+                      if (tag && !project.tech?.includes(tag)) {
+                        onUpdate(index, 'tech', [...(project.tech || []), tag]);
+                      }
                     },
                     onCancel: () => setInputConfig(null)
                   });
                 }}
-                className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-xs font-bold"
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-semibold border border-dashed border-gray-300 dark:border-gray-700 text-gray-500 hover:text-blue-500 hover:border-blue-500 transition-colors"
               >
-                New
+                <Plus className="w-3 h-3" /> Add Tag
               </button>
             </div>
           </div>
-          <div className="flex items-center gap-3 pt-2">
+
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input 
                 type="checkbox" 
-                checked={project.selected} 
+                checked={!!project.selected}
                 onChange={(e) => onUpdate(index, 'selected', e.target.checked)}
-                className="w-4 h-4 rounded-lg border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
               />
-              <span className={`text-xs font-bold ${project.selected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>Featured Project</span>
+              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Featured Project</span>
             </label>
-            <div className="flex-1" />
-            <button 
+
+            <button
               onClick={() => onRemove(index)}
-              className="p-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" /> Remove
             </button>
           </div>
         </div>
@@ -161,36 +154,61 @@ export function ProjectCardEditor({
 }
 
 interface ProjectsVisualEditorProps {
-  data: any[];
-  onChange: (newData: any[]) => void;
+  data: any;
+  onChange: (newData: any) => void;
   onRemoveRequest: (index: number) => void;
   setInputConfig: (config: InputDialogProps | null) => void;
   availableTags: string[];
 }
 
 export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, setInputConfig, availableTags }: ProjectsVisualEditorProps) {
+  const isStructured = Boolean(data && typeof data === 'object' && !Array.isArray(data));
+  const [activeTab, setActiveTab] = useState<'sources' | 'forks'>('sources');
+
+  const currentList: Project[] = useMemo(() => {
+    if (isStructured) {
+      return (data[activeTab] || []) as Project[];
+    }
+    return (Array.isArray(data) ? data : []) as Project[];
+  }, [data, isStructured, activeTab]);
+
   const unifiedTags = useMemo(() => {
     const tags = new Set<string>(availableTags.map(t => t.toLowerCase().trim()));
-    data.forEach(p => p.tech?.forEach((t: string) => {
+    const allProjects: Project[] = isStructured
+      ? [...(data.sources || []), ...(data.forks || [])]
+      : (Array.isArray(data) ? data : []);
+
+    allProjects.forEach(p => p.tech?.forEach((t: string) => {
       const normalized = t.toLowerCase().trim();
       if (normalized) tags.add(normalized);
     }));
     return Array.from(tags).sort();
-  }, [data, availableTags]);
+  }, [data, isStructured, availableTags]);
+
+  const updateList = useCallback((newList: Project[]) => {
+    if (isStructured) {
+      onChange({
+        ...data,
+        [activeTab]: newList
+      });
+    } else {
+      onChange(newList);
+    }
+  }, [data, isStructured, activeTab, onChange]);
 
   const moveProject = useCallback((index: number, direction: 'up' | 'down') => {
-    const newData = [...data];
+    const newList = [...currentList];
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= data.length) return;
+    if (newIndex < 0 || newIndex >= newList.length) return;
     
-    [newData[index], newData[newIndex]] = [newData[newIndex], newData[index]];
-    onChange(newData);
-  }, [data, onChange]);
+    [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
+    updateList(newList);
+  }, [currentList, updateList]);
 
   const updateItem = (index: number, field: string, value: any) => {
-    const newData = [...data];
-    newData[index] = { ...newData[index], [field]: value };
-    onChange(newData);
+    const newList = [...currentList];
+    newList[index] = { ...newList[index], [field]: value };
+    updateList(newList);
   };
 
   const addItem = () => {
@@ -200,19 +218,45 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
       tech: [],
       selected: false
     };
-    onChange([...data, newItem]);
+    updateList([...currentList, newItem]);
   };
 
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto pb-24">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <Box className="w-8 h-8 text-blue-500" /> Projects Manager
         </h2>
-        <div className="flex items-center gap-4">
+        
+        <div className="flex items-center gap-3">
+          {isStructured && (
+            <div className="inline-flex p-1 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setActiveTab('sources')}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  activeTab === 'sources'
+                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Sources ({data.sources?.length || 0})
+              </button>
+              <button
+                onClick={() => setActiveTab('forks')}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  activeTab === 'forks'
+                    ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Forks ({data.forks?.length || 0})
+              </button>
+            </div>
+          )}
+
           <button 
             onClick={addItem}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition-all"
           >
             <Plus className="w-4 h-4" /> Add Project
           </button>
@@ -220,12 +264,12 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
       </div>
 
       <div className="space-y-6">
-        {data.map((project, idx) => (
+        {currentList.map((project, idx) => (
           <ProjectCardEditor 
             key={idx}
             project={project}
             index={idx}
-            total={data.length}
+            total={currentList.length}
             allTechTags={unifiedTags}
             onUpdate={updateItem}
             onRemove={onRemoveRequest}
@@ -233,6 +277,12 @@ export default function ProjectsVisualEditor({ data, onChange, onRemoveRequest, 
             setInputConfig={setInputConfig}
           />
         ))}
+
+        {currentList.length === 0 && (
+          <div className="p-12 text-center text-gray-500 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl">
+            No projects in this section. Click &quot;Add Project&quot; above to create one.
+          </div>
+        )}
       </div>
     </div>
   );

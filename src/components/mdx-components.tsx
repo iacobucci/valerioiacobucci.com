@@ -1,12 +1,25 @@
 import React from 'react';
 import { Link } from '@/i18n/routing';
 import Mermaid from './mdx/MermaidBM';
+import SvgHighlightLabel from './mdx/SvgHighlightLabel';
+import SongPlayer from './mdx/SongPlayer';
 
 type MDXProps = {
   children?: React.ReactNode;
   className?: string;
   [key: string]: unknown;
 };
+
+function slugifyNode(node: React.ReactNode): string | undefined {
+  if (typeof node === 'string') {
+    return node.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+  }
+  if (Array.isArray(node)) {
+    const text = node.map(n => (typeof n === 'string' ? n : '')).join('');
+    return text ? text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') : undefined;
+  }
+  return undefined;
+}
 
 export const mdxComponents = {
   div: (props: MDXProps) => {
@@ -15,15 +28,22 @@ export const mdxComponents = {
     }
     return <div {...props} />;
   },
-  h1: (props: MDXProps) => (
-    <h1 className="text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white" {...props} />
-  ),
-  h2: (props: MDXProps) => (
-    <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900 dark:text-white" {...props} />
-  ),
-  h3: (props: MDXProps) => (
-    <h3 className="text-xl font-medium mt-6 mb-2 text-gray-900 dark:text-white" {...props} />
-  ),
+  h1: (props: MDXProps) => {
+    const id = (props.id as string) || slugifyNode(props.children);
+    return <h1 id={id} className="scroll-mt-24 text-3xl font-bold mt-8 mb-4 text-gray-900 dark:text-white" {...props} />;
+  },
+  h2: (props: MDXProps) => {
+    const id = (props.id as string) || slugifyNode(props.children);
+    return <h2 id={id} className="scroll-mt-24 text-2xl font-semibold mt-8 mb-4 text-gray-900 dark:text-white" {...props} />;
+  },
+  h3: (props: MDXProps) => {
+    const id = (props.id as string) || slugifyNode(props.children);
+    return <h3 id={id} className="scroll-mt-24 text-xl font-medium mt-6 mb-2 text-gray-900 dark:text-white" {...props} />;
+  },
+  h4: (props: MDXProps) => {
+    const id = (props.id as string) || slugifyNode(props.children);
+    return <h4 id={id} className="scroll-mt-24 text-lg font-medium mt-4 mb-2 text-gray-900 dark:text-white" {...props} />;
+  },
   p: (props: MDXProps) => (
     <p className="mt-4 text-gray-700 dark:text-gray-300 leading-relaxed" {...props} />
   ),
@@ -135,14 +155,38 @@ export const mdxComponents = {
   tr: (props: MDXProps) => (
     <tr className="even:bg-gray-50 dark:even:bg-gray-900/50" {...props} />
   ),
+  iframe: (props: React.IframeHTMLAttributes<HTMLIFrameElement>) => (
+    <div className="my-6 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 shadow-xs">
+      <iframe 
+        className="w-full min-h-[400px] border-0 block" 
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        {...props} 
+      />
+    </div>
+  ),
+  Iframe: (props: React.IframeHTMLAttributes<HTMLIFrameElement>) => (
+    <div className="my-6 w-full rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 shadow-xs">
+      <iframe 
+        className="w-full min-h-[400px] border-0 block" 
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        {...props} 
+      />
+    </div>
+  ),
   Label: ({ children }: { children: React.ReactNode }) => (
-    <span className="px-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black">
-      {children}
-    </span>
+    <SvgHighlightLabel>{children}</SvgHighlightLabel>
   ),
   L: ({ children }: { children: React.ReactNode }) => (
-    <span className="px-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-black">
-      {children}
-    </span>
+    <SvgHighlightLabel>{children}</SvgHighlightLabel>
+  ),
+  Song: (props: React.ComponentProps<typeof SongPlayer>) => (
+    <SongPlayer {...props} />
+  ),
+  Music: (props: React.ComponentProps<typeof SongPlayer>) => (
+    <SongPlayer {...props} />
   ),
 };

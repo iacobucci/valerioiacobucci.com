@@ -27,6 +27,8 @@ export interface FileNode {
   children?: FileNode[];
   size?: number;
   isDraft?: boolean;
+  date?: string;
+  mtime?: number;
 }
 
 export async function listContentAction(): Promise<FileNode[]> {
@@ -45,23 +47,40 @@ export async function listContentAction(): Promise<FileNode[]> {
         const relativePath = path.relative(CONTENT_PATH, fullPath);
         
         if (entry.isDirectory()) {
+          const dirStats = fs.statSync(fullPath);
           const children = getTree(fullPath);
           const hasDraft = children.some(child => child.isDraft);
+          let dirDate: string | undefined = undefined;
+          let maxMtime = dirStats.mtimeMs;
+          children.forEach(child => {
+            if (child.date && (!dirDate || new Date(child.date).getTime() > new Date(dirDate).getTime())) {
+              dirDate = child.date;
+            }
+            if (child.mtime && child.mtime > maxMtime) {
+              maxMtime = child.mtime;
+            }
+          });
           return {
             name: entry.name,
             path: relativePath,
             type: 'directory' as const,
             children,
-            isDraft: hasDraft
+            isDraft: hasDraft,
+            date: dirDate,
+            mtime: maxMtime
           };
         } else {
           const stats = fs.statSync(fullPath);
           let isDraft = false;
+          let fileDate: string | undefined = undefined;
           if (entry.name.endsWith('.mdx')) {
             try {
               const content = fs.readFileSync(fullPath, 'utf8');
               const { data } = matter(content);
               isDraft = !!data.draft;
+              if (data.date) {
+                fileDate = data.date instanceof Date ? data.date.toISOString() : String(data.date);
+              }
             } catch {
               // Ignore parse errors
             }
@@ -71,7 +90,9 @@ export async function listContentAction(): Promise<FileNode[]> {
             path: relativePath,
             type: 'file' as const,
             size: stats.size,
-            isDraft
+            isDraft,
+            date: fileDate,
+            mtime: stats.mtimeMs
           };
         }
       })
@@ -289,16 +310,17 @@ export async function getTagsAction() {
         try {
           const content = fs.readFileSync(fullPath, 'utf8');
           const data = JSON.parse(content);
-          if (Array.isArray(data)) {
-            data.forEach(project => {
-              if (Array.isArray(project.tech)) {
-                project.tech.forEach((t: any) => {
-                  const tag = String(t).trim().toLowerCase();
-                  if (tag) tags.add(tag);
-                });
-              }
-            });
-          }
+          const projectList: any[] = Array.isArray(data) 
+            ? data 
+            : [...(Array.isArray(data.sources) ? data.sources : []), ...(Array.isArray(data.forks) ? data.forks : [])];
+          projectList.forEach(project => {
+            if (Array.isArray(project.tech)) {
+              project.tech.forEach((t: any) => {
+                const tag = String(t).trim().toLowerCase();
+                if (tag) tags.add(tag);
+              });
+            }
+          });
         } catch (error: any) {}
       }
     }
@@ -347,7 +369,8 @@ export async function compressImageAction(relativeFilePath: string) {
 
   const ext = path.extname(fullPath);
   const base = fullPath.slice(0, -ext.length);
-  const outputPath = `${base}-compressed.webp`;
+  const isWebp = ext.toLowerCase() === '.webp';
+  const outputPath = isWebp ? `${base}-compressed.webp` : `${base}.webp`;
 
   await sharp(fullPath)
     .webp({ quality: 80 })
@@ -587,8 +610,126 @@ export async function getGitStatusAction() {
     const gitEnv = getGitEnv();
     const status = execSync('git -C content status --short', { encoding: 'utf8', env: gitEnv });
     const diff = execSync('git -C content diff --stat', { encoding: 'utf8', env: gitEnv });
-    const hash = execSync('git -C content rev-parse --short HEAD', { encoding: 'utf8', env: gitEnv }).trim();
-    return { success: true, status, diff, hash };
+    let hash = '';
+    try {
+      hash = execSync('git -C content rev-parse --short HEAD', { encoding: 'utf8', env: gitEnv }).trim();
+    } catch {}
+
+    // Check for unmerged/conflicted files
+    let conflictedFiles: string[] = [];
+    try {
+      const unmerged = execSync('git -C content diff --name-only --diff-filter=U', { encoding: 'utf8', env: gitEnv }).trim();
+      conflictedFiles = unmerged ? unmerged.split('\n').map(s => s.trim()).filter(Boolean) : [];
+    } catch {}
+
+    let isMerging = false;
+    let isRebasing = false;
+    try {
+      const gitDir = execSync('git -C content rev-parse --git-dir', { encoding: 'utf8', env: gitEnv }).trim();
+      const resolvedGitDir = path.isAbsolute(gitDir) ? gitDir : path.resolve(CONTENT_PATH, gitDir);
+      isMerging = fs.existsSync(path.join(resolvedGitDir, 'MERGE_HEAD'));
+      isRebasing = fs.existsSync(path.join(resolvedGitDir, 'rebase-merge')) || fs.existsSync(path.join(resolvedGitDir, 'rebase-apply'));
+    } catch {}
+
+    const hasConflicts = conflictedFiles.length > 0 || isMerging || isRebasing;
+
+    return { 
+      success: true, 
+      status, 
+      diff, 
+      hash,
+      hasConflicts,
+      conflictedFiles,
+      isMerging,
+      isRebasing
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function gitResolveConflictAction(filePath: string, resolution: 'ours' | 'theirs' | 'mark-resolved') {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const gitEnv = getGitEnv();
+    if (resolution === 'ours') {
+      execSync(`git -C content checkout --ours -- "${filePath}"`, { env: gitEnv });
+      execSync(`git -C content add -- "${filePath}"`, { env: gitEnv });
+    } else if (resolution === 'theirs') {
+      execSync(`git -C content checkout --theirs -- "${filePath}"`, { env: gitEnv });
+      execSync(`git -C content add -- "${filePath}"`, { env: gitEnv });
+    } else if (resolution === 'mark-resolved') {
+      execSync(`git -C content add -- "${filePath}"`, { env: gitEnv });
+    }
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function gitAbortConflictAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const gitEnv = getGitEnv();
+    try {
+      execSync('git -C content merge --abort', { env: gitEnv, stdio: 'pipe' });
+      return { success: true };
+    } catch {}
+
+    try {
+      execSync('git -C content rebase --abort', { env: gitEnv, stdio: 'pipe' });
+      return { success: true };
+    } catch {}
+
+    execSync('git -C content reset --hard HEAD', { env: gitEnv, stdio: 'pipe' });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function gitCompleteConflictAction() {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
+    const gitEnv = getGitEnv();
+    // Check if there are still conflicted files
+    const unmerged = execSync('git -C content diff --name-only --diff-filter=U', { encoding: 'utf8', env: gitEnv }).trim();
+    if (unmerged) {
+      const files = unmerged.split('\n').filter(Boolean);
+      return { success: false, error: `Unresolved conflicts remaining in: ${files.join(', ')}` };
+    }
+
+    let isRebasing = false;
+    try {
+      const gitDir = execSync('git -C content rev-parse --git-dir', { encoding: 'utf8', env: gitEnv }).trim();
+      const resolvedGitDir = path.isAbsolute(gitDir) ? gitDir : path.resolve(CONTENT_PATH, gitDir);
+      isRebasing = fs.existsSync(path.join(resolvedGitDir, 'rebase-merge')) || fs.existsSync(path.join(resolvedGitDir, 'rebase-apply'));
+    } catch {}
+
+    if (isRebasing) {
+      const res = spawnSync('git', ['-C', 'content', 'rebase', '--continue'], {
+        encoding: 'utf8',
+        env: { ...gitEnv, GIT_EDITOR: 'true' }
+      });
+      if (res.status !== 0) {
+        return { success: false, error: res.stderr || res.stdout || 'Rebase continue failed' };
+      }
+    } else {
+      spawnSync('git', ['-C', 'content', 'commit', '-m', 'Resolved merge conflicts'], {
+        encoding: 'utf8',
+        env: gitEnv
+      });
+    }
+    return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
@@ -897,5 +1038,21 @@ export async function publishContentAction() {
   if (!push.success) return push;
   
   return triggerDeployAction();
+}
+
+export async function getArticleWritingTimeAction(slug: string): Promise<number> {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+  const { getArticleWritingTime } = await import('@/lib/article-time');
+  return getArticleWritingTime(slug);
+}
+
+export async function recordArticleWritingHeartbeatAction(slug: string, activeSeconds: number): Promise<number> {
+  if (!(await isAuthorized())) {
+    throw new Error("Unauthorized");
+  }
+  const { recordArticleWritingHeartbeat } = await import('@/lib/article-time');
+  return recordArticleWritingHeartbeat(slug, activeSeconds);
 }
 

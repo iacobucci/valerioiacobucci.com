@@ -32,6 +32,11 @@ import {
   duplicateAction,
   translateContentAction,
   restartServiceAction,
+  getArticleWritingTimeAction,
+  recordArticleWritingHeartbeatAction,
+  gitResolveConflictAction,
+  gitAbortConflictAction,
+  gitCompleteConflictAction,
 } from '@/lib/actions/content-editor';
 import { serializeMdxAction } from '@/lib/actions/mdx';
 import { MDXRemote } from 'next-mdx-remote';
@@ -43,7 +48,7 @@ import {
   GitCommit, GitPullRequest, Rocket, 
   RefreshCw, Terminal as TerminalIcon, CheckCircle2,
   RotateCw, Archive, ArchiveRestore, RotateCcw, Zap, ZapOff,
-  Undo2, Redo2, ArrowRight, ArrowLeftRight, Server, AlertCircle
+  Undo2, Redo2, ArrowRight, ArrowLeftRight, Server, AlertCircle, Share2, ArrowUpDown, Clock, AlertTriangle, Check
 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import matter from 'gray-matter';
@@ -72,8 +77,16 @@ function EditorInternal() {
   const [mdxSource, setMdxSource] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'stash' | 'pop' | 'reset' | 'deploy' | 'switch'>('none');
-  const [gitStatus, setGitStatus] = useState<{ status: string; diff: string; hash?: string }>({ status: '', diff: '' });
+  const [gitOperation, setGitOperation] = useState<'none' | 'commit' | 'push' | 'pull' | 'stash' | 'pop' | 'reset' | 'deploy' | 'switch' | 'conflict'>('none');
+  const [gitStatus, setGitStatus] = useState<{ 
+    status: string; 
+    diff: string; 
+    hash?: string;
+    hasConflicts?: boolean;
+    conflictedFiles?: string[];
+    isMerging?: boolean;
+    isRebasing?: boolean;
+  }>({ status: '', diff: '', hasConflicts: false, conflictedFiles: [] });
   const [gitRemote, setGitRemote] = useState<string>('github');
   const [gitRemoteError, setGitRemoteError] = useState<string | null>(null);
   const [gitRemoteLoading, setGitRemoteLoading] = useState<boolean>(false);
@@ -87,20 +100,29 @@ function EditorInternal() {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [isDirty, setIsDirty] = useState(false);
   const [autosave, setAutosave] = useState(false);
+  const [sortBy, setSortBy] = useState<
+    'name-asc' | 'name-desc' | 'date-desc' | 'date-asc' | 'mtime-desc' | 'mtime-asc' | 'status-draft' | 'status-published'
+  >('name-asc');
   const [previewVersion, setPreviewVersion] = useState(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  // Load/Save autosave preference
+  // Load/Save preferences
   useEffect(() => {
     const saved = localStorage.getItem('editor-autosave');
     if (saved !== null) setAutosave(saved === 'true');
+    const savedSort = localStorage.getItem('editor-sort-by');
+    if (savedSort) setSortBy(savedSort as any);
   }, []);
 
   useEffect(() => {
     localStorage.setItem('editor-autosave', String(autosave));
   }, [autosave]);
+
+  useEffect(() => {
+    localStorage.setItem('editor-sort-by', sortBy);
+  }, [sortBy]);
 
   // Confirmation & Input Modal State
   const [confirmConfig, setConfirmModal] = useState<ConfirmModalProps | null>(null);
@@ -149,6 +171,122 @@ function EditorInternal() {
     return { total, published, totalTranslations, publishedTranslations };
   }, [tree]);
 
+  const articleSlug = useMemo(() => {
+    if (!selectedNode || !selectedNode.name.endsWith('.mdx')) return null;
+    return selectedNode.path.includes('/')
+      ? selectedNode.path.replace(/\/[^/]+\.mdx$/, '')
+      : selectedNode.path.replace(/\.mdx$/, '');
+  }, [selectedNode]);
+
+  const [writingSeconds, setWritingSeconds] = useState<number>(0);
+  const lastActivityRef = useRef<number>(Date.now());
+
+  // Load writing time for article from PostgreSQL
+  useEffect(() => {
+    if (!articleSlug) {
+      setWritingSeconds(0);
+      return;
+    }
+    let isMounted = true;
+    getArticleWritingTimeAction(articleSlug).then(sec => {
+      if (isMounted) setWritingSeconds(sec);
+    }).catch(() => {});
+    return () => { isMounted = false; };
+  }, [articleSlug]);
+
+  // Periodic heartbeat tracker for active writing time
+  useEffect(() => {
+    if (!articleSlug) return;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastActivityRef.current < 30000) {
+        setWritingSeconds(prev => prev + 10);
+        recordArticleWritingHeartbeatAction(articleSlug, 10).catch(() => {});
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [articleSlug]);
+
+  const formatWritingTime = useCallback((totalSeconds: number): string => {
+    if (totalSeconds < 60) return `${totalSeconds}s`;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  }, []);
+
+  const sortNodes = useCallback((nodes: FileNode[], sort: typeof sortBy): FileNode[] => {
+    return [...nodes]
+      .sort((a, b) => {
+        if ((a.name === 'public' || a.name === 'apps') && a.path.split('/').length === 1) return -1;
+        if ((b.name === 'public' || b.name === 'apps') && b.path.split('/').length === 1) return 1;
+
+        if (a.type !== b.type) {
+          return a.type === 'directory' ? -1 : 1;
+        }
+
+        switch (sort) {
+          case 'name-asc':
+            return a.name.localeCompare(b.name);
+          case 'name-desc':
+            return b.name.localeCompare(a.name);
+          case 'date-desc': {
+            const timeA = a.date ? new Date(a.date).getTime() : 0;
+            const timeB = b.date ? new Date(b.date).getTime() : 0;
+            if (timeB !== timeA) return timeB - timeA;
+            return a.name.localeCompare(b.name);
+          }
+          case 'date-asc': {
+            const timeA = a.date ? new Date(a.date).getTime() : 0;
+            const timeB = b.date ? new Date(b.date).getTime() : 0;
+            if (timeA !== timeB) return timeA - timeB;
+            return a.name.localeCompare(b.name);
+          }
+          case 'mtime-desc': {
+            const timeA = a.mtime || 0;
+            const timeB = b.mtime || 0;
+            if (timeB !== timeA) return timeB - timeA;
+            return a.name.localeCompare(b.name);
+          }
+          case 'mtime-asc': {
+            const timeA = a.mtime || 0;
+            const timeB = b.mtime || 0;
+            if (timeA !== timeB) return timeA - timeB;
+            return a.name.localeCompare(b.name);
+          }
+          case 'status-draft': {
+            const draftA = a.isDraft ? 1 : 0;
+            const draftB = b.isDraft ? 1 : 0;
+            if (draftB !== draftA) return draftB - draftA;
+            return a.name.localeCompare(b.name);
+          }
+          case 'status-published': {
+            const draftA = a.isDraft ? 1 : 0;
+            const draftB = b.isDraft ? 1 : 0;
+            if (draftA !== draftB) return draftA - draftB;
+            return a.name.localeCompare(b.name);
+          }
+          default:
+            return a.name.localeCompare(b.name);
+        }
+      })
+      .map(node => {
+        if (node.children && node.children.length > 0) {
+          return {
+            ...node,
+            children: sortNodes(node.children, sort)
+          };
+        }
+        return node;
+      });
+  }, []);
+
+  const sortedTree = useMemo(() => {
+    return sortNodes(tree, sortBy);
+  }, [tree, sortBy, sortNodes]);
+
   const loadTree = useCallback(async () => {
     try {
       const data = await listContentAction();
@@ -190,7 +328,11 @@ function EditorInternal() {
       if (result.success) setGitStatus({ 
         status: result.status || 'Clean', 
         diff: result.diff || '',
-        hash: result.hash
+        hash: result.hash,
+        hasConflicts: result.hasConflicts,
+        conflictedFiles: result.conflictedFiles || [],
+        isMerging: result.isMerging,
+        isRebasing: result.isRebasing,
       });
     } catch (error) {}
     loadGitRemote();
@@ -403,6 +545,7 @@ function EditorInternal() {
   }, [handleSave, convertSpacesToTabs]);
 
   const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    lastActivityRef.current = Date.now();
     const textarea = e.currentTarget;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -581,6 +724,108 @@ function EditorInternal() {
       },
       onCancel: () => setConfirmModal(null)
     });
+  };
+
+  const handleResolveConflict = async (file: string, resolution: 'ours' | 'theirs' | 'mark-resolved') => {
+    setGitOperation('conflict');
+    try {
+      const res = await gitResolveConflictAction(file, resolution);
+      if (res.success) {
+        toast.success(`Resolved ${file} (${resolution})`);
+        await loadGitStatus();
+        await loadTree();
+        if (selectedNode?.path === file) {
+          const fresh = await getContentAction(file);
+          setContent(fresh);
+          setIsDirty(false);
+        }
+      } else {
+        toast.error(`Resolution failed: ${res.error}`);
+      }
+    } catch (err: any) {
+      toast.error(`Resolution error: ${err.message}`);
+    } finally {
+      setGitOperation('none');
+    }
+  };
+
+  const handleAbortConflict = async () => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Abort Merge/Rebase",
+      message: "Are you sure you want to abort the current merge and discard unmerged changes?",
+      confirmLabel: "Abort Merge",
+      confirmVariant: "danger",
+      onConfirm: async () => {
+        setConfirmModal(null);
+        setGitOperation('conflict');
+        try {
+          const res = await gitAbortConflictAction();
+          if (res.success) {
+            toast.success("Merge aborted");
+            await loadGitStatus();
+            await loadTree();
+          } else {
+            toast.error(`Abort failed: ${res.error}`);
+          }
+        } catch (err: any) {
+          toast.error(`Abort error: ${err.message}`);
+        } finally {
+          setGitOperation('none');
+        }
+      },
+      onCancel: () => setConfirmModal(null)
+    });
+  };
+
+  const handleCompleteConflict = async () => {
+    setGitOperation('conflict');
+    try {
+      const res = await gitCompleteConflictAction();
+      if (res.success) {
+        toast.success("Merge completed successfully!");
+        await loadGitStatus();
+        await loadTree();
+      } else {
+        toast.error(res.error || "Failed to complete merge");
+      }
+    } catch (err: any) {
+      toast.error(`Error completing merge: ${err.message}`);
+    } finally {
+      setGitOperation('none');
+    }
+  };
+
+  const handleOpenConflictedFile = (filePath: string) => {
+    const parts = filePath.split('/');
+    let current = '';
+    const newExpanded = new Set(expandedPaths);
+    for (let i = 0; i < parts.length - 1; i++) {
+      current = current ? `${current}/${parts[i]}` : parts[i];
+      newExpanded.add(current);
+    }
+    setExpandedPaths(newExpanded);
+
+    const findNode = (nodes: FileNode[], target: string): FileNode | null => {
+      for (const node of nodes) {
+        if (node.path === target) return node;
+        if (node.children) {
+          const found = findNode(node.children, target);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const node = findNode(tree, filePath);
+    if (node) {
+      setSelectedNode(node);
+    } else {
+      setSelectedNode({
+        name: parts[parts.length - 1],
+        path: filePath,
+        type: 'file',
+      });
+    }
   };
 
   const handleDeploy = async () => {
@@ -1192,6 +1437,15 @@ function EditorInternal() {
                 </span>
               </div>
             )}
+            {articleSlug && (
+              <div 
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 select-none ml-2 shrink-0"
+                title={`Active writing time: ${formatWritingTime(writingSeconds)} (tracked in PostgreSQL)`}
+              >
+                <Clock className="w-3.5 h-3.5 text-blue-500" />
+                <span className="font-mono">{formatWritingTime(writingSeconds)}</span>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-1 sm:gap-2">
@@ -1316,6 +1570,26 @@ function EditorInternal() {
                         <Archive className="w-3.5 h-3.5" />
                       </button>
                     </div>
+                    <div className="flex items-center justify-between px-1 py-1 text-xs text-gray-500 bg-gray-50/80 dark:bg-gray-800/40 rounded-lg border border-gray-200/60 dark:border-gray-700/60">
+                      <div className="flex items-center gap-1.5 pl-1.5">
+                        <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+                        <span className="font-semibold text-[11px] text-gray-500 dark:text-gray-400">Sort:</span>
+                      </div>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as any)}
+                        className="bg-transparent text-[11px] font-medium text-gray-700 dark:text-gray-300 focus:outline-none cursor-pointer py-1 pr-2"
+                      >
+                        <option value="name-asc" className="dark:bg-gray-900">Name (A-Z)</option>
+                        <option value="name-desc" className="dark:bg-gray-900">Name (Z-A)</option>
+                        <option value="date-desc" className="dark:bg-gray-900">Date (Newest)</option>
+                        <option value="date-asc" className="dark:bg-gray-900">Date (Oldest)</option>
+                        <option value="mtime-desc" className="dark:bg-gray-900">Last Edit (Newest)</option>
+                        <option value="mtime-asc" className="dark:bg-gray-900">Last Edit (Oldest)</option>
+                        <option value="status-draft" className="dark:bg-gray-900">Status (Drafts first)</option>
+                        <option value="status-published" className="dark:bg-gray-900">Status (Published first)</option>
+                      </select>
+                    </div>
                     <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleUpload} />
                     <input type="file" ref={zipInputRef} accept=".zip" className="hidden" onChange={handleUploadZip} />
                   </div>
@@ -1328,7 +1602,7 @@ function EditorInternal() {
                       <div className="flex justify-center p-8"><Loader2 className="w-6 h-6 animate-spin text-blue-500" /></div>
                     ) : (
                       <div className="space-y-0.5">
-                        {tree.map(node => (
+                        {sortedTree.map(node => (
                           <div key={node.path}>
                             <DraggableFile 
                               node={node} 
@@ -1344,6 +1618,7 @@ function EditorInternal() {
                               selectedPath={selectedNode?.path || null}
                               expandedPaths={expandedPaths}
                               toggleExpand={toggleExpand}
+                              conflictedPaths={new Set(gitStatus.conflictedFiles || [])}
                             />
                             {(node.name === 'public' || node.name === 'apps') && node.path.split('/').length === 1 && (
                               <div className="my-2 border-t border-gray-100 dark:border-gray-800/50 mx-2" />
@@ -1438,6 +1713,34 @@ function EditorInternal() {
                       </div>
                     )}
                   </div>
+
+                  {/* Merge Conflict Resolution in Sidebar */}
+                  {gitStatus.hasConflicts && (
+                    <div className="bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800 rounded-xl p-3 space-y-3">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-red-500 animate-pulse" />
+                        <span className="text-xs font-bold text-red-700 dark:text-red-300">
+                          Merge Conflict ({gitStatus.conflictedFiles?.length || 0})
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleCompleteConflict}
+                          disabled={gitOperation !== 'none' || (gitStatus.conflictedFiles && gitStatus.conflictedFiles.length > 0)}
+                          className="flex-1 py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold disabled:opacity-50"
+                        >
+                          Complete
+                        </button>
+                        <button
+                          onClick={handleAbortConflict}
+                          disabled={gitOperation !== 'none'}
+                          className="flex-1 py-1.5 px-2 rounded-lg border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 text-[11px] font-bold disabled:opacity-50"
+                        >
+                          Abort
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Git Operations */}
                   <div className="space-y-3">
@@ -1574,6 +1877,90 @@ function EditorInternal() {
             />
           )}
 
+          {/* Merge Conflict Banner */}
+          {gitStatus.hasConflicts && (
+            <div className="bg-amber-50 dark:bg-amber-950/40 border-b border-amber-300 dark:border-amber-700/60 p-3 sm:p-4 text-xs shrink-0">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-amber-500 text-white shrink-0 animate-pulse">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-amber-900 dark:text-amber-200 text-sm">
+                      Git Merge Conflict Detected ({gitStatus.conflictedFiles?.length || 0} file(s) in conflict)
+                    </span>
+                    <p className="text-amber-700 dark:text-amber-300 text-[11px] mt-0.5">
+                      Choose an action per file, or open & edit conflict markers directly, then complete the merge.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 self-end sm:self-auto">
+                  <button
+                    onClick={handleAbortConflict}
+                    disabled={gitOperation !== 'none'}
+                    className="px-3 py-1.5 rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 font-bold transition-all disabled:opacity-50"
+                  >
+                    Abort Merge
+                  </button>
+                  <button
+                    onClick={handleCompleteConflict}
+                    disabled={gitOperation !== 'none' || (gitStatus.conflictedFiles && gitStatus.conflictedFiles.length > 0)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all disabled:opacity-50"
+                    title={gitStatus.conflictedFiles && gitStatus.conflictedFiles.length > 0 ? "Resolve all files before completing" : "Commit/continue merge"}
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Complete Merge</span>
+                  </button>
+                </div>
+              </div>
+
+              {gitStatus.conflictedFiles && gitStatus.conflictedFiles.length > 0 && (
+                <div className="mt-3 grid grid-cols-1 gap-2 pt-2 border-t border-amber-200 dark:border-amber-800/40">
+                  {gitStatus.conflictedFiles.map(file => (
+                    <div key={file} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 bg-white dark:bg-gray-900 rounded-lg border border-amber-200 dark:border-amber-800/50">
+                      <div className="flex items-center gap-2 font-mono text-gray-800 dark:text-gray-200 font-bold truncate">
+                        <span className="px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-[10px]">CONFLICT</span>
+                        <span className="truncate">{file}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => handleOpenConflictedFile(file)}
+                          className="px-2.5 py-1 rounded bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-700 dark:text-gray-300 text-[11px] font-bold"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleResolveConflict(file, 'ours')}
+                          disabled={gitOperation !== 'none'}
+                          className="px-2.5 py-1 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 border border-blue-200 dark:border-blue-800 text-[11px] font-bold"
+                          title="Keep our local version"
+                        >
+                          Accept Ours
+                        </button>
+                        <button
+                          onClick={() => handleResolveConflict(file, 'theirs')}
+                          disabled={gitOperation !== 'none'}
+                          className="px-2.5 py-1 rounded bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 border border-purple-200 dark:border-purple-800 text-[11px] font-bold"
+                          title="Accept remote version"
+                        >
+                          Accept Theirs
+                        </button>
+                        <button
+                          onClick={() => handleResolveConflict(file, 'mark-resolved')}
+                          disabled={gitOperation !== 'none'}
+                          className="px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold"
+                          title="Mark this file as resolved (git add)"
+                        >
+                          Mark Resolved
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Main Content */}
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-white dark:bg-gray-950 min-h-0">
             {selectedNode ? (
@@ -1619,6 +2006,7 @@ function EditorInternal() {
                           <textarea
                             value={content}
                             onChange={(e) => {
+                              lastActivityRef.current = Date.now();
                               setContent(e.target.value);
                               setIsDirty(true);
                             }}

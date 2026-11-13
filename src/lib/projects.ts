@@ -11,6 +11,12 @@ export interface Project {
 	website_url?: string;
 	tech: string[];
 	selected?: boolean;
+	isFork?: boolean;
+}
+
+export interface ProjectsData {
+	sources: Project[];
+	forks: Project[];
 }
 
 export type { Project as ProjectType };
@@ -27,17 +33,27 @@ export interface ProjectGitHubData extends Project {
 }
 
 // In-memory cache for projects.json (Production only)
-let cachedProjects: Project[] | null = null;
+let cachedProjectsCategorized: { sources: Project[]; forks: Project[] } | null = null;
 let lastProjectsMtime: number = 0;
 
-/**
- * Loads projects from JSON file with in-memory caching and HMR support.
- */
-export function getProjects(): Project[] {
-	// In development, return the imported data to enable HMR.
-	// Turbopack will automatically refresh the components when projects.json changes.
+export function parseProjectsData(data: any): { sources: Project[]; forks: Project[] } {
+	if (Array.isArray(data)) {
+		return {
+			sources: data.map(p => ({ ...p, isFork: false })),
+			forks: []
+		};
+	}
+	if (data && typeof data === 'object') {
+		const sources = (Array.isArray(data.sources) ? data.sources : []).map((p: any) => ({ ...p, isFork: false }));
+		const forks = (Array.isArray(data.forks) ? data.forks : []).map((p: any) => ({ ...p, isFork: true }));
+		return { sources, forks };
+	}
+	return { sources: [], forks: [] };
+}
+
+export function getProjectsCategorized(): { sources: Project[]; forks: Project[] } {
 	if (process.env.NODE_ENV === 'development') {
-		return projectsDataHMR;
+		return parseProjectsData(projectsDataHMR);
 	}
 
 	try {
@@ -45,19 +61,27 @@ export function getProjects(): Project[] {
 		const stats = fs.statSync(projectsPath);
 		const mtime = stats.mtimeMs;
 
-		// Return cache if file hasn't changed
-		if (cachedProjects && mtime === lastProjectsMtime) {
-			return cachedProjects;
+		if (cachedProjectsCategorized && mtime === lastProjectsMtime) {
+			return cachedProjectsCategorized;
 		}
 
 		const fileContent = fs.readFileSync(projectsPath, 'utf8');
-		cachedProjects = JSON.parse(fileContent);
+		const parsed = JSON.parse(fileContent);
+		cachedProjectsCategorized = parseProjectsData(parsed);
 		lastProjectsMtime = mtime;
-		return cachedProjects!;
+		return cachedProjectsCategorized;
 	} catch (error) {
 		console.error('Error reading projects.json:', error);
-		return cachedProjects || [];
+		return cachedProjectsCategorized || { sources: [], forks: [] };
 	}
+}
+
+/**
+ * Loads all projects (sources + forks) with in-memory caching and HMR support.
+ */
+export function getProjects(): Project[] {
+	const { sources, forks } = getProjectsCategorized();
+	return [...sources, ...forks];
 }
 
 // In-memory cache for GitHub data

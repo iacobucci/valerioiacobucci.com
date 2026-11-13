@@ -15,6 +15,7 @@ interface ProjectListProps {
 export default function ProjectList({ projects }: ProjectListProps) {
   const t = useTranslations('projects');
   
+  const [activeTab, setActiveTab] = useState<'sources' | 'forks'>('sources');
   const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const [selectedProject, setSelectedProject] = useState<ProjectGitHubData | null>(null);
@@ -25,30 +26,34 @@ export default function ProjectList({ projects }: ProjectListProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
 
+  const sourceProjects = useMemo(() => projects.filter(p => !p.isFork), [projects]);
+  const forkProjects = useMemo(() => projects.filter(p => p.isFork), [projects]);
+  const activeProjects = useMemo(() => activeTab === 'sources' ? sourceProjects : forkProjects, [activeTab, sourceProjects, forkProjects]);
+
   const allTechs = useMemo(() => {
     const techs = new Set<string>();
-    projects.forEach(p => p.tech.forEach(t => techs.add(t)));
+    activeProjects.forEach(p => p.tech.forEach(t => techs.add(t)));
     return Array.from(techs).sort();
-  }, [projects]);
+  }, [activeProjects]);
 
   const selectedProjects = useMemo(() => 
-    projects.filter(p => p.selected), 
-  [projects]);
+    activeProjects.filter(p => p.selected), 
+  [activeProjects]);
 
   const filteredProjects = useMemo(() => {
-    let list = projects;
+    let list = activeProjects;
     if (selectedTechs.length === 0) {
       // If no filter, we only show non-selected in the main list
       // to avoid duplication with the featured section
-      list = projects.filter(p => !p.selected);
+      list = activeProjects.filter(p => !p.selected);
     } else {
       // If filtering, we show everything that matches
-      list = projects.filter(p => 
+      list = activeProjects.filter(p => 
         selectedTechs.every(tech => p.tech.includes(tech))
       );
     }
     return list;
-  }, [projects, selectedTechs]);
+  }, [activeProjects, selectedTechs]);
 
   const openProject = (project: ProjectGitHubData) => {
     setSelectedProject(project);
@@ -162,6 +167,46 @@ export default function ProjectList({ projects }: ProjectListProps) {
 
   return (
     <>
+      {/* Sources / Forks Tabs */}
+      <div className="flex justify-center mb-10">
+        <div className="inline-flex p-1.5 rounded-2xl bg-gray-100 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/80">
+          <button
+            onClick={() => { setActiveTab('sources'); setSelectedTechs([]); }}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'sources'
+                ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            <span>Sources</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${
+              activeTab === 'sources' 
+                ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' 
+                : 'bg-gray-200/70 dark:bg-gray-700/70 text-gray-600 dark:text-gray-300'
+            }`}>
+              {sourceProjects.length}
+            </span>
+          </button>
+          <button
+            onClick={() => { setActiveTab('forks'); setSelectedTechs([]); }}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'forks'
+                ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+            }`}
+          >
+            <span>Forks</span>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${
+              activeTab === 'forks' 
+                ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' 
+                : 'bg-gray-200/70 dark:bg-gray-700/70 text-gray-600 dark:text-gray-300'
+            }`}>
+              {forkProjects.length}
+            </span>
+          </button>
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row justify-between items-center mb-12 gap-6">
         <TechFilter 
           allTechs={allTechs}
@@ -170,7 +215,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
         />
 
         <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-          {t('count', { count: selectedTechs.length === 0 ? projects.length : filteredProjects.length })}
+          {t('count', { count: selectedTechs.length === 0 ? activeProjects.length : filteredProjects.length })}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { MicroblogPost, MicroblogReaction } from './entities/microblog';
+import { ArticleWritingTime } from './entities/article-time';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   synchronize: false, // Disabilitato per evitare DeprecationWarning di pg durante l'inizializzazione concorrente
   logging: !isProduction,
-  entities: [MicroblogPost, MicroblogReaction],
+  entities: [MicroblogPost, MicroblogReaction, ArticleWritingTime],
   subscribers: [],
   migrations: [],
 });

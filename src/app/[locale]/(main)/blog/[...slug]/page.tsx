@@ -2,7 +2,7 @@ import {getPost, getPosts} from '@/lib/content';
 import {notFound} from 'next/navigation';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Link} from '@/i18n/routing';
-import {ArrowLeft} from 'lucide-react';
+import {ArrowLeft, Folder} from 'lucide-react';
 import {FormattedDate} from '@/components/FormattedDate';
 import {MdLanguage, MdEdit} from 'react-icons/md';
 import { Metadata } from 'next';
@@ -16,8 +16,10 @@ import {serverMdxComponents} from '@/components/mdx-server-components';
 import {routing} from '@/i18n/routing';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
 import Video from '@/components/mdx/Video';
+import SongPlayer from '@/components/mdx/SongPlayer';
 import ShareDraftButton from '@/components/ShareDraftButton';
 import Comments from '@/components/Comments';
+import TableOfContents, { extractToc } from '@/components/TableOfContents';
 import * as path from 'path';
 import { getSvgDimensions } from '@/lib/image-utils-server';
 
@@ -26,9 +28,10 @@ const CONTENT_TYPE = 'blog';
 export async function generateMetadata({
   params
 }: {
-  params: Promise<{locale: string; slug: string}>;
+  params: Promise<{locale: string; slug: string | string[]}>;
 }): Promise<Metadata> {
-  const {locale, slug} = await params;
+  const {locale, slug: rawSlug} = await params;
+  const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : rawSlug;
   const post = await getPost(CONTENT_TYPE, locale, slug);
 
   if (!post) {
@@ -84,14 +87,14 @@ export async function generateMetadata({
 
 export async function generateStaticParams() {
   const locales = routing.locales;
-  const allParams: {locale: string; slug: string}[] = [];
+  const allParams: {locale: string; slug: string[]}[] = [];
 
   for (const locale of locales) {
     const posts = await getPosts(CONTENT_TYPE, locale);
     posts.forEach((post) => {
       allParams.push({
         locale,
-        slug: post.slug,
+        slug: post.slug.split('/'),
       });
     });
   }
@@ -103,10 +106,11 @@ export default async function BlogPostPage({
   params,
   searchParams
 }: {
-  params: Promise<{locale: string; slug: string}>;
+  params: Promise<{locale: string; slug: string | string[]}>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const {locale, slug} = await params;
+  const {locale, slug: rawSlug} = await params;
+  const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : rawSlug;
   const { pwd } = await searchParams;
   
   setRequestLocale(locale);
@@ -191,6 +195,8 @@ export default async function BlogPostPage({
       return <img src={finalSrc as string} alt={alt} className={className || "mdx-img"} {...props} />;
     },
     Video: (props: React.ComponentProps<typeof Video>) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
+    Song: (props: React.ComponentProps<typeof SongPlayer>) => <SongPlayer {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
+    Music: (props: React.ComponentProps<typeof SongPlayer>) => <SongPlayer {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
   };
 
   return (
@@ -244,6 +250,13 @@ export default async function BlogPostPage({
             </div>
           )}
 
+          {post.category && (
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-3 uppercase tracking-wider">
+              <Folder className="w-3.5 h-3.5" />
+              <span>{post.category}</span>
+            </div>
+          )}
+
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mb-4">
             {post.title}
           </h1>
@@ -280,7 +293,20 @@ export default async function BlogPostPage({
               ))}
             </div>
           </div>
+
+          {(post.song || post.music) && (
+            <div className="mt-6">
+              <SongPlayer
+                title={typeof post.song === 'object' ? (post.song as any).title : undefined}
+                artist={typeof post.song === 'object' ? (post.song as any).artist : undefined}
+                src={typeof post.song === 'string' ? post.song : ((post.song as any)?.src || (post.music as string))}
+                assetPath={`/assets/${CONTENT_TYPE}/${slug}`}
+              />
+            </div>
+          )}
         </header>
+
+        <TableOfContents items={extractToc(post.content)} />
 
         <div className="prose prose-neutral prose-lg dark:prose-invert max-w-none">
           <MDXRemote 

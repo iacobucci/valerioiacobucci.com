@@ -5,6 +5,11 @@
 	[x] tailwind css with dark mode
 	[x] multilingual interface (en, it, nl)
 	[x] deployment on vps with systemd & nginx
+	[x] top bar solid background to cover viewport top in all browsers
+	[x] global audio player
+	[x] versatile language selector (dropdown with flags & names: uk, nl, it)
+	[x] center search bar in desktop mode
+	[x] linkedin profile button on home page
 
 [x] multilingual blog (mdx)
 	[x] markdown based with frontmatter
@@ -14,6 +19,12 @@
 	[x] hot module replacement (hmr) for content
 	[x] tag filtering and word count
 	[x] content hosted in a separate git submodule
+	[x] categories support (nested folder-based organization: cocktails/, recipes/, 3d-prints/, etc.)
+	[x] special music tag for songs
+	[x] iframe embedding in mdx articles
+	[x] table of contents extracted from markdown headers
+	[x] model viewer error handling (avoid page crash if 3d file is missing)
+	[x] svg label highlight (highlight closest letter above of matching type)
 
 [x] online content editor
 	[x] secure administration area
@@ -26,6 +37,11 @@
 	[x] server-side deployment control (systemd integration)
 	[x] preview mode (edit, split, preview)
 	[x] update apps without re deploying the site.
+	[x] image compression without appending '-compressed' if extension is not webp
+	[x] article sorting (by date, name, last edit, publication status)
+	[x] article writing time tracker (persisted in postgresql)
+	[x] git merge conflict resolution UI
+	[x] share draft link directly from editor
 
 [x] microblog
 	[x] database-backed feed
@@ -46,6 +62,7 @@
 	[x] relative path resolution for images in readmes
 	[x] mermaid diagrams in readmes
 	[x] carousel and list views
+	[x] forks section in separate json array with "sources" and "forks" tabs
 
 [x] discovery & utilities
 	[x] global search bar (pages, blog, projects)

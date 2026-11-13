@@ -24,12 +24,13 @@ interface DraggableFileProps {
   selectedPath: string | null;
   expandedPaths: Set<string>;
   toggleExpand: (path: string) => void;
+  conflictedPaths?: Set<string>;
 }
 
 export default function DraggableFile({ 
   node, onSelect, onDelete, onRename, onMove, 
   onCompress, onDuplicate, onTranslate, onEditFrontmatter, onDownloadDir,
-  selectedPath, expandedPaths, toggleExpand 
+  selectedPath, expandedPaths, toggleExpand, conflictedPaths
 }: DraggableFileProps) {
 
   const isExpanded = expandedPaths.has(node.path);
@@ -87,6 +88,11 @@ export default function DraggableFile({
         <span className="truncate flex-1">
           {node.name}
         </span>
+        {conflictedPaths?.has(node.path) && (
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 mr-2 shrink-0">
+            CONFLICT
+          </span>
+        )}
         
         {node.type === 'file' && (
           <span className="text-[10px] text-gray-400 dark:text-gray-600 mr-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
@@ -188,6 +194,7 @@ export default function DraggableFile({
                 selectedPath={selectedPath}
                 expandedPaths={expandedPaths}
                 toggleExpand={toggleExpand}
+                conflictedPaths={conflictedPaths}
               />
               {(child.name === 'public' || child.name === 'apps') && child.path.split('/').length === 1 && (
                 <div className="my-2 border-t border-gray-100 dark:border-gray-800/50 mx-2" />
