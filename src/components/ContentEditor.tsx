@@ -505,19 +505,23 @@ function EditorInternal() {
     if (!selectedNode) return { type: 'blog', slug: '' };
     const parts = selectedNode.path.split('/');
     if (parts.length === 1) return { type: 'blog', slug: '' };
-    if (parts.length === 2) return { type: 'blog', slug: parts[0] };
-    return { type: parts[0], slug: parts[1] };
+    if (parts[0] === 'public' || parts[0] === 'apps') {
+      return { type: parts[0], slug: parts.slice(1).join('/') };
+    }
+    const isFile = selectedNode.type === 'file' || selectedNode.path.endsWith('.mdx');
+    const slugParts = isFile ? parts.slice(0, -1) : parts;
+    return { type: 'blog', slug: slugParts.join('/') };
   }, [selectedNode]);
 
   const handlePreview = useCallback(() => {
     if (!selectedNode || !selectedNode.path.endsWith('.mdx')) return;
     
     const parts = selectedNode.path.split('/');
-    const { type, slug } = getFileInfo();
+    const { slug } = getFileInfo();
     const fileName = parts[parts.length - 1];
     const lang = fileName.replace('.mdx', '');
     
-    const url = `/${lang}/${type}/${slug}`;
+    const url = lang === 'en' ? `/blog/${slug}` : `/${lang}/blog/${slug}`;
     window.open(url, '_blank');
   }, [selectedNode, getFileInfo]);
 
@@ -2129,7 +2133,7 @@ function EditorInternal() {
                   <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
                     {isImage ? (
                       <img 
-                        src={`/assets/${getFileInfo().type}/${getFileInfo().slug}/${selectedNode.name}`} 
+                        src={selectedNode.path.startsWith('public/') ? `/${selectedNode.path}` : `/assets/blog/${selectedNode.path}`} 
                         alt={selectedNode.name} 
                         className="max-w-full max-h-[60vh] object-contain rounded-lg border border-gray-200 dark:border-gray-800 mb-8" 
                       />
@@ -2152,7 +2156,7 @@ function EditorInternal() {
                     )}
                     <div className="flex gap-3">
                       <a 
-                        href={`/assets/${getFileInfo().type}/${getFileInfo().slug}/${selectedNode.name}`}
+                        href={selectedNode.path.startsWith('public/') ? `/${selectedNode.path}` : `/assets/blog/${selectedNode.path}`}
                         download
                         className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-bold text-sm"
                       >

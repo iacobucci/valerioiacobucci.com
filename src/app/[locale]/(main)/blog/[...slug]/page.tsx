@@ -1,5 +1,5 @@
 import {getPost, getPosts} from '@/lib/content';
-import {notFound} from 'next/navigation';
+import {notFound, redirect} from 'next/navigation';
 import {getTranslations, setRequestLocale} from 'next-intl/server';
 import {Link} from '@/i18n/routing';
 import {ArrowLeft} from 'lucide-react';
@@ -19,7 +19,8 @@ import Video from '@/components/mdx/Video';
 import SongPlayer from '@/components/mdx/SongPlayer';
 import ShareDraftButton from '@/components/ShareDraftButton';
 import Comments from '@/components/Comments';
-import TableOfContents, { extractToc } from '@/components/TableOfContents';
+import TableOfContents from '@/components/TableOfContents';
+import { extractToc } from '@/lib/toc';
 import * as path from 'path';
 import { getSvgDimensions } from '@/lib/image-utils-server';
 
@@ -30,16 +31,31 @@ export async function generateMetadata({
 }: {
   params: Promise<{locale: string; slug: string | string[]}>;
 }): Promise<Metadata> {
-  const {locale, slug: rawSlug} = await params;
-  const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : rawSlug;
-  const post = await getPost(CONTENT_TYPE, locale, slug);
+  const {locale: rawLocale, slug: rawSlug} = await params;
+  const slugParts = Array.isArray(rawSlug) ? [...rawSlug] : [rawSlug];
+  let locale = rawLocale;
+  if ((routing.locales as readonly string[]).includes(slugParts[0])) {
+    locale = slugParts.shift()!;
+  }
+  let slug = slugParts.join('/');
+  let post = await getPost(CONTENT_TYPE, locale, slug);
+  if (!post && !slug.includes('/')) {
+    const allPosts = await getPosts(CONTENT_TYPE, locale, true);
+    const matched = allPosts.find(p => p.slug.endsWith(`/${slug}`));
+    if (matched) {
+      slug = matched.slug;
+      post = matched;
+    }
+  }
 
   if (!post) {
     return {};
   }
 
   const baseUrl = process.env.AUTH_URL || 'https://valerioiacobucci.com';
-  const url = `${baseUrl}/${locale}/blog/${slug}`;
+  const url = locale === routing.defaultLocale
+    ? `${baseUrl}/blog/${slug}`
+    : `${baseUrl}/${locale}/blog/${slug}`;
   
   let ogImage = undefined;
   if (post.cover) {
@@ -109,8 +125,20 @@ export default async function BlogPostPage({
   params: Promise<{locale: string; slug: string | string[]}>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const {locale, slug: rawSlug} = await params;
-  const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : rawSlug;
+  const {locale: rawLocale, slug: rawSlug} = await params;
+  const slugParts = Array.isArray(rawSlug) ? [...rawSlug] : [rawSlug];
+  
+  if ((routing.locales as readonly string[]).includes(slugParts[0])) {
+    const targetLocale = slugParts.shift()!;
+    const actualSlug = slugParts.join('/');
+    const targetUrl = targetLocale === routing.defaultLocale
+      ? `/blog/${actualSlug}`
+      : `/${targetLocale}/blog/${actualSlug}`;
+    redirect(targetUrl);
+  }
+
+  const locale = rawLocale;
+  const slug = slugParts.join('/');
   const { pwd } = await searchParams;
   
   setRequestLocale(locale);
@@ -129,6 +157,17 @@ export default async function BlogPostPage({
   }
   
   const post = await getPost(CONTENT_TYPE, locale, slug);
+  if (!post && !slug.includes('/')) {
+    const allPosts = await getPosts(CONTENT_TYPE, locale, true);
+    const matched = allPosts.find(p => p.slug.endsWith(`/${slug}`));
+    if (matched) {
+      const targetUrl = locale === routing.defaultLocale
+        ? `/blog/${matched.slug}`
+        : `/${locale}/blog/${matched.slug}`;
+      redirect(targetUrl);
+    }
+  }
+
   const authorized = await isAuthorized();
 
   const isPreviewValid = post?.preview && (

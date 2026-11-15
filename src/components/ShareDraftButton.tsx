@@ -15,7 +15,7 @@ export default function ShareDraftButton({ slug, locale, passcode, isPreviewEnab
 
   const handleShare = () => {
     const origin = window.location.origin;
-    let url = `${origin}/${locale}/blog/${slug}`;
+    let url = locale === 'en' ? `${origin}/blog/${slug}` : `${origin}/${locale}/blog/${slug}`;
     if (passcode) {
       url += `?pwd=${passcode}`;
     }
