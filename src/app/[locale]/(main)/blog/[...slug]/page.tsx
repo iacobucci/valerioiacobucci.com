@@ -23,6 +23,8 @@ import TableOfContents from '@/components/TableOfContents';
 import { extractToc } from '@/lib/toc';
 import * as path from 'path';
 import { getSvgDimensions } from '@/lib/image-utils-server';
+import { loadNotebook } from '@/lib/notebooks';
+import { Notebook } from '@/components/notebook';
 
 const CONTENT_TYPE = 'blog';
 
@@ -236,6 +238,26 @@ export default async function BlogPostPage({
     Video: (props: React.ComponentProps<typeof Video>) => <Video {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
     Song: (props: React.ComponentProps<typeof SongPlayer>) => <SongPlayer {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
     Music: (props: React.ComponentProps<typeof SongPlayer>) => <SongPlayer {...props} assetPath={`/assets/${CONTENT_TYPE}/${slug}`} />,
+    Notebook: (props: React.ComponentProps<typeof Notebook>) => {
+      let initialData = props.initialData;
+      let resolvedPath = props.resolvedPath;
+      if (props.src && !initialData) {
+        const res = loadNotebook(props.src, slug);
+        if (res.data) {
+          initialData = res.data;
+          resolvedPath = res.relativePath;
+        }
+      }
+      return (
+        <Notebook
+          {...props}
+          initialData={initialData}
+          resolvedPath={resolvedPath}
+          slug={slug}
+          isAuthor={authorized}
+        />
+      );
+    },
   };
 
   return (

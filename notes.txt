@@ -69,3 +69,15 @@
 	[x] rss feed (multilingual)
 	[x] fake interactive terminal (repl)
 		[x] lispv interpreter (custom language)
+
+[x] notebook mode
+	[x] embeddable in blog article
+	[x] external notebook files storage (referenced via src, shared across articles)
+	[x] jupyter looking interface
+	[x] typescript code inputting
+	[x] transpiler and local execution
+	[x] codeblocks and markdown blocks
+		[x] editable toggle with in-preview saving to external files
+	[x] built in visualization libraries
+	[x] syntax highlighting with codemirror 6 (typescript & markdown, one dark & light)
+	[x] vim modal keybindings and ex commands (:w to save, :r to run)

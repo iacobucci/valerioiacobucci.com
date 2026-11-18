@@ -3,6 +3,7 @@ import { Link } from '@/i18n/routing';
 import Mermaid from './mdx/MermaidBM';
 import SvgHighlightLabel from './mdx/SvgHighlightLabel';
 import SongPlayer from './mdx/SongPlayer';
+import { Notebook, NotebookCellItem } from './notebook';
 
 type MDXProps = {
   children?: React.ReactNode;
@@ -94,7 +95,7 @@ export const mdxComponents = {
         <Link 
           href={href as string} 
           className="text-blue-600 dark:text-blue-400 hover:underline" 
-          {...(otherProps as any)} 
+          {...otherProps} 
         />
       );
     }
@@ -188,5 +189,11 @@ export const mdxComponents = {
   ),
   Music: (props: React.ComponentProps<typeof SongPlayer>) => (
     <SongPlayer {...props} />
+  ),
+  Notebook: (props: React.ComponentProps<typeof Notebook>) => (
+    <Notebook {...props} />
+  ),
+  NotebookCell: (props: React.ComponentProps<typeof NotebookCellItem>) => (
+    <NotebookCellItem {...props} />
   ),
 };

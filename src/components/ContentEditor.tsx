@@ -41,6 +41,7 @@ import {
 import { serializeMdxAction } from '@/lib/actions/mdx';
 import { MDXRemote } from 'next-mdx-remote';
 import { clientMdxComponents } from '@/components/mdx-client-components';
+import { Notebook } from '@/components/notebook';
 import { 
   Save, Send, FileText, ChevronRight, 
   Loader2, Folder, File, Trash2, Upload, Plus, FolderPlus, Download, X, ExternalLink,
@@ -1395,6 +1396,16 @@ function EditorInternal() {
     Video: (props: any) => {
       const { type, slug } = getFileInfo();
       return <Video {...props} assetPath={`/assets/${type}/${slug}`} version={previewVersion} />;
+    },
+    Notebook: (props: React.ComponentProps<typeof Notebook>) => {
+      const { slug } = getFileInfo();
+      return (
+        <Notebook
+          {...props}
+          slug={slug}
+          isAuthor={true}
+        />
+      );
     }
   };
 
