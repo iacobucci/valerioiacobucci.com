@@ -9,6 +9,8 @@ import sharp from 'sharp';
 import matter from 'gray-matter';
 import { invalidateTodoCache } from "../todo-cache";
 import { invalidateLinksCache } from "../links";
+import { ensureNotebooksExistInMdx, invalidateNotebookCache } from "../notebooks";
+import { invalidateCVCache } from "../cv";
 
 const CONTENT_PATH = path.join(process.cwd(), 'content');
 
@@ -142,8 +144,24 @@ export async function saveContentAction(relativeFilePath: string, content: strin
     invalidateLinksCache();
   }
 
+  if (relativeFilePath.endsWith('.json')) {
+    invalidateNotebookCache(fullPath);
+  }
+
+  if (relativeFilePath.includes('cv/') || relativeFilePath.endsWith('cv')) {
+    console.log('Invalidating CV cache...');
+    invalidateCVCache();
+  }
+
+  // If saving an MDX article, ensure any referenced <Notebook src="..." /> files exist
+  let createdNotebooks: string[] = [];
+  if (relativeFilePath.endsWith('.mdx')) {
+    const articleSlug = path.dirname(relativeFilePath).replace(/^\/+/, '');
+    createdNotebooks = ensureNotebooksExistInMdx(content, articleSlug);
+  }
+
   revalidatePath("/", "layout");
-  return { success: true };
+  return { success: true, createdNotebooks };
 }
 
 export async function uploadFileAction(formData: FormData) {
@@ -422,6 +440,7 @@ title: "${title}"
 description: "${description}"
 date: "${date}"
 draft: true
+reviewed: true
 tags: []
 ---
 
@@ -557,6 +576,7 @@ ${content}`;
       ...data,
       title: translatedData.title || data.title,
       description: translatedData.description || data.description,
+      reviewed: false,
     };
 
     const finalContent = matter.stringify(translatedBody, finalData);

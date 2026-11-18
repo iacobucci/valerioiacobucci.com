@@ -14,6 +14,7 @@
 [x] multilingual blog (mdx)
 	[x] markdown based with frontmatter
 	[x] fallback to english for missing translations
+	[x] reviewed / unreviewed translation tags (reviewed: true for en.mdx, reviewed: false for AI translations, article badges & warning banner)
 	[x] mermaid diagrams support
 	[x] three.js (react three fiber) visualizations
 	[x] hot module replacement (hmr) for content
@@ -29,7 +30,7 @@
 [x] online content editor
 	[x] secure administration area
 	[x] file system management (create, rename, move, delete)
-	[x] integrated code editor (mdx, json)
+	[x] integrated code editor (mdx, json, ts/js) with codemirror, syntax highlighting & vim mode
 	[x] visual editor for projects
 	[x] drag & drop file organization
 	[x] image upload and webp compression (sharp)
@@ -42,6 +43,7 @@
 	[x] article writing time tracker (persisted in postgresql)
 	[x] git merge conflict resolution UI
 	[x] share draft link directly from editor
+	[x] markdown-based CV editing in content/public/cv/ (runtime reloading without recompile, live split preview)
 
 [x] microblog
 	[x] database-backed feed
@@ -72,7 +74,7 @@
 
 [x] notebook mode
 	[x] embeddable in blog article
-	[x] external notebook files storage (referenced via src, shared across articles)
+	[x] external notebook files storage in article directory (relative paths across articles, content/notebooks as category)
 	[x] jupyter looking interface
 	[x] typescript code inputting
 	[x] transpiler and local execution
@@ -81,3 +83,9 @@
 	[x] built in visualization libraries
 	[x] syntax highlighting with codemirror 6 (typescript & markdown, one dark & light)
 	[x] vim modal keybindings and ex commands (:w to save, :r to run)
+	[x] seamless Ctrl+S and <ESC>:w saving in dedicated editor and notebook cells with instant toast feedback
+	[x] notebook saving restricted strictly to authenticated administrators in editing mode (isAuthor && isEditable)
+	[x] dedicated visual & split notebook editor in /admin/editor for notebook json files
+	[x] multiple graphical outputs support per code block (sequential plots, charts, tables)
+	[x] precomputed results caching (text & graphics) with SSR full render and zero layout shift
+	[x] extensible visualization system with animation support (NotebookAnimation, SVG/canvas frames, timeline controls)

@@ -11,6 +11,7 @@ import { NotebookCellData, CellType } from './types';
 import { NotebookPlot } from './NotebookPlot';
 import { NotebookTable } from './NotebookTable';
 import { NotebookMarkdown } from './NotebookMarkdown';
+import { NotebookAnimation } from './NotebookAnimation';
 import { Play, ArrowUp, ArrowDown, Trash2, Check, Edit3, Code2, FileText } from 'lucide-react';
 
 interface NotebookCellProps {
@@ -21,6 +22,7 @@ interface NotebookCellProps {
   vimMode?: boolean;
   onSelect: () => void;
   onRun: () => void;
+  onSave?: () => void;
   onChangeSource: (source: string) => void;
   onChangeType: (type: CellType) => void;
   onDelete: () => void;
@@ -36,6 +38,7 @@ export const NotebookCell: React.FC<NotebookCellProps> = ({
   vimMode = false,
   onSelect,
   onRun,
+  onSave,
   onChangeSource,
   onChangeType,
   onDelete,
@@ -66,10 +69,24 @@ export const NotebookCell: React.FC<NotebookCellProps> = ({
     }
   }, [vimMode, isEditable, ensureInsertMode]);
 
-  // CodeMirror keymap for running cell (Shift+Enter, Ctrl+Enter, Cmd+Enter)
+  // CodeMirror keymap for saving (Mod-s / Ctrl+S) and running cell (Shift+Enter, Ctrl+Enter, Cmd+Enter)
   const runKeymap = useMemo(() => {
     return Prec.highest(
       keymap.of([
+        {
+          key: 'Mod-s',
+          run: () => {
+            if (isEditable) {
+              if (onSave) {
+                onSave();
+              } else {
+                window.dispatchEvent(new CustomEvent('notebook-save'));
+              }
+              return true;
+            }
+            return false;
+          },
+        },
         {
           key: 'Shift-Enter',
           run: () => {
@@ -93,7 +110,7 @@ export const NotebookCell: React.FC<NotebookCellProps> = ({
         },
       ])
     );
-  }, [onRun]);
+  }, [onRun, onSave, isEditable]);
 
   // Custom editor theme (zero shadows, zero blurs, flat aesthetic)
   const customEditorTheme = useMemo(() => {
@@ -478,6 +495,19 @@ export const NotebookCell: React.FC<NotebookCellProps> = ({
                       <div
                         dangerouslySetInnerHTML={{ __html: out.svg }}
                       />
+                    </div>
+                  );
+                }
+
+                if (out.type === 'animation' && out.animation) {
+                  return (
+                    <div key={out.id} className="w-full">
+                      <div className="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-semibold mb-1 select-none">
+                        Out [{cell.executionCount ?? ' '}]:
+                      </div>
+                      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-2 sm:p-4">
+                        <NotebookAnimation data={out.animation} />
+                      </div>
                     </div>
                   );
                 }

@@ -112,6 +112,27 @@ export default function FrontmatterModal({ isOpen, data, availableTags, onSave, 
                   </div>
                 </label>
 
+                <label className={`flex items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${
+                  formData.reviewed !== false
+                    ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/50' 
+                    : 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={formData.reviewed !== false} 
+                    onChange={(e) => setFormData({ ...formData, reviewed: e.target.checked })}
+                    className="w-5 h-5 rounded-lg text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700"
+                  />
+                  <div>
+                    <span className={`block text-sm font-bold ${formData.reviewed !== false ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                      {formData.reviewed !== false ? 'Reviewed' : 'Unreviewed Translation'}
+                    </span>
+                    <span className="text-[10px] text-gray-500">
+                      {formData.reviewed !== false ? 'Marked as human-reviewed' : 'Flagged as unreviewed AI translation'}
+                    </span>
+                  </div>
+                </label>
+
                 <div className={`p-4 rounded-2xl border transition-all ${
                   formData.preview 
                     ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50' 

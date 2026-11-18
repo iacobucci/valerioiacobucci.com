@@ -59,6 +59,7 @@ interface PlotScatterOptions {
 
 interface NotebookItemWrapper {
   __notebookType?: 'plot' | 'table';
+  id?: string;
   plot?: PlotData;
   table?: TableData;
 }
@@ -388,115 +389,198 @@ export class NotebookSession {
       return { result: undefined, error: null };
     }
 
-    // Prepare cell execution context
+    // Prepare cell execution context with deduplicated, sequential outputs support
+    const emittedOutputIds = new Set<string>();
+    const emitOutput = (output: CellOutput) => {
+      if (emittedOutputIds.has(output.id)) return;
+      emittedOutputIds.add(output.id);
+      onOutput(output);
+    };
+
     const customConsole = {
       log: (...args: unknown[]) => {
-        onOutput({
-          id: `out-${Date.now()}-${Math.random()}`,
+        emitOutput({
+          id: `out-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'stdout',
           text: args.map(formatLogArg).join(' '),
         });
       },
       info: (...args: unknown[]) => {
-        onOutput({
-          id: `out-${Date.now()}-${Math.random()}`,
+        emitOutput({
+          id: `out-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'stdout',
           text: args.map(formatLogArg).join(' '),
         });
       },
       warn: (...args: unknown[]) => {
-        onOutput({
-          id: `err-${Date.now()}-${Math.random()}`,
+        emitOutput({
+          id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'stderr',
           text: args.map(formatLogArg).join(' '),
         });
       },
       error: (...args: unknown[]) => {
-        onOutput({
-          id: `err-${Date.now()}-${Math.random()}`,
+        emitOutput({
+          id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'stderr',
           text: args.map(formatLogArg).join(' '),
         });
       },
       table: (data: unknown) => {
-        onOutput({
-          id: `tbl-${Date.now()}-${Math.random()}`,
+        emitOutput({
+          id: `tbl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'table',
           table: normalizeTable(data),
         });
       },
     };
 
-    const display = (val: unknown) => {
-      if (typeof val === 'object' && val !== null && '__notebookType' in val) {
-        const item = val as NotebookItemWrapper;
-        if (item.__notebookType === 'plot' && item.plot) {
-          onOutput({
-            id: `plot-${Date.now()}-${Math.random()}`,
-            type: 'plot',
-            plot: item.plot,
-          });
-          return;
-        }
-        if (item.__notebookType === 'table' && item.table) {
-          onOutput({
-            id: `tbl-${Date.now()}-${Math.random()}`,
-            type: 'table',
-            table: item.table,
-          });
-          return;
-        }
+    const createPlotWrapper = (type: 'line' | 'bar' | 'scatter' | 'area', options: unknown) => {
+      let plotData: PlotData;
+      if (type === 'bar') {
+        plotData = normalizePlotBar(options);
+      } else if (type === 'scatter') {
+        plotData = normalizePlotScatter(options);
+      } else {
+        plotData = normalizePlotLine(options);
+        if (type === 'area') plotData.type = 'area';
       }
-      onOutput({
-        id: `res-${Date.now()}-${Math.random()}`,
-        type: 'result',
-        value: val,
-      });
+
+      const outId = `plot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const outputItem: CellOutput = {
+        id: outId,
+        type: 'plot',
+        plot: plotData,
+      };
+
+      // Auto-emit plot immediately so multiple plots appear in order of execution
+      emitOutput(outputItem);
+
+      const wrapper = {
+        __notebookType: 'plot' as const,
+        id: outId,
+        plot: plotData,
+        outputItem,
+        show: function () {
+          emitOutput(outputItem);
+          return wrapper;
+        },
+      };
+      return wrapper;
+    };
+
+    const plot = {
+      line: (options: unknown) => createPlotWrapper('line', options),
+      bar: (options: unknown) => createPlotWrapper('bar', options),
+      scatter: (options: unknown) => createPlotWrapper('scatter', options),
+      area: (options: unknown) => createPlotWrapper('area', options),
+    };
+
+    const table = (data: unknown) => {
+      const tableData = normalizeTable(data);
+      const outId = `tbl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const outputItem: CellOutput = {
+        id: outId,
+        type: 'table',
+        table: tableData,
+      };
+
+      emitOutput(outputItem);
+
+      const wrapper = {
+        __notebookType: 'table' as const,
+        id: outId,
+        table: tableData,
+        outputItem,
+        show: function () {
+          emitOutput(outputItem);
+          return wrapper;
+        },
+      };
+      return wrapper;
+    };
+
+    const animate = (options: {
+      title?: string;
+      frames?: string[];
+      fps?: number;
+      width?: number;
+      height?: number;
+      loop?: boolean;
+      autoPlay?: boolean;
+    }) => {
+      const outId = `anim-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const outputItem: CellOutput = {
+        id: outId,
+        type: 'animation',
+        animation: {
+          title: options.title,
+          frames: options.frames || [],
+          fps: options.fps || 30,
+          width: options.width || 600,
+          height: options.height || 300,
+          loop: options.loop !== false,
+          autoPlay: options.autoPlay ?? true,
+        },
+      };
+      emitOutput(outputItem);
+      return outputItem;
+    };
+
+    const display = (...args: unknown[]) => {
+      for (const val of args) {
+        if (Array.isArray(val) && val.some((it) => it && typeof it === 'object' && ('__notebookType' in it || 'plot' in it || 'table' in it))) {
+          display(...val);
+          continue;
+        }
+        if (typeof val === 'object' && val !== null && '__notebookType' in val) {
+          const item = val as NotebookItemWrapper;
+          if (item.__notebookType === 'plot' && item.plot) {
+            emitOutput({
+              id: item.id || `plot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              type: 'plot',
+              plot: item.plot,
+            });
+            continue;
+          }
+          if (item.__notebookType === 'table' && item.table) {
+            emitOutput({
+              id: item.id || `tbl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              type: 'table',
+              table: item.table,
+            });
+            continue;
+          }
+        }
+        emitOutput({
+          id: `res-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          type: 'result',
+          value: val,
+        });
+      }
     };
 
     display.html = (html: string) => {
-      onOutput({
-        id: `html-${Date.now()}-${Math.random()}`,
+      emitOutput({
+        id: `html-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         type: 'html',
         html,
       });
     };
 
     display.svg = (svg: string) => {
-      onOutput({
-        id: `svg-${Date.now()}-${Math.random()}`,
+      emitOutput({
+        id: `svg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         type: 'svg',
         svg,
       });
     };
 
+    display.animation = animate;
+    display.plot = (options: unknown) => createPlotWrapper('line', options);
+    display.table = table;
     display.image = (url: string, alt = '') => {
       display.html(`<img src="${url}" alt="${alt}" class="max-w-full h-auto rounded-lg" />`);
-    };
-
-    const plot = {
-      line: (options: unknown) => {
-        const plotData = normalizePlotLine(options);
-        return { __notebookType: 'plot', plot: plotData };
-      },
-      bar: (options: unknown) => {
-        const plotData = normalizePlotBar(options);
-        return { __notebookType: 'plot', plot: plotData };
-      },
-      scatter: (options: unknown) => {
-        const plotData = normalizePlotScatter(options);
-        return { __notebookType: 'plot', plot: plotData };
-      },
-      area: (options: unknown) => {
-        const plotData = normalizePlotLine(options);
-        plotData.type = 'area';
-        return { __notebookType: 'plot', plot: plotData };
-      },
-    };
-
-    const table = (data: unknown) => {
-      const tableData = normalizeTable(data);
-      return { __notebookType: 'table', table: tableData };
     };
 
     // Inject built-ins into userScope
@@ -505,6 +589,7 @@ export class NotebookSession {
       display,
       plot,
       table,
+      animate,
       linspace,
       range,
       sum,
@@ -554,21 +639,25 @@ export class NotebookSession {
       const fn = new AsyncFunction('scope', preparedCode);
       const result = await fn(this.scopeProxy);
 
-      // If the result returned is a plot or table wrapper, output it
+      // If the result returned is a plot or table wrapper, check if already emitted
       if (result !== undefined) {
         if (typeof result === 'object' && result !== null && '__notebookType' in result) {
           const item = result as NotebookItemWrapper;
+          if (item.id && emittedOutputIds.has(item.id)) {
+            // Already emitted during execution, avoid duplicate!
+            return { result, error: null };
+          }
           if (item.__notebookType === 'plot' && item.plot) {
-            onOutput({
-              id: `plot-${Date.now()}-${Math.random()}`,
+            emitOutput({
+              id: item.id || `plot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
               type: 'plot',
               plot: item.plot,
             });
             return { result, error: null };
           }
           if (item.__notebookType === 'table' && item.table) {
-            onOutput({
-              id: `tbl-${Date.now()}-${Math.random()}`,
+            emitOutput({
+              id: item.id || `tbl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
               type: 'table',
               table: item.table,
             });
@@ -576,9 +665,38 @@ export class NotebookSession {
           }
         }
 
+        // If result is an array of notebook objects
+        if (
+          Array.isArray(result) &&
+          result.some((it) => it && typeof it === 'object' && ('__notebookType' in it || 'plot' in it || 'table' in it))
+        ) {
+          for (const item of result) {
+            if (item && typeof item === 'object') {
+              if (item.__notebookType === 'plot' && item.plot) {
+                if (!item.id || !emittedOutputIds.has(item.id)) {
+                  emitOutput({
+                    id: item.id || `plot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    type: 'plot',
+                    plot: item.plot,
+                  });
+                }
+              } else if (item.__notebookType === 'table' && item.table) {
+                if (!item.id || !emittedOutputIds.has(item.id)) {
+                  emitOutput({
+                    id: item.id || `tbl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                    type: 'table',
+                    table: item.table,
+                  });
+                }
+              }
+            }
+          }
+          return { result, error: null };
+        }
+
         // Standard return value
-        onOutput({
-          id: `res-${Date.now()}-${Math.random()}`,
+        emitOutput({
+          id: `res-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
           type: 'result',
           value: result,
         });

@@ -24,6 +24,7 @@ export interface ContentMetadata {
   preview?: boolean;
   preview_passcode?: string;
   selected?: boolean;
+  reviewed?: boolean;
   song?: any;
   music?: any;
   [key: string]: unknown;
@@ -122,7 +123,8 @@ export async function getPost(type: string, locale: string, slug: string): Promi
       draft: data.draft === true,
       preview: data.preview === true,
       preview_passcode: data.preview_passcode ? String(data.preview_passcode) : undefined,
-      selected: data.selected === true
+      selected: data.selected === true,
+      reviewed: data.reviewed !== undefined ? data.reviewed === true : (actualLocale === 'en')
     };
 
     contentCache.set(filePath, { data: postData, mtime });

@@ -24,60 +24,86 @@ export function resolveNotebookPath(
     normalizedSrc += '.json';
   }
 
-  // Prevent directory traversal attacks
-  const safeSrc = path.normalize(normalizedSrc).replace(/^(\.\.[\/\\])+/, '');
+  // Base directory for resolving relative paths:
+  // If slug is provided, resolve relative to content/<slug>
+  // If slug is not provided, resolve relative to contentRoot
+  const baseDir = slug ? path.join(contentRoot, slug) : contentRoot;
 
-  // 1. Explicit relative path: ./foo.json
-  if (normalizedSrc.startsWith('./') && slug) {
-    const rel = path.join(slug, normalizedSrc.slice(2));
-    const full = path.join(contentRoot, rel);
-    return { fullPath: full, relativePath: rel };
-  }
-
-  // 2. Explicit absolute relative to content: /notebooks/foo.json
+  let fullPath: string;
   if (normalizedSrc.startsWith('/')) {
-    const rel = normalizedSrc.slice(1);
-    const full = path.join(contentRoot, rel);
-    return { fullPath: full, relativePath: rel };
-  }
-
-  // 3. Article-specific: check content/<slug>/notebooks/<src> or content/<slug>/<src>
-  if (slug) {
-    const slugNb = path.join(contentRoot, slug, 'notebooks', safeSrc);
-    if (fs.existsSync(slugNb)) {
-      return { fullPath: slugNb, relativePath: path.join(slug, 'notebooks', safeSrc) };
+    // Explicit path from contentRoot (e.g. /category/article/foo.json)
+    fullPath = path.resolve(contentRoot, normalizedSrc.slice(1));
+  } else {
+    // Relative path (e.g. "signal.json", "./signal.json", or "../other-article/signal.json")
+    const articleLocalPath = path.resolve(baseDir, normalizedSrc);
+    // If it doesn't start with '.' and does not exist in articleLocalPath,
+    // check if it was specified relative to contentRoot
+    if (!normalizedSrc.startsWith('.') && !fs.existsSync(articleLocalPath)) {
+      const rootRelativePath = path.resolve(contentRoot, normalizedSrc);
+      if (fs.existsSync(rootRelativePath)) {
+        fullPath = rootRelativePath;
+      } else {
+        fullPath = articleLocalPath;
+      }
+    } else {
+      fullPath = articleLocalPath;
     }
-    const slugDirect = path.join(contentRoot, slug, safeSrc);
-    if (fs.existsSync(slugDirect)) {
-      return { fullPath: slugDirect, relativePath: path.join(slug, safeSrc) };
-    }
   }
 
-  // 4. Shared notebooks: content/notebooks/<src>
-  const sharedPath = path.join(contentRoot, 'notebooks', safeSrc);
-  if (fs.existsSync(sharedPath)) {
-    return { fullPath: sharedPath, relativePath: path.join('notebooks', safeSrc) };
+  // Security check: ensure path is strictly contained within contentRoot
+  const relFromRoot = path.relative(contentRoot, fullPath);
+  if (relFromRoot.startsWith('..') || path.isAbsolute(relFromRoot)) {
+    throw new Error(`Access denied: path '${src}' resolves outside content directory`);
   }
 
-  // 5. Fallback for new files:
-  if (slug && safeSrc.includes('/')) {
-    const rel = path.join(slug, safeSrc);
-    return { fullPath: path.join(contentRoot, rel), relativePath: rel };
-  }
+  return { fullPath, relativePath: relFromRoot };
+}
 
-  // Default to shared notebooks
-  const defaultRel = path.join('notebooks', safeSrc);
-  return { fullPath: path.join(contentRoot, defaultRel), relativePath: defaultRel };
+export function createDefaultNotebook(
+  src: string,
+  slug?: string,
+  customTitle?: string
+): { data: NotebookFileData; relativePath: string; fullPath: string } {
+  const { fullPath, relativePath } = resolveNotebookPath(src, slug);
+
+  const baseTitle = path
+    .basename(src, '.json')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const title = customTitle || baseTitle || 'Interactive TypeScript Notebook';
+
+  const defaultData: NotebookFileData = {
+    title,
+    cells: [
+      {
+        type: 'markdown',
+        source: `### ${title}\nWelcome to your notebook! Run the cells below or edit the TypeScript code directly in your browser.`,
+      },
+      {
+        type: 'code',
+        source: `// TypeScript execution in browser\nconst x: number = 42;\nconsole.log("Hello from ${title}! x =", x);\nx * 2;`,
+      },
+    ],
+  };
+
+  saveNotebook(src, defaultData, slug);
+  return { data: defaultData, relativePath, fullPath };
 }
 
 export function loadNotebook(
   src: string,
-  slug?: string
+  slug?: string,
+  createIfMissing = true
 ): { data: NotebookFileData | null; relativePath: string } {
   try {
     const { fullPath, relativePath } = resolveNotebookPath(src, slug);
 
     if (!fs.existsSync(fullPath)) {
+      if (createIfMissing) {
+        const created = createDefaultNotebook(src, slug);
+        return { data: created.data, relativePath: created.relativePath };
+      }
       return { data: null, relativePath };
     }
 
@@ -95,13 +121,17 @@ export function loadNotebook(
     const fileContent = fs.readFileSync(fullPath, 'utf8');
     const parsed = JSON.parse(fileContent) as NotebookFileData;
 
-    // Validate structure
+    // Validate structure and restore cached execution outputs
     const data: NotebookFileData = {
       title: parsed.title || path.basename(src, '.json'),
       cells: Array.isArray(parsed.cells)
         ? parsed.cells.map(c => ({
+            id: typeof c.id === 'string' ? c.id : undefined,
             type: c.type === 'markdown' ? 'markdown' : 'code',
             source: typeof c.source === 'string' ? c.source : '',
+            executionCount: typeof c.executionCount === 'number' ? c.executionCount : null,
+            status: c.status || (Array.isArray(c.outputs) && c.outputs.length > 0 ? 'success' : 'idle'),
+            outputs: Array.isArray(c.outputs) ? c.outputs : [],
           }))
         : [],
     };
@@ -134,12 +164,16 @@ export function saveNotebook(
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    // Clean data structure to persist
+    // Clean data structure to persist, preserving cached outputs, status and execution counts
     const cleanData: NotebookFileData = {
       title: data.title || path.basename(src, '.json'),
       cells: data.cells.map(c => ({
+        id: c.id,
         type: c.type === 'markdown' ? 'markdown' : 'code',
         source: c.source,
+        executionCount: typeof c.executionCount === 'number' ? c.executionCount : null,
+        status: c.status || (Array.isArray(c.outputs) && c.outputs.length > 0 ? 'success' : 'idle'),
+        outputs: Array.isArray(c.outputs) ? c.outputs : [],
       })),
     };
 
@@ -152,4 +186,36 @@ export function saveNotebook(
     console.error(`Error saving notebook ${src}:`, err);
     return { success: false, relativePath: src, error: err.message };
   }
+}
+
+/**
+ * Scan MDX content for <Notebook src="..." /> tags and automatically create
+ * any notebook files that do not exist yet on disk.
+ */
+export function ensureNotebooksExistInMdx(mdxContent: string, articleSlug?: string): string[] {
+  const regex = /<Notebook\b([\s\S]*?)\/?>/g;
+  const createdFiles: string[] = [];
+  let match;
+
+  while ((match = regex.exec(mdxContent)) !== null) {
+    const tagAttrs = match[1];
+    const srcMatch = tagAttrs.match(/\bsrc=(?:["']([^"']+)["']|\{(?:["']([^"']+)["'])\})/);
+    const titleMatch = tagAttrs.match(/\btitle=(?:["']([^"']+)["']|\{(?:["']([^"']+)["'])\})/);
+    const src = srcMatch ? (srcMatch[1] || srcMatch[2]) : null;
+    const customTitle = titleMatch ? (titleMatch[1] || titleMatch[2]) : undefined;
+
+    if (src) {
+      try {
+        const { fullPath, relativePath } = resolveNotebookPath(src, articleSlug);
+        if (!fs.existsSync(fullPath)) {
+          createDefaultNotebook(src, articleSlug, customTitle);
+          createdFiles.push(relativePath);
+        }
+      } catch (err) {
+        console.warn(`Could not ensure notebook '${src}' for article '${articleSlug}':`, err);
+      }
+    }
+  }
+
+  return createdFiles;
 }

@@ -6,6 +6,7 @@ import { NotebookCell } from './NotebookCell';
 import { NotebookSession } from './runtime';
 import { registerNotebookVimCommands } from './vim';
 import { getNotebookAction, saveNotebookAction } from '@/lib/actions/notebook';
+import { toast } from '@/lib/toast';
 import { Play, RotateCcw, Plus, Lock, Unlock, Terminal, Save, Check, FileJson } from 'lucide-react';
 
 function parseRawChildren(children: React.ReactNode): NotebookCellData[] {
@@ -112,6 +113,7 @@ export const Notebook: React.FC<NotebookProps> = ({
   className = '',
   onSave: customOnSave,
 }) => {
+  const notebookRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState(initialTitle || initialData?.title || 'Interactive TypeScript Notebook');
   const [resolvedPath, setResolvedPath] = useState<string | null>(initialResolvedPath || (src ? src : null));
   const [isEditable, setIsEditable] = useState(defaultEditable);
@@ -142,17 +144,17 @@ export const Notebook: React.FC<NotebookProps> = ({
     });
   }, []);
 
-  // Initialize cells state
+  // Initialize cells state with deterministic IDs and cached SSR outputs
   const [cells, setCells] = useState<NotebookCellData[]>(() => {
     // 1. If initialData provided from SSR
     if (initialData?.cells && initialData.cells.length > 0) {
       return initialData.cells.map((c, idx) => ({
-        id: `cell-${idx}-${Math.random()}`,
+        id: c.id || `cell-${idx}`,
         type: c.type || 'code',
         source: c.source || '',
-        executionCount: null,
-        status: 'idle',
-        outputs: [],
+        executionCount: typeof c.executionCount === 'number' ? c.executionCount : (c.outputs && c.outputs.length > 0 ? idx + 1 : null),
+        status: c.status || (c.outputs && c.outputs.length > 0 ? 'success' : 'idle'),
+        outputs: Array.isArray(c.outputs) ? c.outputs : [],
       }));
     }
 
@@ -160,7 +162,7 @@ export const Notebook: React.FC<NotebookProps> = ({
     const raw = propCells || propInitialCells;
     if (raw && raw.length > 0) {
       return raw.map((c, idx) => ({
-        id: `cell-${idx}-${Math.random()}`,
+        id: `cell-${idx}`,
         type: c.type || 'code',
         source: (c.source ?? c.content ?? '').trim(),
         executionCount: null,
@@ -207,12 +209,12 @@ export const Notebook: React.FC<NotebookProps> = ({
         if (Array.isArray(res.data.cells) && res.data.cells.length > 0) {
           setCells(
             res.data.cells.map((c, idx) => ({
-              id: `cell-${idx}-${Math.random()}`,
+              id: c.id || `cell-${idx}`,
               type: c.type || 'code',
               source: c.source || '',
-              executionCount: null,
-              status: 'idle',
-              outputs: [],
+              executionCount: typeof c.executionCount === 'number' ? c.executionCount : (c.outputs && c.outputs.length > 0 ? idx + 1 : null),
+              status: c.status || (c.outputs && c.outputs.length > 0 ? 'success' : 'idle'),
+              outputs: Array.isArray(c.outputs) ? c.outputs : [],
             }))
           );
         }
@@ -327,17 +329,19 @@ export const Notebook: React.FC<NotebookProps> = ({
     );
   }, [session]);
 
-  // Auto-run on mount if autoRun is true
+  // Auto-run on mount ONLY if autoRun is true AND cells do NOT already have cached outputs!
   const hasAutoRunRef = useRef(false);
   useEffect(() => {
-    if (autoRun && !hasAutoRunRef.current && cells.length > 0) {
+    const hasCachedOutputs = cells.some((c) => c.outputs && c.outputs.length > 0);
+    if (autoRun && !hasAutoRunRef.current && !hasCachedOutputs && cells.length > 0) {
       hasAutoRunRef.current = true;
       runAllCells();
     }
-  }, [autoRun, runAllCells, cells.length]);
+  }, [autoRun, runAllCells, cells]);
 
-  // Save Notebook action (when editing in preview)
+  // Save Notebook action (strictly allowed ONLY if isAuthor AND isEditable)
   const handleSaveNotebook = useCallback(async () => {
+    if (!isAuthor || !isEditable) return;
     if (!src && !customOnSave) return;
     setIsSaving(true);
     setSaveError(null);
@@ -345,8 +349,12 @@ export const Notebook: React.FC<NotebookProps> = ({
     const fileData: NotebookFileData = {
       title,
       cells: cells.map((c) => ({
+        id: c.id,
         type: c.type,
         source: c.source,
+        executionCount: typeof c.executionCount === 'number' ? c.executionCount : null,
+        status: c.status || 'idle',
+        outputs: c.outputs || [],
       })),
     };
 
@@ -356,9 +364,12 @@ export const Notebook: React.FC<NotebookProps> = ({
         if (res.success) {
           setHasUnsavedChanges(false);
           setSaveSuccess(true);
+          toast.success('Notebook saved successfully');
           setTimeout(() => setSaveSuccess(false), 2500);
         } else {
-          setSaveError(res.error || 'Failed to save');
+          const errMsg = res.error || 'Failed to save';
+          setSaveError(errMsg);
+          toast.error(errMsg);
         }
       } else if (src) {
         const res = await saveNotebookAction(src, fileData, slug);
@@ -366,33 +377,46 @@ export const Notebook: React.FC<NotebookProps> = ({
           setResolvedPath(res.path);
           setHasUnsavedChanges(false);
           setSaveSuccess(true);
+          toast.success(`Notebook saved: ${res.path || src}`);
           setTimeout(() => setSaveSuccess(false), 2500);
         } else {
-          setSaveError(res.error || 'Failed to save notebook file');
+          const errMsg = res.error || 'Failed to save notebook file';
+          setSaveError(errMsg);
+          toast.error(errMsg);
         }
       }
     } catch (err: unknown) {
       const e = err instanceof Error ? err : new Error(String(err));
       setSaveError(e.message);
+      toast.error(`Error saving notebook: ${e.message}`);
     } finally {
       setIsSaving(false);
     }
-  }, [src, title, cells, slug, customOnSave]);
+  }, [src, title, cells, slug, customOnSave, isAuthor, isEditable]);
 
-  // Global Ctrl+S keyboard shortcut inside notebook
+  // Global Ctrl+S / Cmd+S keyboard shortcut inside notebook (capture phase; strictly for author in edit mode)
   useEffect(() => {
-    if (!isAuthor || (!src && !customOnSave)) return;
+    if (!isAuthor || !isEditable || (!src && !customOnSave)) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSaveNotebook();
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        const activeEl = document.activeElement;
+        const isInsideThisNotebook = notebookRef.current && (
+          (activeEl && notebookRef.current.contains(activeEl)) ||
+          notebookRef.current.matches(':hover')
+        );
+
+        if (isInsideThisNotebook) {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSaveNotebook();
+        }
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isAuthor, src, customOnSave, handleSaveNotebook]);
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [isAuthor, isEditable, src, customOnSave, handleSaveNotebook]);
 
   // Initialize Vim Ex commands once on client
   useEffect(() => {
@@ -401,8 +425,15 @@ export const Notebook: React.FC<NotebookProps> = ({
 
   // Listen to custom Vim Ex commands (:w to save, :r to run)
   useEffect(() => {
-    const handleVimSave = () => {
-      if (isAuthor && (src || customOnSave)) {
+    const handleVimSave = (e: Event) => {
+      if (!isAuthor || !isEditable) return;
+      const customEvent = e as CustomEvent<{ dom?: HTMLElement }>;
+      if (customEvent.detail?.dom && notebookRef.current) {
+        if (!notebookRef.current.contains(customEvent.detail.dom)) {
+          return;
+        }
+      }
+      if (src || customOnSave) {
         handleSaveNotebook();
       }
     };
@@ -419,7 +450,7 @@ export const Notebook: React.FC<NotebookProps> = ({
       window.removeEventListener('notebook-save', handleVimSave);
       window.removeEventListener('notebook-run-selected', handleVimRun);
     };
-  }, [isAuthor, src, customOnSave, handleSaveNotebook, selectedCellId, runCell]);
+  }, [isAuthor, isEditable, src, customOnSave, handleSaveNotebook, selectedCellId, runCell]);
 
   // Cell manipulation helpers
   const addCell = (type: CellType, atIndex?: number) => {
@@ -497,6 +528,8 @@ export const Notebook: React.FC<NotebookProps> = ({
 
   return (
     <div
+      ref={notebookRef}
+      data-notebook-root="true"
       className={`my-8 border border-gray-200 dark:border-gray-800 rounded-2xl bg-white dark:bg-gray-950 overflow-hidden font-sans ${className}`}
     >
       {/* Top Header Toolbar */}
@@ -531,7 +564,7 @@ export const Notebook: React.FC<NotebookProps> = ({
               {vimMode && (
                 <span className="text-amber-600 dark:text-amber-400 font-semibold">• Vim mode active</span>
               )}
-              {hasUnsavedChanges && isAuthor && (
+              {hasUnsavedChanges && isAuthor && isEditable && (
                 <span className="text-amber-600 dark:text-amber-400 font-semibold">• Unsaved changes</span>
               )}
             </div>
@@ -540,8 +573,8 @@ export const Notebook: React.FC<NotebookProps> = ({
 
         {/* Right: Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Author Save Button (shown in preview mode when authorized) */}
-          {isAuthor && (src || customOnSave) && (
+          {/* Author Save Button (shown ONLY when administrator AND in editing mode) */}
+          {isAuthor && isEditable && (src || customOnSave) && (
             <button
               onClick={handleSaveNotebook}
               disabled={isSaving}
@@ -680,6 +713,7 @@ export const Notebook: React.FC<NotebookProps> = ({
               vimMode={vimMode}
               onSelect={() => setSelectedCellId(cell.id)}
               onRun={() => runCell(cell.id)}
+              onSave={handleSaveNotebook}
               onChangeSource={(newSrc) => updateCellSource(cell.id, newSrc)}
               onChangeType={(newType) => updateCellType(cell.id, newType)}
               onDelete={() => deleteCell(cell.id)}

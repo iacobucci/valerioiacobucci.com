@@ -68,6 +68,15 @@ import ProjectsVisualEditor from './editor/ProjectsVisualEditor';
 import LinksVisualEditor from './editor/LinksVisualEditor';
 import Video from '@/components/mdx/Video';
 import ModelViewerWrapper from '@/components/ModelViewerWrapper';
+import CVClient from '@/components/CVClient';
+import CodeMirror, { EditorView, Prec, keymap } from '@uiw/react-codemirror';
+import { markdown } from '@codemirror/lang-markdown';
+import { json } from '@codemirror/lang-json';
+import { javascript } from '@codemirror/lang-javascript';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { vim, Vim, getCM } from '@replit/codemirror-vim';
+import { useTheme } from '@/hooks/useTheme';
+import { registerNotebookVimCommands } from './notebook/vim';
 
 function EditorInternal() {
   const searchParams = useSearchParams();
@@ -107,7 +116,7 @@ function EditorInternal() {
   const [previewVersion, setPreviewVersion] = useState(Date.now());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const handleSaveRef = useRef<(silent?: boolean) => Promise<void>>(() => Promise.resolve());
 
   // Load/Save preferences
   useEffect(() => {
@@ -135,14 +144,144 @@ function EditorInternal() {
   const [undoStack, setUndoStack] = useState<HistoryItem[]>([]);
   const [redoStack, setRedoStack] = useState<HistoryItem[]>([]);
 
-  const isMdx = !!selectedNode?.name.endsWith('.mdx');
+  const currentTheme = useTheme();
+  const editorViewRef = useRef<EditorView | null>(null);
+  const [vimMode, setVimMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const saved = localStorage.getItem('editor_vim_mode');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  const toggleVimMode = useCallback(() => {
+    setVimMode(prev => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('editor_vim_mode', String(next));
+      }
+      return next;
+    });
+  }, []);
+
+  const ensureInsertMode = useCallback((view?: EditorView | null) => {
+    if (!view) return;
+    const setMode = () => {
+      const cm = getCM(view);
+      if (cm && cm.state.vim && !cm.state.vim.insertMode) {
+        Vim.handleKey(cm, 'i', 'user');
+      }
+    };
+    setMode();
+    requestAnimationFrame(setMode);
+  }, []);
+
+  useEffect(() => {
+    if (vimMode && editorViewRef.current) {
+      ensureInsertMode(editorViewRef.current);
+    }
+  }, [vimMode, ensureInsertMode]);
+
+  const customEditorTheme = useMemo(() => {
+    return EditorView.theme({
+      '&': {
+        height: '100%',
+        fontSize: '13px',
+        backgroundColor: 'transparent !important',
+      },
+      '&.cm-focused': {
+        outline: 'none !important',
+        boxShadow: 'none !important',
+      },
+      '.cm-scroller': {
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+        lineHeight: '1.6',
+      },
+      '.cm-gutters': {
+        backgroundColor: 'transparent !important',
+        border: 'none !important',
+        color: '#9ca3af',
+      },
+      '.cm-lineNumbers .cm-gutterElement': {
+        minWidth: '28px',
+        paddingRight: '8px',
+        fontSize: '11px',
+        lineHeight: '1.6',
+      },
+      '.cm-activeLine': {
+        backgroundColor: 'rgba(59, 130, 246, 0.05) !important',
+      },
+      '.cm-activeLineGutter': {
+        backgroundColor: 'transparent !important',
+        color: '#3b82f6 !important',
+        fontWeight: '600',
+      },
+      '.cm-vim-panel': {
+        padding: '2px 8px',
+        fontSize: '11px',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        backgroundColor: 'rgba(128, 128, 128, 0.08)',
+        borderTop: '1px solid rgba(128, 128, 128, 0.2)',
+      },
+      '.cm-vim-panel input': {
+        fontFamily: 'inherit',
+        fontSize: '11px',
+        outline: 'none',
+        border: 'none',
+      },
+    });
+  }, []);
+
+  const isMdx = !!(selectedNode?.name.endsWith('.mdx') || selectedNode?.name.endsWith('.md'));
   const isJson = !!selectedNode?.name.endsWith('.json');
   const isTxt = !!selectedNode?.name.endsWith('.txt');
   const isHtml = !!selectedNode?.name.endsWith('.html');
   const isCss = !!selectedNode?.name.endsWith('.css');
-  const isJs = !!selectedNode?.name.endsWith('.js');
+  const isJs = !!(selectedNode?.name.endsWith('.js') || selectedNode?.name.endsWith('.ts') || selectedNode?.name.endsWith('.tsx') || selectedNode?.name.endsWith('.jsx'));
   const isImage = !!selectedNode && ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(selectedNode.name.split('.').pop()?.toLowerCase() || '');
-  const hasVisualEditor = selectedNode?.name === 'projects.json' || selectedNode?.name === 'links.json';
+  const isNotebookJson = useMemo(() => {
+    if (!isJson) return false;
+    try {
+      const parsed = JSON.parse(content || '{}');
+      return Array.isArray(parsed?.cells);
+    } catch {
+      return false;
+    }
+  }, [isJson, content]);
+
+  const hasVisualEditor = selectedNode?.name === 'projects.json' || selectedNode?.name === 'links.json' || isNotebookJson;
+
+  const codeMirrorExtensions = useMemo(() => {
+    const saveKeymap = Prec.highest(
+      keymap.of([
+        {
+          key: 'Mod-s',
+          run: () => {
+            handleSaveRef.current();
+            return true;
+          },
+        },
+      ])
+    );
+
+    const exts = [
+      saveKeymap,
+      EditorView.lineWrapping,
+      customEditorTheme,
+    ];
+
+    if (isMdx) {
+      exts.push(markdown());
+    } else if (isJson) {
+      exts.push(json());
+    } else if (isJs) {
+      exts.push(javascript({ typescript: true, jsx: true }));
+    }
+
+    if (vimMode) {
+      exts.push(vim({ status: true }));
+    }
+
+    return exts;
+  }, [isMdx, isJson, isJs, vimMode, customEditorTheme]);
 
   const articleStats = useMemo(() => {
     let total = 0;
@@ -466,8 +605,20 @@ function EditorInternal() {
         setContent(fileContent);
         setIsDirty(false);
         
+        let isNb = false;
+        if (selectedNode.name.endsWith('.json')) {
+          try {
+            const parsed = JSON.parse(fileContent);
+            if (Array.isArray(parsed?.cells)) {
+              isNb = true;
+            }
+          } catch {}
+        }
+
         if (selectedNode.name === 'projects.json' || selectedNode.name === 'links.json') {
           setPreviewMode('visual');
+        } else if (isNb) {
+          setPreviewMode(window.innerWidth < 1024 ? 'visual' : 'split');
         } else if (selectedNode.name.endsWith('.mdx')) {
           setPreviewMode(window.innerWidth < 1024 ? 'edit' : 'split');
         } else {
@@ -506,10 +657,11 @@ function EditorInternal() {
     if (!selectedNode) return { type: 'blog', slug: '' };
     const parts = selectedNode.path.split('/');
     if (parts.length === 1) return { type: 'blog', slug: '' };
-    if (parts[0] === 'public' || parts[0] === 'apps') {
-      return { type: parts[0], slug: parts.slice(1).join('/') };
-    }
     const isFile = selectedNode.type === 'file' || selectedNode.path.endsWith('.mdx');
+    if (parts[0] === 'public' || parts[0] === 'apps') {
+      const slugParts = isFile ? parts.slice(1, -1) : parts.slice(1);
+      return { type: parts[0], slug: slugParts.join('/') };
+    }
     const slugParts = isFile ? parts.slice(0, -1) : parts;
     return { type: 'blog', slug: slugParts.join('/') };
   }, [selectedNode]);
@@ -518,11 +670,16 @@ function EditorInternal() {
     if (!selectedNode || !selectedNode.path.endsWith('.mdx')) return;
     
     const parts = selectedNode.path.split('/');
-    const { slug } = getFileInfo();
+    const { type, slug } = getFileInfo();
     const fileName = parts[parts.length - 1];
     const lang = fileName.replace('.mdx', '');
     
-    const url = lang === 'en' ? `/blog/${slug}` : `/${lang}/blog/${slug}`;
+    let url = '';
+    if (type === 'public' && slug === 'cv') {
+      url = lang === 'en' ? '/cv' : `/${lang}/cv`;
+    } else {
+      url = lang === 'en' ? `/blog/${slug}` : `/${lang}/blog/${slug}`;
+    }
     window.open(url, '_blank');
   }, [selectedNode, getFileInfo]);
 
@@ -550,6 +707,10 @@ function EditorInternal() {
     }
   }, [selectedNode, content, loadGitStatus]);
 
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
+  }, [handleSave]);
+
   // Autosave effect
   useEffect(() => {
     if (autosave && isDirty && !saving && (isMdx || isJson || isTxt || isHtml || isCss || isJs)) {
@@ -570,6 +731,15 @@ function EditorInternal() {
   }, [content]);
 
   useEffect(() => {
+    registerNotebookVimCommands();
+    const handleEditorSaveEvent = () => {
+      handleSave();
+    };
+    window.addEventListener('editor-save', handleEditorSaveEvent);
+    return () => window.removeEventListener('editor-save', handleEditorSaveEvent);
+  }, [handleSave]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
@@ -584,70 +754,6 @@ function EditorInternal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSave, convertSpacesToTabs]);
 
-  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    lastActivityRef.current = Date.now();
-    const textarea = e.currentTarget;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const newContent = content.substring(0, start) + '\t' + content.substring(end);
-      setContent(newContent);
-      setIsDirty(true);
-
-      requestAnimationFrame(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 1;
-      });
-    } else if (e.key === 'Enter') {
-      // Auto-indentation logic: inherit tabs/spaces from current line
-      const lines = content.substring(0, start).split('\n');
-      const currentLine = lines[lines.length - 1];
-      const indentationMatch = currentLine.match(/^([ \t]+)/);
-      
-      if (indentationMatch) {
-        e.preventDefault();
-        const indentation = indentationMatch[1];
-        const newContent = content.substring(0, start) + '\n' + indentation + content.substring(end);
-        setContent(newContent);
-        setIsDirty(true);
-
-        requestAnimationFrame(() => {
-          textarea.selectionStart = textarea.selectionEnd = start + 1 + indentation.length;
-        });
-      }
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLTextAreaElement>) => {
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLTextAreaElement>) => {
-    if (!touchStartRef.current) return;
-    
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
-    
-    // Swipe right (horizontal) with at least 50px distance and low vertical movement
-    if (deltaX > 60 && Math.abs(deltaY) < 30) {
-      const textarea = e.currentTarget;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      
-      const newContent = content.substring(0, start) + '\t' + content.substring(end);
-      setContent(newContent);
-      setIsDirty(true);
-      
-      requestAnimationFrame(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 1;
-      });
-    }
-    
-    touchStartRef.current = null;
-  };
 
   const handleGitCommit = async () => {
     setInputConfig({
@@ -1134,6 +1240,7 @@ function EditorInternal() {
           preview_passcode: data.preview_passcode ? String(data.preview_passcode) : undefined,
           selected: !!data.selected,
           tags: (Array.isArray(data.tags) ? data.tags : []).map(t => String(t).toLowerCase().trim()).filter(Boolean),
+          reviewed: data.reviewed !== undefined ? Boolean(data.reviewed) : (path.endsWith('en.mdx') ? true : false),
         }
       });
     } catch {
@@ -1528,6 +1635,12 @@ function EditorInternal() {
                     <button onClick={() => setPreviewMode('split')} className={`hidden sm:block px-3 py-1 text-xs font-bold rounded-md transition-all ${previewMode === 'split' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Split</button>
                     <button onClick={() => setPreviewMode('preview')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'preview' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Prev</button>
                   </>
+                ) : isNotebookJson ? (
+                  <>
+                    <button onClick={() => setPreviewMode('edit')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Source</button>
+                    <button onClick={() => setPreviewMode('split')} className={`hidden sm:block px-3 py-1 text-xs font-bold rounded-md transition-all ${previewMode === 'split' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Split</button>
+                    <button onClick={() => setPreviewMode('visual')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'visual' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Notebook</button>
+                  </>
                 ) : (
                   <>
                     <button onClick={() => setPreviewMode('edit')} className={`px-2 sm:px-3 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-all ${previewMode === 'edit' ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-white' : 'text-gray-500 hover:text-gray-700'}`}>Source</button>
@@ -1561,6 +1674,19 @@ function EditorInternal() {
             >
               {autosave ? <Zap className="w-4 h-4" /> : <ZapOff className="w-4 h-4" />}
               <span className="hidden lg:inline">Autosave</span>
+            </button>
+
+            <button
+              onClick={toggleVimMode}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg font-mono font-bold transition-all text-xs sm:text-sm border ${
+                vimMode 
+                  ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300' 
+                  : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'
+              }`}
+              title={vimMode ? "Vim Mode ON (:w to save) - Click to toggle" : "Vim Mode OFF - Click to enable"}
+            >
+              <span>VIM</span>
+              <span className="text-[10px] hidden sm:inline">{vimMode ? 'ON' : 'OFF'}</span>
             </button>
             
 
@@ -2076,8 +2202,8 @@ function EditorInternal() {
                   <>
                     <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-full min-h-0">
                       {/* Visual Editor View */}
-                      {isJson && hasVisualEditor && previewMode === 'visual' && (
-                        <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/10">
+                      {isJson && hasVisualEditor && (previewMode === 'visual' || (isNotebookJson && previewMode === 'split')) && (
+                        <div className={`flex-1 overflow-y-auto bg-gray-50/50 dark:bg-gray-900/10 ${isNotebookJson && previewMode === 'split' ? 'order-1 lg:order-2' : ''}`}>
                           {(() => {
                             try {
                               const jsonData = JSON.parse(content || '{}');
@@ -2099,6 +2225,33 @@ function EditorInternal() {
                               } else if (selectedNode?.name === 'links.json') {
                                 const linksData = (typeof jsonData === 'object' && jsonData !== null && !Array.isArray(jsonData)) ? jsonData : {};
                                 return <LinksVisualEditor data={linksData} onChange={handleLinksVisualChange} setConfirmModal={setConfirmModal} />;
+                              } else if (isNotebookJson) {
+                                return (
+                                  <div className="p-4 sm:p-8 max-w-4xl mx-auto w-full">
+                                    <Notebook
+                                      key={selectedNode?.path}
+                                      src={selectedNode?.path}
+                                      initialData={jsonData}
+                                      isAuthor={true}
+                                      editable={true}
+                                      onSave={async (savedData) => {
+                                        const formatted = JSON.stringify(savedData, null, 2);
+                                        setContent(formatted);
+                                        setIsDirty(false);
+                                        try {
+                                          if (selectedNode) {
+                                            await saveContentAction(selectedNode.path, formatted);
+                                          }
+                                          loadGitStatus();
+                                          return { success: true };
+                                        } catch (err: unknown) {
+                                          const e = err instanceof Error ? err : new Error(String(err));
+                                          return { success: false, error: e.message };
+                                        }
+                                      }}
+                                    />
+                                  </div>
+                                );
                               }
                               return <div className="p-12 text-center text-gray-500">Visual editor is not available for this JSON file.</div>;
                             } catch (e) {
@@ -2111,30 +2264,62 @@ function EditorInternal() {
                       {/* MDX Preview View */}
                       {isMdx && (previewMode === 'preview' || previewMode === 'split') && (
                         <div className={`flex-1 overflow-y-auto p-4 sm:p-8 order-1 lg:order-2 ${previewMode === 'split' ? 'bg-gray-50/30 dark:bg-gray-900/10' : ''}`}>
-                          <div className="max-w-none prose prose-neutral dark:prose-invert">
-                            {mdxSource && <MDXRemote {...mdxSource} components={components} />}
-                          </div>
+                          {selectedNode?.path.startsWith('public/cv') ? (
+                            <CVClient content={content} />
+                          ) : (
+                            <div className="max-w-none prose prose-neutral dark:prose-invert">
+                              {mdxSource && <MDXRemote {...mdxSource} components={components} />}
+                            </div>
+                          )}
                         </div>
                       )}
                       
                       {/* Source Editor View */}
-                      {(previewMode === 'edit' || (isMdx && previewMode === 'split') || (isJson && previewMode !== 'visual') || isHtml || isCss || isJs) && (
-                        <div className={`flex-1 flex flex-col min-h-0 order-2 lg:order-1 ${previewMode === 'split' ? 'border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800' : ''}`}>
-                          <textarea
+                      {(previewMode === 'edit' || ((isMdx || isNotebookJson) && previewMode === 'split') || (isJson && !isNotebookJson && previewMode !== 'visual') || isHtml || isCss || isJs) && (
+                        <div className={`flex-1 flex flex-col min-h-0 order-2 lg:order-1 overflow-hidden ${previewMode === 'split' ? 'border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-800' : ''}`}>
+                          <CodeMirror
                             value={content}
-                            onChange={(e) => {
+                            height="100%"
+                            className="flex-1 h-full overflow-hidden text-base sm:text-sm"
+                            theme={currentTheme === 'dark' ? oneDark : 'light'}
+                            extensions={codeMirrorExtensions}
+                            onChange={(val) => {
                               lastActivityRef.current = Date.now();
-                              setContent(e.target.value);
+                              setContent(val);
                               setIsDirty(true);
                             }}
-                            onKeyDown={handleEditorKeyDown}
-                            onTouchStart={handleTouchStart}
-                            onTouchEnd={handleTouchEnd}
-                            autoCapitalize="none"
-                            autoCorrect="off"
-                            spellCheck="true"
-                            className="flex-1 p-4 sm:p-6 font-mono text-base sm:text-sm resize-none focus:outline-none bg-transparent text-gray-800 dark:text-gray-200 leading-relaxed overflow-y-auto"
-                            placeholder="Start writing..."
+                            onCreateEditor={(view) => {
+                              editorViewRef.current = view;
+                              if (vimMode) {
+                                ensureInsertMode(view);
+                              }
+                            }}
+                            onFocus={() => {
+                              if (vimMode && editorViewRef.current) {
+                                ensureInsertMode(editorViewRef.current);
+                              }
+                            }}
+                            basicSetup={{
+                              lineNumbers: true,
+                              foldGutter: true,
+                              dropCursor: false,
+                              allowMultipleSelections: false,
+                              indentOnInput: true,
+                              bracketMatching: true,
+                              closeBrackets: true,
+                              autocompletion: true,
+                              rectangularSelection: true,
+                              crosshairCursor: false,
+                              highlightActiveLine: true,
+                              highlightSelectionMatches: true,
+                              closeBracketsKeymap: true,
+                              defaultKeymap: true,
+                              searchKeymap: true,
+                              historyKeymap: true,
+                              foldKeymap: true,
+                              completionKeymap: true,
+                              lintKeymap: false,
+                            }}
                           />
                         </div>
                       )}

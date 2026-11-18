@@ -352,7 +352,46 @@ export default async function BlogPostPage({
                 </span>
               ))}
             </div>
+
+            {/* Translation Review Status Tag */}
+            {post.reviewed === false ? (
+              <span
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300 dark:border-amber-800"
+                title="This translation was generated automatically by AI and is unreviewed."
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                <span>{t('unreviewed_translation_badge')}</span>
+              </span>
+            ) : post.language !== 'en' ? (
+              <span
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800"
+                title="This translation has been reviewed."
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>{t('reviewed_translation_badge')}</span>
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                title="Original language (reviewed)"
+              >
+                <span>{t('reviewed_badge')}</span>
+              </span>
+            )}
           </div>
+
+          {/* Informative notice if translation is unreviewed */}
+          {post.reviewed === false && (
+            <div className="my-6 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 flex items-center gap-3 text-xs text-amber-800 dark:text-amber-200">
+              <div className="p-1 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-400 shrink-0">
+                <MdLanguage className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-semibold">{t('unreviewed_translation_title')}:</span>{' '}
+                <span>{t('unreviewed_translation_desc')}</span>
+              </div>
+            </div>
+          )}
 
           {(post.song || post.music) && (
             <div className="mt-6">

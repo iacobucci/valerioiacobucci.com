@@ -21,6 +21,7 @@ export interface FrontmatterData {
   preview: boolean;
   preview_passcode?: string;
   selected: boolean;
+  reviewed?: boolean;
   tags: string[];
   [key: string]: any;
 }

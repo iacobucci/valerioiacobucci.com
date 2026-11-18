@@ -27,15 +27,28 @@ export interface TableData {
   rows: (string | number | boolean | null | undefined)[][];
 }
 
+export interface AnimationData {
+  type?: 'svg' | 'canvas' | 'frame';
+  title?: string;
+  frames?: string[];
+  fps?: number;
+  width?: number;
+  height?: number;
+  loop?: boolean;
+  autoPlay?: boolean;
+  initialDataUrl?: string;
+}
+
 export interface CellOutput {
   id: string;
-  type: 'stdout' | 'stderr' | 'result' | 'plot' | 'table' | 'html' | 'svg' | 'error';
+  type: 'stdout' | 'stderr' | 'result' | 'plot' | 'table' | 'html' | 'svg' | 'animation' | 'error';
   text?: string;
   value?: unknown;
   plot?: PlotData;
   table?: TableData;
   html?: string;
   svg?: string;
+  animation?: AnimationData;
   error?: {
     name: string;
     message: string;
@@ -53,12 +66,18 @@ export interface NotebookCellData {
   isEditing?: boolean;
 }
 
+export interface NotebookCellFileData {
+  id?: string;
+  type: CellType;
+  source: string;
+  executionCount?: number | null;
+  status?: CellStatus;
+  outputs?: CellOutput[];
+}
+
 export interface NotebookFileData {
   title?: string;
-  cells: Array<{
-    type: CellType;
-    source: string;
-  }>;
+  cells: NotebookCellFileData[];
 }
 
 export interface NotebookProps {

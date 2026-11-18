@@ -31,8 +31,8 @@ export const NotebookPlot: React.FC<NotebookPlotProps> = ({ data, className = ''
     const step = plotWidth / (labels.length || 1);
 
     return (
-      <div className={`w-full overflow-x-auto my-3 ${className}`}>
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-w-full font-sans select-none block">
+      <div className={`w-full overflow-hidden my-3 max-w-full rounded-xl ${className}`} style={{ aspectRatio: `${width} / ${height}` }}>
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full font-sans select-none block" preserveAspectRatio="xMidYMid meet">
           {data.title && (
             <text x={padding.left} y={20} className="fill-gray-900 dark:fill-white font-bold text-[13px]">
               {data.title}
@@ -149,8 +149,8 @@ export const NotebookPlot: React.FC<NotebookPlotProps> = ({ data, className = ''
     const scaleY = (val: number) => padding.top + plotHeight - ((val - minY) / rangeY) * plotHeight;
 
     return (
-      <div className={`w-full overflow-x-auto my-3 ${className}`}>
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto max-w-full font-sans select-none block">
+      <div className={`w-full overflow-hidden my-3 max-w-full rounded-xl ${className}`} style={{ aspectRatio: `${width} / ${height}` }}>
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full font-sans select-none block" preserveAspectRatio="xMidYMid meet">
           {data.title && (
             <text x={padding.left} y={20} className="fill-gray-900 dark:fill-white font-bold text-[13px]">
               {data.title}

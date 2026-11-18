@@ -9,7 +9,8 @@ export async function getNotebookAction(
   src: string,
   slug?: string
 ): Promise<{ data: NotebookFileData | null; relativePath: string }> {
-  return loadNotebook(src, slug);
+  const authorized = await isAuthorized();
+  return loadNotebook(src, slug, authorized);
 }
 
 export async function saveNotebookAction(
@@ -18,9 +19,8 @@ export async function saveNotebookAction(
   slug?: string
 ): Promise<{ success: boolean; path: string; error?: string }> {
   const authorized = await isAuthorized();
-  const isDev = process.env.NODE_ENV === 'development';
 
-  if (!authorized && !isDev) {
+  if (!authorized) {
     return {
       success: false,
       path: src,
